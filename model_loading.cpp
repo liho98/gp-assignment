@@ -5,10 +5,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "/home/liho/Desktop/graphic-programming/test/learnopengl/filesystem.h"
-#include "/home/liho/Desktop/graphic-programming/test/learnopengl/shader_m.h"
-#include "/home/liho/Desktop/graphic-programming/test/learnopengl/camera.h"
-#include "/home/liho/Desktop/graphic-programming/test/learnopengl/model.h"
+// #include "/home/liho/Desktop/graphic-programming/test/learnopengl/filesystem.h"
+#include "learnopengl/shader_m.h"
+#include "learnopengl/camera.h"
+#include "learnopengl/model.h"
 
 #include <iostream>
 
@@ -75,11 +75,11 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader ourShader("/home/liho/Desktop/graphic-programming/test/model_loading.vs", "/home/liho/Desktop/graphic-programming/test/model_loading.fs");
+    Shader ourShader("/home/liho/Desktop/graphic-programming/gp-assignment/model_loading.vs", "/home/liho/Desktop/graphic-programming/gp-assignment/model_loading.fs");
 
     // load models
     // -----------
-    Model ourModel("/home/liho/Desktop/graphic-programming/test/nanosuit/nanosuit.obj");
+    Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/nanosuit/nanosuit.obj");
     // Model ourModel("/home/liho/Desktop/graphic-programming/test/ironman/Mark_42.obj");
     
     // draw in wireframe
