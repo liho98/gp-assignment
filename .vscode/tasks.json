@@ -57,10 +57,11 @@
             "command": "/usr/bin/g++",
             "args": [
                 "-g",
+                "-L${fileDirname}/lib",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
-                "/home/liho/Desktop/graphic-programming/gp-assignment/libglad.a",
+                "-lglad",
                 "-lGLEW",
                 "-lglfw",
                 "-lassimp",
