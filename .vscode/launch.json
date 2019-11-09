@@ -24,12 +24,7 @@
                     }
                 ]
             },
-            "osx": {
-                "program": "${workspaceRoot}/Builds/Mac_Build/${fileBasenameNoExtension}",
-                "MIMode": "lldb"
-            },
             "windows": {
-                "program": "${workspaceRoot}/Builds/Win_Build/${fileBasenameNoExtension}",
                 "miDebuggerPath": "D:\\MinGW\\bin\\gdb.exe"
             }
         }

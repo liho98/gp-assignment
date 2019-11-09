@@ -9,6 +9,7 @@
             "linux": {
                 "command": "g++",
                 "args": [
+                    "-I${fileDirname}/include", // include path for header
                     "-L${fileDirname}/lib", // linker for static library
                     "-g",
                     "${file}",
@@ -19,8 +20,6 @@
                     "-lglfw",
                     "-lassimp",
                     "-ldl",
-                    "&&",
-                    "${fileDirname}/${fileBasenameNoExtension}"
                 ],
                 "options": {
                     "cwd": "/usr/bin"
@@ -93,6 +92,7 @@
                 }
             },
             "args": [
+                "-I${fileDirname}/include", // include path for header
                 "-L${fileDirname}/lib", // linker for static library
                 "-g",
                 "${file}",

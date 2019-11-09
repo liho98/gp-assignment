@@ -1,3 +1,6 @@
 {
-    "files.associations": {}
+    "files.associations": {
+        "string": "cpp",
+        "fstream": "cpp"
+    }
 }
