@@ -1,1 +1,5 @@
+# exclude everything
 lib/*
+
+# exception to the rule
+!lib/.gitkeep 
