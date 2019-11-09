@@ -28,16 +28,17 @@
             "windows": {
                 "command": "D:\\MinGW\\bin\\g++.exe",
                 "args": [
+                    "-I${fileDirname}/include", // include path for header
                     "-L${fileDirname}/lib", // linker for static library
                     "-g",
                     "${file}",
                     "-o",
                     "${fileDirname}/${fileBasenameNoExtension}",
-                    "-lmingw32",
-                    "-lopengl32",
-                    "-lglu32",
-                    "-lgdi32",
-                    "-lfreeglut",
+                    "-lglad",
+                    "-lGLEW",
+                    "-lglfw",
+                    "-lassimp",
+                    "-ldl",
                 ],
                 "options": {
                     "cwd": "D:\\MinGW\\bin"
