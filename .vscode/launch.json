@@ -15,13 +15,23 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
+            "linux": {
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ]
+            },
+            "osx": {
+                "program": "${workspaceRoot}/Builds/Mac_Build/${fileBasenameNoExtension}",
+                "MIMode": "lldb"
+            },
+            "windows": {
+                "program": "${workspaceRoot}/Builds/Win_Build/${fileBasenameNoExtension}",
+                "miDebuggerPath": "D:\\MinGW\\bin\\gdb.exe"
+            }
         }
     ]
 }
