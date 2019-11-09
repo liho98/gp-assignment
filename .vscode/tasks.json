@@ -17,7 +17,9 @@
                     "${fileDirname}/${fileBasenameNoExtension}",
                     "-lglad",
                     "-lGLEW",
-                    "-lglfw",
+                    "-lglfw3",
+                    "-lX11",
+                    "-lpthread",
                     "-lassimp",
                     "-ldl",
                 ],
@@ -36,7 +38,9 @@
                     "${fileDirname}/${fileBasenameNoExtension}",
                     "-lglad",
                     "-lGLEW",
-                    "-lglfw",
+                    "-lglfw3",
+                    "-lX11",
+                    "-lpthread",
                     "-lassimp",
                     "-ldl",
                 ],
@@ -93,15 +97,17 @@
                 }
             },
             "args": [
-                "-I${fileDirname}/include", // include path for header
                 "-L${fileDirname}/lib", // linker for static library
+                "-I${fileDirname}/include", // include path for header
                 "-g",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "-lglad",
                 "-lGLEW",
-                "-lglfw",
+                "-lglfw3",
+                "-lX11",
+                "-lpthread",
                 "-lassimp",
                 "-ldl",
                 "&&",
