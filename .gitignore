@@ -1,7 +1,11 @@
 # exclude everything
-bin/*
-lib/*
+bin/linux/*
+bin/wins/*
+lib/linux/*
+lib/wins/*
 
 # exception to the rule
-!bin/.gitkeep 
-!lib/.gitkeep 
+!bin/linux/.gitkeep 
+!bin/wins/.gitkeep 
+!lib/linux/.gitkeep 
+!lib/wins/.gitkeep 

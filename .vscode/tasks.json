@@ -10,8 +10,8 @@
                 "command": "g++",
                 "args": [
                     "-I${fileDirname}/include", // for header files 
-                    "-L${fileDirname}/lib", // for binary libraries (static (.a) and shared libraries (.so))
-                    "-L${fileDirname}/bin", // for binary libraries (static (.a) and shared libraries (.so))
+                    "-L${fileDirname}/lib/linux", // for static (.a) 
+                    "-L${fileDirname}/bin/linux", // for shared libraries (.so)
                     "-g",
                     "${file}",
                     "-o",
@@ -30,13 +30,13 @@
                 "command": "C:\\MinGW\\bin\\g++.exe",
                 "args": [
                     "-I${fileDirname}\\include", // include path for header
-                    "-L${fileDirname}\\lib", // for binary libraries (static (.dll) and shared libraries (.lib))
-                    "-L${fileDirname}\\bin", // for executables (and scripts) 
+                    "-L${fileDirname}\\lib\\wins", // for static (.a or .lib) 
+                    "-L${fileDirname}\\bin\\wins", // for shared libraries (.dll)) 
                     "-g",
                     "${fileDirname}\\glad.c",
                     "${file}",
                     "-o",
-                    "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe",
+                    "${fileDirname}\\bin\\wins\\${fileBasenameNoExtension}.exe",
                     "-lGLEW",
                     "-lglfw3",
                     "-lassimp",
@@ -64,7 +64,7 @@
                 "command": "${fileDirname}/${fileBasenameNoExtension}"
             },
             "windows": {
-                "command": "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe"
+                "command": "${fileDirname}\\bin\\wins\\${fileBasenameNoExtension}.exe"
             },
             "problemMatcher": [
                 "$gcc"
@@ -85,19 +85,19 @@
                 "command": "g++",
                 "args": [
                     "-I${fileDirname}/include", // for header files 
-                    "-L${fileDirname}/lib", // for binary libraries (static (.a))
-                    "-L${fileDirname}/bin", // for binary libraries (shared libraries (.so))
+                    "-L${fileDirname}/lib/linux", // for static (.a) 
+                    "-L${fileDirname}/bin/linux", // for shared libraries (.so)
                     "-g",
                     "${file}",
                     "-o",
-                    "${fileDirname}/bin/${fileBasenameNoExtension}",
+                    "${fileDirname}${fileBasenameNoExtension}",
                     "-lglad",
                     "-lGLEW",
                     "-lglfw",
                     "-lassimp",
                     "-ldl",
                     "&&",
-                    "${fileDirname}/bin/${fileBasenameNoExtension}"
+                    "${fileDirname}${fileBasenameNoExtension}"
                 ],
                 "options": {
                     "cwd": "/usr/bin"
@@ -107,18 +107,18 @@
                 "command": "C:\\MinGW\\bin\\g++.exe",
                 "args": [
                     "-I${fileDirname}\\include", // include path for header
-                    "-L${fileDirname}\\lib", // for binary libraries (static (.lib))
-                    "-L${fileDirname}\\bin", // for binary libraries (shared libraries (.dll))
+                    "-L${fileDirname}\\lib\\wins", // for static (.a or .lib) 
+                    "-L${fileDirname}\\bin\\wins", // for shared libraries (.dll)) 
                     "-g",
                     "${fileDirname}\\glad.c",
                     "${file}",
                     "-o",
-                    "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe",
+                    "${fileDirname}\\bin\\wins\\${fileBasenameNoExtension}.exe",
                     "-lGLEW",
                     "-lglfw3",
                     "-lassimp",
                     "&&",
-                    "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe"
+                    "${fileDirname}\\bin\\wins\\${fileBasenameNoExtension}.exe"
                 ],
                 "options": {
                     "cwd": "C:\\MinGW\\bin"
