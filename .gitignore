@@ -1,5 +1,7 @@
 # exclude everything
+bin/*
 lib/*
 
 # exception to the rule
+!bin/.gitkeep 
 !lib/.gitkeep 

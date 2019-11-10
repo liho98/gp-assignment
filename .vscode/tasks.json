@@ -9,17 +9,16 @@
             "linux": {
                 "command": "g++",
                 "args": [
-                    "-I${fileDirname}/include", // include path for header
-                    "-L${fileDirname}/lib", // linker for static library
+                    "-I${fileDirname}/include", // for header files 
+                    "-L${fileDirname}/lib", // for binary libraries (static (.a) and shared libraries (.so))
+                    "-L${fileDirname}/bin", // for binary libraries (static (.a) and shared libraries (.so))
                     "-g",
                     "${file}",
                     "-o",
                     "${fileDirname}/${fileBasenameNoExtension}",
                     "-lglad",
                     "-lGLEW",
-                    "-lglfw3",
-                    "-lX11",
-                    "-lpthread",
+                    "-lglfw",
                     "-lassimp",
                     "-ldl",
                 ],
@@ -28,24 +27,22 @@
                 },
             },
             "windows": {
-                "command": "D:\\MinGW\\bin\\g++.exe",
+                "command": "C:\\MinGW\\bin\\g++.exe",
                 "args": [
-                    "-I${fileDirname}/include", // include path for header
-                    "-L${fileDirname}/lib", // linker for static library
+                    "-I${fileDirname}\\include", // include path for header
+                    "-L${fileDirname}\\lib", // for binary libraries (static (.dll) and shared libraries (.lib))
+                    "-L${fileDirname}\\bin", // for executables (and scripts) 
                     "-g",
+                    "${fileDirname}\\glad.c",
                     "${file}",
                     "-o",
-                    "${fileDirname}/${fileBasenameNoExtension}",
-                    "-lglad",
+                    "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe",
                     "-lGLEW",
                     "-lglfw3",
-                    "-lX11",
-                    "-lpthread",
                     "-lassimp",
-                    "-ldl",
                 ],
                 "options": {
-                    "cwd": "D:\\MinGW\\bin"
+                    "cwd": "C:\\MinGW\\bin"
                 }
             },
             "problemMatcher": [
@@ -67,7 +64,7 @@
                 "command": "${fileDirname}/${fileBasenameNoExtension}"
             },
             "windows": {
-                "command": "${fileDirname}/${fileBasenameNoExtension}.exe"
+                "command": "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe"
             },
             "problemMatcher": [
                 "$gcc"
@@ -86,33 +83,47 @@
             "label": "g++ build & run active file",
             "linux": {
                 "command": "g++",
+                "args": [
+                    "-I${fileDirname}/include", // for header files 
+                    "-L${fileDirname}/lib", // for binary libraries (static (.a))
+                    "-L${fileDirname}/bin", // for binary libraries (shared libraries (.so))
+                    "-g",
+                    "${file}",
+                    "-o",
+                    "${fileDirname}/bin/${fileBasenameNoExtension}",
+                    "-lglad",
+                    "-lGLEW",
+                    "-lglfw",
+                    "-lassimp",
+                    "-ldl",
+                    "&&",
+                    "${fileDirname}/bin/${fileBasenameNoExtension}"
+                ],
                 "options": {
                     "cwd": "/usr/bin"
                 },
             },
             "windows": {
-                "command": "D:\\MinGW\\bin\\g++.exe",
+                "command": "C:\\MinGW\\bin\\g++.exe",
+                "args": [
+                    "-I${fileDirname}\\include", // include path for header
+                    "-L${fileDirname}\\lib", // for binary libraries (static (.lib))
+                    "-L${fileDirname}\\bin", // for binary libraries (shared libraries (.dll))
+                    "-g",
+                    "${fileDirname}\\glad.c",
+                    "${file}",
+                    "-o",
+                    "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe",
+                    "-lGLEW",
+                    "-lglfw3",
+                    "-lassimp",
+                    "&&",
+                    "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe"
+                ],
                 "options": {
-                    "cwd": "D:\\MinGW\\bin"
+                    "cwd": "C:\\MinGW\\bin"
                 }
             },
-            "args": [
-                "-L${fileDirname}/lib", // linker for static library
-                "-I${fileDirname}/include", // include path for header
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
-                "-lglad",
-                "-lGLEW",
-                "-lglfw3",
-                "-lX11",
-                "-lpthread",
-                "-lassimp",
-                "-ldl",
-                "&&",
-                "${fileDirname}/${fileBasenameNoExtension}"
-            ],
             "problemMatcher": [
                 "$gcc"
             ],
