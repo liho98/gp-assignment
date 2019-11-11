@@ -9,9 +9,9 @@
             "linux": {
                 "command": "g++",
                 "args": [
-                    "-I${fileDirname}/include", // for header files 
-                    "-L${fileDirname}/lib/linux", // for static (.a) 
-                    "-L${fileDirname}/bin/linux", // for shared libraries (.so)
+                    "-I${workspaceFolder}/include", // for header files 
+                    "-L${workspaceFolder}/lib/linux", // for static (.a) 
+                    "-L${workspaceFolder}/bin/linux", // for shared libraries (.so)
                     "-g",
                     "${file}",
                     "-o",
@@ -29,14 +29,14 @@
             "windows": {
                 "command": "C:\\MinGW\\bin\\g++.exe",
                 "args": [
-                    "-I${fileDirname}\\include", // include path for header
-                    "-L${fileDirname}\\lib\\wins", // for static (.a or .lib) 
-                    "-L${fileDirname}\\bin\\wins", // for shared libraries (.dll)) 
+                    "-I${workspaceFolder}\\include", // include path for header
+                    "-L${workspaceFolder}\\lib\\wins", // for static (.a or .lib) 
+                    "-L${workspaceFolder}\\bin\\wins", // for shared libraries (.dll)) 
                     "-g",
-                    "${fileDirname}\\glad.c",
+                    "${workspaceFolder}\\glad.c",
                     "${file}",
                     "-o",
-                    "${fileDirname}\\bin\\wins\\${fileBasenameNoExtension}.exe",
+                    "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe",
                     "-lGLEW",
                     "-lglfw3",
                     "-lassimp",
@@ -64,7 +64,7 @@
                 "command": "${fileDirname}/${fileBasenameNoExtension}"
             },
             "windows": {
-                "command": "${fileDirname}\\bin\\wins\\${fileBasenameNoExtension}.exe"
+                "command": "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
             },
             "problemMatcher": [
                 "$gcc"
@@ -84,20 +84,20 @@
             "linux": {
                 "command": "g++",
                 "args": [
-                    "-I${fileDirname}/include", // for header files 
-                    "-L${fileDirname}/lib/linux", // for static (.a) 
-                    "-L${fileDirname}/bin/linux", // for shared libraries (.so)
+                    "-I${workspaceFolder}/include", // for header files 
+                    "-L${workspaceFolder}/lib/linux", // for static (.a) 
+                    "-L${workspaceFolder}/bin/linux", // for shared libraries (.so)
                     "-g",
                     "${file}",
                     "-o",
-                    "${fileDirname}${fileBasenameNoExtension}",
+                    "${fileDirname}/${fileBasenameNoExtension}",
                     "-lglad",
                     "-lGLEW",
                     "-lglfw",
                     "-lassimp",
                     "-ldl",
                     "&&",
-                    "${fileDirname}${fileBasenameNoExtension}"
+                    "${fileDirname}/${fileBasenameNoExtension}"
                 ],
                 "options": {
                     "cwd": "/usr/bin"
@@ -106,19 +106,19 @@
             "windows": {
                 "command": "C:\\MinGW\\bin\\g++.exe",
                 "args": [
-                    "-I${fileDirname}\\include", // include path for header
-                    "-L${fileDirname}\\lib\\wins", // for static (.a or .lib) 
-                    "-L${fileDirname}\\bin\\wins", // for shared libraries (.dll)) 
+                    "-I${workspaceFolder}\\include", // include path for header
+                    "-L${workspaceFolder}\\lib\\wins", // for static (.a or .lib) 
+                    "-L${workspaceFolder}\\bin\\wins", // for shared libraries (.dll)) 
                     "-g",
-                    "${fileDirname}\\glad.c",
+                    "${workspaceFolder}\\glad.c",
                     "${file}",
                     "-o",
-                    "${fileDirname}\\bin\\wins\\${fileBasenameNoExtension}.exe",
+                    "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe",
                     "-lGLEW",
                     "-lglfw3",
                     "-lassimp",
                     "&&",
-                    "${fileDirname}\\bin\\wins\\${fileBasenameNoExtension}.exe"
+                    "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
                 ],
                 "options": {
                     "cwd": "C:\\MinGW\\bin"

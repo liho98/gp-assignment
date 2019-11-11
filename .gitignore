@@ -9,3 +9,5 @@ lib/wins/*
 !bin/wins/.gitkeep 
 !lib/linux/.gitkeep 
 !lib/wins/.gitkeep 
+
+test
