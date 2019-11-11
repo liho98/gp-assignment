@@ -79,8 +79,8 @@ int main()
 
     // load models
     // -----------
-    Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/nanosuit/nanosuit.obj");
-    // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/ironman/Mark_42.obj");
+    // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/nanosuit/nanosuit.obj");
+    Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/ironman/Mark_42.obj");
     
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
