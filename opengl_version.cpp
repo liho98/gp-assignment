@@ -10,6 +10,10 @@ int main()
         fprintf(stderr, "ERROR: could not start GLFW3\n");
         return 1;
     }
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);
 
     // uncomment these lines if on Apple OS X
     // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -27,14 +31,18 @@ int main()
     glfwMakeContextCurrent(window);
 
     // start GLEW extension handler
-    glewExperimental = GL_TRUE;
-    glewInit();
+    // glewExperimental = GL_TRUE;
+    // glewInit();
 
     // get version info
     const GLubyte *renderer = glGetString(GL_RENDERER); // get renderer string
     const GLubyte *version = glGetString(GL_VERSION);   // version as a string
     printf("Renderer: %s\n", renderer);
     printf("OpenGL version supported %s\n", version);
+
+    int nrAttributes;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+    printf("Maximum nr of vertex attributes supported: %d\n", nrAttributes);
 
     // tell GL to only draw onto a pixel if the shape is closer to the viewer
     glEnable(GL_DEPTH_TEST); // enable depth-testing

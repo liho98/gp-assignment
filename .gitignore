@@ -3,11 +3,18 @@ bin/linux/*
 bin/wins/*
 lib/linux/*
 lib/wins/*
+include/*
+model/*
+test/*
+
+model_loading
+opengl_version
 
 # exception to the rule
 !bin/linux/.gitkeep 
 !bin/wins/.gitkeep 
 !lib/linux/.gitkeep 
 !lib/wins/.gitkeep 
+!include/.gitkeep 
+!model/.gitkeep 
 
-test
