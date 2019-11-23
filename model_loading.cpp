@@ -80,17 +80,17 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader skyboxShader("/home/liho/Desktop/graphic-programming/test/shader/skybox.vs", "/home/liho/Desktop/graphic-programming/test/shader/skybox.fs");
-    // Shader ourShader("/home/liho/Desktop/graphic-programming/test/shader/material_shader.vs", "/home/liho/Desktop/graphic-programming/test/shader/material_shader.fs");
-    Shader ourShader("/home/liho/Desktop/graphic-programming/test/shader/model_loading.vs", "/home/liho/Desktop/graphic-programming/test/shader/model_loading.fs");
+    Shader skyboxShader("/home/liho/Desktop/graphic-programming/gp-assignment/shader/skybox.vs", "/home/liho/Desktop/graphic-programming/gp-assignment/shader/skybox.fs");
+    // Shader ourShader("/home/liho/Desktop/graphic-programming/gp-assignment/shader/material_shader.vs", "/home/liho/Desktop/graphic-programming/gp-assignment/shader/material_shader.fs");
+    Shader ourShader("/home/liho/Desktop/graphic-programming/gp-assignment/shader/model_loading.vs", "/home/liho/Desktop/graphic-programming/gp-assignment/shader/model_loading.fs");
 
     // load models
     // -----------
-    // Model ourModel("/home/liho/Desktop/graphic-programming/test/model/nanosuit/nanosuit.obj");
-    Model ourModel("/home/liho/Desktop/graphic-programming/test/model/windmill/windmil.obj");
-    // Model ourModel("/home/liho/Desktop/graphic-programming/test/model/windmill/Low Poly Mill.obj");
+    // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/nanosuit/nanosuit.obj");
+    Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/windmill/windmil.obj");
+    // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/windmill/Low Poly Mill.obj");
     // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/ironman/Mark_42.obj");
-    // Model ourModel("/home/liho/Desktop/graphic-programming/test/model/nanosuit_reflection/nanosuit.obj");
+    // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/nanosuit_reflection/nanosuit.obj");
 
     float skyboxVertices[] = {
         // positions
@@ -148,12 +148,12 @@ int main()
     // load textures
     // -------------
     vector<std::string> faces{
-        "/home/liho/Desktop/graphic-programming/test/model/sor_sea/right.jpg",
-        "/home/liho/Desktop/graphic-programming/test/model/sor_sea/left.jpg",
-        "/home/liho/Desktop/graphic-programming/test/model/sor_sea/top.jpg",
-        "/home/liho/Desktop/graphic-programming/test/model/sor_sea/bottom.jpg",
-        "/home/liho/Desktop/graphic-programming/test/model/sor_sea/front.jpg",
-        "/home/liho/Desktop/graphic-programming/test/model/sor_sea/back.jpg"};
+        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/right.jpg",
+        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/left.jpg",
+        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/top.jpg",
+        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/bottom.jpg",
+        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/front.jpg",
+        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/back.jpg"};
     unsigned int cubemapTexture = loadCubemap(faces);
 
     // draw in wireframe
