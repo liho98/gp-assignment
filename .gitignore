@@ -5,7 +5,7 @@ lib/linux/*
 lib/wins/*
 include/*
 model/*
-test/*
+test
 
 model_loading
 opengl_version
