@@ -9,6 +9,7 @@ test
 
 model_loading
 opengl_version
+gipsydanger
 
 # exception to the rule
 !bin/linux/.gitkeep 
