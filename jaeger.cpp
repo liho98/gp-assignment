@@ -6,6 +6,7 @@
 #define WINDOW_TITLE "OpenGL Window"
 
 void drawArm();
+void drawBracers();
 void drawFingers();
 
 void drawCone();
@@ -302,7 +303,7 @@ void drawCylinder(double baseRadius, double topRadius, double height, int slices
 {
     GLUquadricObj *cylinder = NULL;
     cylinder = gluNewQuadric();
-    gluQuadricDrawStyle(cylinder, GLU_FILL);
+    gluQuadricDrawStyle(cylinder, GLU_LINE);
     gluCylinder(cylinder, baseRadius, topRadius, height, slices, stacks);
     gluDeleteQuadric(cylinder);
 }
@@ -531,55 +532,74 @@ void drawArm()
         drawCylinder(0.15, 0.22, 1, 20, 10);
     }
     glPopMatrix();
+    drawBracers();
+    drawFingers();
+}
 
+void drawBracers()
+{
     // hand
-    glPushMatrix();
-    {
-        glRotatef(180, 0, 1, 1);
-        glTranslatef(0, 0, -0.2);
-        drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    }
-    glPopMatrix();
-    // hand
-    glPushMatrix();
-    {
-        glRotatef(180, 0, 1, 1);
-        glTranslatef(0, 0, -0.25);
-        drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    }
-    glPopMatrix();
-
-    glPushMatrix();
-    {
-        glRotatef(180, 0, 1, 1);
-        glTranslatef(0, 0, -0.3);
-        drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    }
-    glPopMatrix();
-
-    glPushMatrix();
-    {
-        glRotatef(180, 0, 1, 1);
-        glTranslatef(0, 0, -0.35);
-        drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    }
-    glPopMatrix();
-    glPushMatrix();
-    {
-        glRotatef(180, 0, 1, 1);
-        glTranslatef(0, 0, -0.4);
-        drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    }
-    glPopMatrix();
     glPushMatrix();
     {
         glRotatef(180, 0, 1, 1);
         glTranslatef(0, 0, -0.45);
-        drawCylinder(0.15, 0.2, 0.2, 20, 10);
+        drawCylinder(0.1, 0.2, 0.45, 20, 10);
     }
     glPopMatrix();
 
-    drawFingers();
+    glPushMatrix();
+    {
+        glTranslatef(0.1, -0.43, 0);
+        glRotatef(180, 0, 1, 1);
+        glRotatef(90, 0, 1, 0);
+        drawCylinder(0.05, 0.05, 0.21, 20, 10);
+    }
+    glPopMatrix();
+    // glPushMatrix();
+    // {
+    //     glRotatef(180, 0, 1, 1);
+    //     glTranslatef(0, 0, -0.2);
+    //     drawCylinder(0.15, 0.2, 0.4, 20, 10);
+    // }
+    // glPopMatrix();
+    // hand
+    // glPushMatrix();
+    // {
+    //     glRotatef(180, 0, 1, 1);
+    //     glTranslatef(0, 0, -0.25);
+    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
+    // }
+    // glPopMatrix();
+
+    // glPushMatrix();
+    // {
+    //     glRotatef(180, 0, 1, 1);
+    //     glTranslatef(0, 0, -0.3);
+    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
+    // }
+    // glPopMatrix();
+
+    // glPushMatrix();
+    // {
+    //     glRotatef(180, 0, 1, 1);
+    //     glTranslatef(0, 0, -0.35);
+    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
+    // }
+    // glPopMatrix();
+    // glPushMatrix();
+    // {
+    //     glRotatef(180, 0, 1, 1);
+    //     glTranslatef(0, 0, -0.4);
+    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
+    // }
+    // glPopMatrix();
+    // glPushMatrix();
+    // {
+    //     glRotatef(180, 0, 1, 1);
+    //     glTranslatef(0, 0, -0.45);
+    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
+    // }
+    // glPopMatrix();
 }
 
 void drawFingers()
