@@ -1,28 +1,12 @@
-#include <Windows.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include <gl/GL.h>
 #include <gl/GLU.h>
 #include <math.h>
 #include <string>
-#define WINDOW_TITLE "OpenGL Window"
 
-void drawArm();
-void drawBracers();
-void drawFingers();
-
-void drawCone();
-void drawTower();
-void drawPencil();
-
-void drawCloud(float size);
-void drawCirle(float x1, float y1, float radius);
-
-void drawSphere(float radius, int slice, int slack);
-void drawCuboid(float x, float widthness, float thickness, float longness);
-void drawCylinder(double baseRadius, double topRadius, double height, int slices, int stacks);
-void drawBridge();
-void drawBridgeLine();
-void drawMoon();
-void drawClouds();
+#include <cstdio>
 
 float speed = 0;
 float perspectiveX = 0, perspectiveY = 0, perspectiveZ = -5;
@@ -47,138 +31,168 @@ extern "C"
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
-LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    switch (msg)
-    {
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-
-    case WM_KEYDOWN:
-        if (wParam == VK_ESCAPE)
-            PostQuitMessage(0);
-        else if (wParam == VK_F1)
+    if (action == GLFW_PRESS)
+        if (key == GLFW_KEY_ESCAPE)
+            glfwSetWindowShouldClose(window, GL_TRUE);
+        else if (key == GLFW_KEY_F1)
         {
             if (isOrtho)
                 isOrtho = false;
             else
                 isOrtho = true;
         }
-        else if (wParam == VK_F2)
+        else if (key == GLFW_KEY_F2)
         {
             if (isLift)
                 isLift = false;
             else
                 isLift = true;
         }
-        else if (wParam == VK_SPACE)
+        else if (key == GLFW_KEY_SPACE)
         {
             if (rotate)
                 rotate = false;
             else
                 rotate = true;
         }
-        else if (wParam == VK_RIGHT)
+        else if (key == GLFW_KEY_RIGHT)
         {
             perspectiveX -= 0.1;
             orthoX -= 0.1;
         }
-        else if (wParam == VK_LEFT)
+        else if (key == GLFW_KEY_LEFT)
         {
             perspectiveX += 0.1;
             orthoX += 0.1;
         }
-        else if (wParam == VK_UP)
+        else if (key == GLFW_KEY_UP)
         {
             perspectiveY -= 0.1;
             orthoY -= 0.1;
         }
-        else if (wParam == VK_DOWN)
+        else if (key == GLFW_KEY_DOWN)
         {
             perspectiveY += 0.1;
             orthoY += 0.1;
         }
-        else if (wParam == VK_NUMPAD8)
+        else if (key == GLFW_KEY_KP_8)
         {
             perspectiveZ += 0.1;
             orthoZ += 0.1;
         }
-        else if (wParam == VK_NUMPAD2)
+        else if (key == GLFW_KEY_KP_2)
         {
             perspectiveZ -= 0.1;
             orthoZ -= 0.1;
         }
-    default:
-        break;
-    }
-
-    return DefWindowProc(hWnd, msg, wParam, lParam);
 }
-//--------------------------------------------------------------------
 
-bool initPixelFormat(HDC hdc)
+GLFWwindow *initWindow(const int resX, const int resY)
 {
-    PIXELFORMATDESCRIPTOR pfd;
-    ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
-
-    pfd.cAlphaBits = 8;
-    pfd.cColorBits = 32;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 0;
-
-    pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
-
-    pfd.iLayerType = PFD_MAIN_PLANE;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-
-    // choose pixel format returns the number most similar pixel format available
-    int n = ChoosePixelFormat(hdc, &pfd);
-
-    // set pixel format returns whether it sucessfully set the pixel format
-    if (SetPixelFormat(hdc, n, &pfd))
+    if (!glfwInit())
     {
-        return true;
+        fprintf(stderr, "Failed to initialize GLFW\n");
+        return NULL;
     }
-    else
+    glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
+
+    // Open a window and create its OpenGL context
+    GLFWwindow *window = glfwCreateWindow(resX, resY, "TEST", NULL, NULL);
+
+    if (window == NULL)
     {
-        return false;
+        fprintf(stderr, "Failed to open GLFW window.\n");
+        glfwTerminate();
+        return NULL;
     }
+
+    glfwMakeContextCurrent(window);
+    glfwSetKeyCallback(window, controls);
+
+    // Get info of GPU and supported OpenGL version
+    printf("Renderer: %s\n", glGetString(GL_RENDERER));
+    printf("OpenGL version supported %s\n", glGetString(GL_VERSION));
+
+    glEnable(GL_DEPTH_TEST); // Depth Testing
+    glDepthFunc(GL_LEQUAL);
+    glDisable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    return window;
 }
-//--------------------------------------------------------------------
 
-void display()
+void drawCube()
 {
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
+    GLfloat vertices[] =
+        {
+            -1, -1, -1, -1, -1, 1, -1, 1, 1, -1, 1, -1,
+            1, -1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1,
+            -1, -1, -1, -1, -1, 1, 1, -1, 1, 1, -1, -1,
+            -1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1,
+            -1, -1, -1, -1, 1, -1, 1, 1, -1, 1, -1, -1,
+            -1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, 1};
 
-    glRotatef(speed, 0, 1, 0);
-    glRotatef(90, 0, 1, 0);
+    GLfloat colors[] =
+        {
+            0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0,
+            1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0,
+            0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0,
+            0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
+            0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0,
+            0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1};
 
-    glPushMatrix();
+    static float alpha = 0;
+    //attempt to rotate cube
+    glRotatef(alpha, 0, 1, 0);
+
+    /* We have a color array and a vertex array */
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glColorPointer(3, GL_FLOAT, 0, colors);
+
+    /* Send data : 24 vertices */
+    glDrawArrays(GL_QUADS, 0, 24);
+
+    /* Cleanup states */
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    alpha += 1;
+}
+
+void drawCirle(float x1, float y1, float radius)
+{
+    float x2 = x1, y2 = y1;
+
+    glColor3ub(246, 246, 246);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(x1, y1);
+    for (float angle = 0; angle <= 360; angle += 10)
     {
-        glRotatef(90, 0, 1, 0);
-        glTranslatef(0.7, 0, 0);
-        drawArm();
+        x2 = x1 + cos(angle) * radius;
+        y2 = y1 + sin(angle) * radius;
+        glVertex2f(x2, y2);
     }
-    glPopMatrix();
+    glEnd();
+}
 
-    glPushMatrix();
-    {
-        glRotatef(90, 0, 1, 0);
-        glTranslatef(-0.7, 0, 0);
-        drawArm();
-    }
-    glPopMatrix();
+void drawCylinder(double baseRadius, double topRadius, double height, int slices, int stacks)
+{
+    GLUquadricObj *cylinder = NULL;
+    cylinder = gluNewQuadric();
+    gluQuadricDrawStyle(cylinder, GLU_LINE);
+    gluCylinder(cylinder, baseRadius, topRadius, height, slices, stacks);
+    gluDeleteQuadric(cylinder);
+}
 
-    // glPushMatrix();
-    // {
-    //         drawBridgeCuboid(1.5, 4, 10, 1);
-    // }
-    // glPopMatrix();
+void drawSphere(float radius, int slice, int slack)
+{
+    GLUquadricObj *sphere = NULL;
+    sphere = gluNewQuadric();
+    gluQuadricDrawStyle(sphere, GLU_LINE);
+    gluSphere(sphere, radius, slice, slack);
+    gluDeleteQuadric(sphere);
 }
 
 void drawCone()
@@ -199,63 +213,6 @@ void drawCone()
     // gluDeleteQuadric(cylinder);
     // glPopMatrix();
 }
-
-// void drawCuboid(float topLeftX, float topLeftY, float topLeftZ,
-//                 float topRightX, float topRightY, float topRightZ,
-//                 float botLeftX, float botLeftY, float botLeftZ,
-//                 float botRightX, float botRightY, float botRightZ)
-// {
-//     glPushMatrix();
-//     glBegin(GL_QUADS);
-//     //Face 1
-//     glTexCoord2f(0, 1);
-//     glVertex3f(topLeftX, topLeftY, topLeftZ);
-//     glTexCoord2f(0, 0);
-//     glVertex3f(botLeftX, botLeftY, botLeftZ);
-//     glTexCoord2f(1, 0);
-//     glVertex3f(botRightX, botRightY, botRightZ);
-//     glTexCoord2f(1, 1);
-//     glVertex3f(topRightX, topRightY, topRightZ);
-//     //Face 2
-//     glTexCoord2f(0, 1);
-//     glVertex3f(topLeftX, topLeftY, topLeftZ);
-//     glTexCoord2f(0, 0);
-//     glVertex3f(botLeftX, botLeftY, botLeftZ);
-//     glTexCoord2f(1, 0);
-//     glVertex3f(-botLeftX, botLeftY, botLeftZ);
-//     glTexCoord2f(1, 1);
-//     glVertex3f(-topLeftX, topLeftY, topLeftZ);
-//     //Face 3
-//     glTexCoord2f(0, 1);
-//     glVertex3f(-topLeftX, topLeftY, topLeftZ);
-//     glTexCoord2f(0, 0);
-//     glVertex3f(-botLeftX, botLeftY, botLeftZ);
-//     glTexCoord2f(1, 0);
-//     glVertex3f(-botRightX, botRightY, botRightZ);
-//     glTexCoord2f(1, 1);
-//     glVertex3f(-topRightX, topRightY, topRightZ);
-//     //Face 4
-//     glTexCoord2f(0, 1);
-//     glVertex3f(-topRightX, topRightY, topRightZ);
-//     glTexCoord2f(0, 0);
-//     glVertex3f(-botRightX, botRightY, botRightZ);
-//     glTexCoord2f(1, 0);
-//     glVertex3f(botRightX, botRightY, botRightZ);
-//     glTexCoord2f(1, 1);
-//     glVertex3f(topRightX, topRightY, topRightZ);
-//     //Face 5
-//     glTexCoord2f(0, 1);
-//     glVertex3f(topRightX, topRightY, topRightZ);
-//     glTexCoord2f(0, 0);
-//     glVertex3f(topLeftX, topLeftY, topLeftZ);
-//     glTexCoord2f(1, 0);
-//     glVertex3f(-topLeftX, topLeftY, topLeftZ);
-//     glTexCoord2f(1, 1);
-//     glVertex3f(-topRightX, topRightY, topRightZ);
-
-//     glEnd();
-//     glPopMatrix();
-// }
 
 void drawCuboid(float x, float widthness, float thickness, float longness)
 {
@@ -297,15 +254,6 @@ void drawCuboid(float x, float widthness, float thickness, float longness)
     glVertex3f(0, 0, x + widthness);
 
     glEnd();
-}
-
-void drawCylinder(double baseRadius, double topRadius, double height, int slices, int stacks)
-{
-    GLUquadricObj *cylinder = NULL;
-    cylinder = gluNewQuadric();
-    gluQuadricDrawStyle(cylinder, GLU_LINE);
-    gluCylinder(cylinder, baseRadius, topRadius, height, slices, stacks);
-    gluDeleteQuadric(cylinder);
 }
 
 void drawMoon()
@@ -392,150 +340,6 @@ void drawClouds()
     }
     glPopMatrix();
 }
-
-void drawCirle(float x1, float y1, float radius)
-{
-    float x2 = x1, y2 = y1;
-
-    glColor3ub(246, 246, 246);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(x1, y1);
-    for (float angle = 0; angle <= 360; angle += 10)
-    {
-        x2 = x1 + cos(angle) * radius;
-        y2 = y1 + sin(angle) * radius;
-        glVertex2f(x2, y2);
-    }
-    glEnd();
-}
-
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
-{
-    WNDCLASSEX wc;
-    ZeroMemory(&wc, sizeof(WNDCLASSEX));
-
-    wc.cbSize = sizeof(WNDCLASSEX);
-    wc.hInstance = GetModuleHandle(NULL);
-    wc.lpfnWndProc = WindowProcedure;
-    wc.lpszClassName = WINDOW_TITLE;
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-
-    if (!RegisterClassEx(&wc))
-        return false;
-
-    HWND hWnd = CreateWindow(WINDOW_TITLE, WINDOW_TITLE, WS_OVERLAPPEDWINDOW,
-                             CW_USEDEFAULT, CW_USEDEFAULT, 1920, 1080,
-                             NULL, NULL, wc.hInstance, NULL);
-
-    //--------------------------------
-    //	Initialize window for OpenGL
-    //--------------------------------
-
-    HDC hdc = GetDC(hWnd);
-
-    //	initialize pixel format for the window
-    initPixelFormat(hdc);
-
-    //	get an openGL context
-    HGLRC hglrc = wglCreateContext(hdc);
-
-    //	make context current
-    if (!wglMakeCurrent(hdc, hglrc))
-        return false;
-
-    //--------------------------------
-    //	End initialization
-    //--------------------------------
-
-    ShowWindow(hWnd, nCmdShow);
-
-    MSG msg;
-    ZeroMemory(&msg, sizeof(msg));
-
-    while (true)
-    {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-        {
-            if (msg.message == WM_QUIT)
-                break;
-
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-        // setup the camera and
-        // toggle different view mode
-        if (isOrtho)
-        {
-            glLoadIdentity();
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(-2 * ar, 2 * ar, -2, 2, -2, 2);
-
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            glTranslatef(orthoX, orthoY, orthoZ);
-        }
-        else
-        {
-            glLoadIdentity();
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            gluPerspective(45, ar, 1, 2000);
-
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
-        }
-
-        display();
-
-        if (rotate)
-            speed += 1;
-        else
-            speed = speed;
-
-        if (isLift)
-        {
-            if (bridgeDegree < 35)
-            {
-                bridgeDegree += 1;
-            }
-            if (bridgeLineUp < 0.26)
-            {
-                bridgeLineUp += 0.008;
-            }
-        }
-        else
-        {
-            if (bridgeDegree > 0)
-            {
-                bridgeDegree -= 1;
-            }
-            if (bridgeLineUp > 0)
-            {
-                bridgeLineUp -= 0.008;
-            }
-        }
-
-        SwapBuffers(hdc);
-    }
-    UnregisterClass(WINDOW_TITLE, wc.hInstance);
-    return true;
-}
-
-void drawArm()
-{
-    // draw arm
-    glPushMatrix();
-    {
-        glRotatef(180, 0, 1, 1);
-        drawCylinder(0.15, 0.22, 1, 20, 10);
-    }
-    glPopMatrix();
-    drawBracers();
-    drawFingers();
-}
-
 void drawBracers()
 {
     // hand
@@ -813,11 +617,129 @@ void drawFingers()
     glPopMatrix();
 }
 
-void drawSphere(float radius, int slice, int slack)
+
+
+void drawArm()
 {
-    GLUquadricObj *sphere = NULL;
-    sphere = gluNewQuadric();
-    gluQuadricDrawStyle(sphere, GLU_LINE);
-    gluSphere(sphere, radius, slice, slack);
-    gluDeleteQuadric(sphere);
+    // draw arm
+    glPushMatrix();
+    {
+        glRotatef(180, 0, 1, 1);
+        drawCylinder(0.15, 0.22, 1, 20, 10);
+    }
+    glPopMatrix();
+    drawBracers();
+    drawFingers();
+}
+
+void display()
+{
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    glRotatef(speed, 0, 1, 0);
+    glRotatef(90, 0, 1, 0);
+
+    glPushMatrix();
+    {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0.7, 0, 0);
+        drawArm();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(-0.7, 0, 0);
+        drawArm();
+    }
+    glPopMatrix();
+
+    // glPushMatrix();
+    // {
+    //         drawBridgeCuboid(1.5, 4, 10, 1);
+    // }
+    // glPopMatrix();
+}
+
+int main(int argc, char **argv)
+{
+    GLFWwindow *window = initWindow(1920, 1080);
+
+    if (NULL != window)
+    {
+        while (!glfwWindowShouldClose(window))
+        {
+            // Scale to window size
+            GLint windowWidth, windowHeight;
+            glfwGetWindowSize(window, &windowWidth, &windowHeight);
+            glViewport(0, 0, windowWidth, windowHeight);
+
+            // setup the camera and
+            // toggle different view mode
+            if (isOrtho)
+            {
+                glLoadIdentity();
+                glMatrixMode(GL_PROJECTION);
+                glLoadIdentity();
+                glOrtho(-2 * ar, 2 * ar, -2, 2, -2, 2);
+
+                glMatrixMode(GL_MODELVIEW);
+                glLoadIdentity();
+                glTranslatef(orthoX, orthoY, orthoZ);
+            }
+            else
+            {
+                glLoadIdentity();
+                glMatrixMode(GL_PROJECTION);
+                glLoadIdentity();
+                gluPerspective(45, ar, 1, 2000);
+
+                glMatrixMode(GL_MODELVIEW);
+                glLoadIdentity();
+                glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
+            }
+
+            display();
+
+            if (rotate)
+                speed += 1;
+            else
+                speed = speed;
+
+            if (isLift)
+            {
+                if (bridgeDegree < 35)
+                {
+                    bridgeDegree += 1;
+                }
+                if (bridgeLineUp < 0.26)
+                {
+                    bridgeLineUp += 0.008;
+                }
+            }
+            else
+            {
+                if (bridgeDegree > 0)
+                {
+                    bridgeDegree -= 1;
+                }
+                if (bridgeLineUp > 0)
+                {
+                    bridgeLineUp -= 0.008;
+                }
+            }
+
+            // Update Screen
+            glfwSwapBuffers(window);
+
+            // Check for any input, or window movement
+            glfwPollEvents();
+        }
+    }
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
 }
