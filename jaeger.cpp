@@ -33,7 +33,7 @@ extern "C"
 
 void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    if (action == GLFW_PRESS)
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
         if (key == GLFW_KEY_ESCAPE)
             glfwSetWindowShouldClose(window, GL_TRUE);
         else if (key == GLFW_KEY_F1)
@@ -99,7 +99,7 @@ GLFWwindow *initWindow(const int resX, const int resY)
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
 
     // Open a window and create its OpenGL context
-    GLFWwindow *window = glfwCreateWindow(resX, resY, "TEST", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(resX, resY, "Jaeger", glfwGetPrimaryMonitor(), NULL);
 
     if (window == NULL)
     {
@@ -616,8 +616,6 @@ void drawFingers()
     }
     glPopMatrix();
 }
-
-
 
 void drawArm()
 {
