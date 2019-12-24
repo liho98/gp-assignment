@@ -25,8 +25,16 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = -0.20;
-float v1 = -0.7;
+float v = 0.5;
+float v1 = 0.5;
+float v2 = 0.5;
+float v3 = 0.5;
+
+int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
+int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
+int selectedGluDrawStyles = 100011;
+int selectedGlDrawStyles = 0x0002;
+int stylesNo = 0;
 
 // use dedicated GPU to run
 extern "C"
@@ -49,6 +57,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             printf("v1: %f\n", v1);
 
             glfwSetWindowShouldClose(window, GL_TRUE);
+            break;
+        case GLFW_KEY_GRAVE_ACCENT:
+            stylesNo += 1;
+            if (stylesNo % 4 == 0)
+            {
+                stylesNo = 0;
+            }
+            selectedGluDrawStyles = gluDrawStyles[stylesNo];
+            selectedGlDrawStyles = glDrawStyles[stylesNo];
             break;
         case GLFW_KEY_F1:
             mode = 0;
@@ -136,6 +153,30 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_5:
             moveFinger = 4;
+            break;
+        case GLFW_KEY_T:
+            v += 0.01;
+            break;
+        case GLFW_KEY_G:
+            v -= 0.01;
+            break;
+        case GLFW_KEY_Y:
+            v1 += 0.01;
+            break;
+        case GLFW_KEY_H:
+            v1 -= 0.01;
+            break;
+        case GLFW_KEY_U:
+            v2 += 0.01;
+            break;
+        case GLFW_KEY_J:
+            v2 -= 0.01;
+            break;
+        case GLFW_KEY_I:
+            v3 += 0.01;
+            break;
+        case GLFW_KEY_K:
+            v3 -= 0.01;
             break;
         default:
             break;
@@ -251,7 +292,7 @@ void drawCylinder(double baseRadius, double topRadius, double height, int slices
 {
     GLUquadricObj *cylinder = NULL;
     cylinder = gluNewQuadric();
-    gluQuadricDrawStyle(cylinder, GLU_LINE);
+    gluQuadricDrawStyle(cylinder, selectedGluDrawStyles);
     gluCylinder(cylinder, baseRadius, topRadius, height, slices, stacks);
     gluDeleteQuadric(cylinder);
 }
@@ -260,7 +301,7 @@ void drawSphere(float radius, int slice, int slack)
 {
     GLUquadricObj *sphere = NULL;
     sphere = gluNewQuadric();
-    gluQuadricDrawStyle(sphere, GLU_LINE);
+    gluQuadricDrawStyle(sphere, selectedGluDrawStyles);
     gluSphere(sphere, radius, slice, slack);
     gluDeleteQuadric(sphere);
 }
@@ -270,7 +311,7 @@ void drawCone()
     glPushMatrix();
     GLUquadricObj *cylinder = NULL;
     cylinder = gluNewQuadric();
-    gluQuadricDrawStyle(cylinder, GLU_FILL);
+    gluQuadricDrawStyle(cylinder, selectedGluDrawStyles);
     gluCylinder(cylinder, 0.01, 0.3, 1, 20, 20);
     gluDeleteQuadric(cylinder);
     glPopMatrix();
@@ -286,66 +327,106 @@ void drawCone()
 
 void drawCuboid(float size, float widthScale)
 {
-    glBegin(GL_LINES);
-    // front top
+    glBegin(selectedGlDrawStyles);
+    // front
     glColor3ub(30, 136, 229);
     glVertex3f(0, 0, size);
     glVertex3f(size * widthScale, 0, size);
-
-    // front right
-    glVertex3f(size * widthScale, 0, size);
     glVertex3f(size * widthScale, 0, 0);
 
-    // front bottom
-    glVertex3f(size * widthScale, 0, 0);
     glVertex3f(0, 0, 0);
 
-    // front left
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 0, size);
-
-    // left top
+    // left
+    // glColor3ub(223, 120, 239);
     glVertex3f(0, size, size);
     glVertex3f(0, 0, size);
-
-    // left right
-    glVertex3f(0, 0, size);
-    glVertex3f(0, 0, 0);
-
-    // left bottom
     glVertex3f(0, 0, 0);
     glVertex3f(0, size, 0);
 
-    // left left
+    // bottom
+    // glColor3ub(128, 226, 126);
     glVertex3f(0, size, 0);
-    glVertex3f(0, size, size);
+    glVertex3f(size * widthScale, size, 0);
+    glVertex3f(size * widthScale, 0, 0);
+    glVertex3f(0, 0, 0);
 
     // right
-    // right top
+    // glColor3ub(255, 255, 114);
     glVertex3f(size * widthScale, 0, size);
     glVertex3f(size * widthScale, size, size);
-
-    // right right
-    glVertex3f(size * widthScale, size, size);
-    glVertex3f(size * widthScale, size, 0);
-
-    // right bottom
     glVertex3f(size * widthScale, size, 0);
     glVertex3f(size * widthScale, 0, 0);
 
-    // right left
-    glVertex3f(size * widthScale, 0, 0);
-    glVertex3f(size * widthScale, 0, size);
-
-    // behind top
+    // behind
+    // glColor3ub(255, 201, 71);
+    glVertex3f(size * widthScale, size, size);
     glVertex3f(0, size, size);
-    glVertex3f(size * widthScale, size, size);
-
-    // behind bottom
     glVertex3f(0, size, 0);
     glVertex3f(size * widthScale, size, 0);
 
+    // top
+    glVertex3f(0, size, size);
+    glVertex3f(size * widthScale, size, size);
+    glVertex3f(size * widthScale, 0, size);
+    glVertex3f(0, 0, size);
+
     glEnd();
+}
+
+void drawPyramid()
+{
+    glPushMatrix();
+    glTranslatef(0, -0.5f, 0);
+    //glRotatef(rotateDeg, 1, 1, 1);
+    glBegin(GL_POLYGON);
+    {
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, -0.5);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(-0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(0.5, 0, 0);
+
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, -0.5);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(-0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(-0.5, 0, -1.0);
+
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, -0.5);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(0.5, 0, -1.0);
+
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, -0.5);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(0.5, 0, -1.0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(-0.5, 0, -1.0);
+    }
+    glEnd();
+
+    glBegin(GL_QUADS);
+    {
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(-0.5, 0, -1);
+
+        glTexCoord2f(1, 1);
+        glVertex3f(-0.5, 0, 0);
+
+        glTexCoord2f(1, 0.0f);
+        glVertex3f(0.5, 0, 0);
+
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(0.5, 0, -1);
+    }
+    glEnd();
+
+    glPopMatrix();
 }
 
 void drawMoon()
@@ -354,7 +435,7 @@ void drawMoon()
     glPushMatrix();
     {
         // Call only once for all remaining points
-        glBegin(GL_LINES);
+        glBegin(selectedGlDrawStyles);
 
         // All lines lie in the xy plane.
         for (float angle = 0.0f; angle <= GL_PI; angle += (GL_PI / 50.0f))
@@ -541,7 +622,8 @@ void drawFingers()
     // float thumb = -0.02;
     // float secondY = -0.04, secondZ = 0.2;
 
-    glRotatef(0 + handDegree, 0, 0, 1);
+    glRotatef(-90, 0, 0, 1);
+    glRotatef(-90, 1, 0, 0);
 
     glPushMatrix();
     {
@@ -576,208 +658,6 @@ void drawFingers()
         drawFinger(0.3, 2);
     }
     glPopMatrix();
-
-    // // first level fingers
-    // glPushMatrix();
-    // {
-    //     glRotatef(40, 1, 0, 0);
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(0, -0.6 - (middleFinger * 1), 0);
-    //         drawCuboid(0.04, 0, 0, 0.1 + middleFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(0.05, -0.6 - (indexRingFinger * 1), 0);
-    //         drawCuboid(0.04, 0, 0, 0.1 + indexRingFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(-0.05, -0.6 - (indexRingFinger * 1), 0);
-    //         drawCuboid(0.04, 0, 0, 0.1 + indexRingFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(-0.10, -0.6 - (littleFinger * 1), 0);
-    //         drawCuboid(0.04, 0, 0, 0.1 + littleFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glRotatef(35, 0, 0, 1);
-    //         glTranslatef(-0.19, -0.54 - (thumb * 1), 0);
-    //         drawCuboid(0.04, 0, 0, 0.1 + thumb);
-    //     }
-    //     glPopMatrix();
-    // }
-    // glPopMatrix();
-
-    // // second level fingers888888888888
-    // glPushMatrix();
-    // {
-    //     glTranslatef(0, secondY, secondZ);
-    //     glRotatef(20, 1, 0, 0);
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(0, -0.73 - (middleFinger * 2), 0);
-    //         drawCuboid(0.04, 0, 0, 0.08 + middleFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(0.05, -0.73 - (indexRingFinger * 2), 0);
-    //         drawCuboid(0.04, 0, 0, 0.08 + indexRingFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(-0.05, -0.73 - (indexRingFinger * 2), 0);
-    //         drawCuboid(0.04, 0, 0, 0.08 + indexRingFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(-0.10, -0.73 - (littleFinger * 2), 0);
-    //         drawCuboid(0.04, 0, 0, 0.08 + littleFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(0.12, -0.7 - (thumb * 2), 0);
-    //         glRotatef(0, 0, 0, 1);
-    //         drawCuboid(0.04, 0, 0, 0.1 + thumb);
-    //     }
-    //     glPopMatrix();
-    // }
-    // glPopMatrix();
-
-    // // third level fingers
-    // glPushMatrix();
-    // {
-    //     glTranslatef(0, secondY * 4, secondZ * 2);
-    //     glRotatef(40, 1, 0, 0);
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(0, -0.83 - (middleFinger * 3), 0);
-    //         drawCuboid(0.04, 0, 0, 0.05 + middleFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(0.05, -0.83 - (indexRingFinger * 3), 0);
-    //         drawCuboid(0.04, 0, 0, 0.05 + indexRingFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(-0.05, -0.83 - (indexRingFinger * 3), 0);
-    //         drawCuboid(0.04, 0, 0, 0.05 + indexRingFinger);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(-0.10, -0.83 - (littleFinger * 3), 0);
-    //         drawCuboid(0.04, 0, 0, 0.05 + littleFinger);
-    //     }
-    //     glPopMatrix();
-    // }
-    // glPopMatrix();
-
-    // // first and second level finger joint
-    // glPushMatrix();
-    // {
-    //     int jointSliceStack = 10;
-    //     float jointRadius = 0.025;
-    //     float jointX = 0.015;
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX, -0.6 - (middleFinger * 1), 0.01);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX + 0.05, -0.6 - (indexRingFinger * 1), 0.01);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX - 0.05, -0.6 - (indexRingFinger * 1), 0.01);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX - 0.10, -0.6 - (littleFinger * 1), 0.01);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX + 0.12, -0.55 - (thumb * 1), 0.02);
-    //         glRotatef(35, 0, 0, 1);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-    // }
-    // glPopMatrix();
-
-    // // second and third level finger joint
-    // glPushMatrix();
-    // {
-    //     float jointX = 0.015;
-    //     int jointSliceStack = 10;
-    //     float jointRadius = 0.025;
-    //     glTranslatef(0, secondY, secondZ);
-    //     glRotatef(20, 1, 0, 0);
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX, -0.73 - (middleFinger * 1), 0.01);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX + 0.05, -0.73 - (indexRingFinger * 1), 0.01);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX - 0.05, -0.73 - (indexRingFinger * 1), 0.01);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-
-    //     glPushMatrix();
-    //     {
-    //         glTranslatef(jointX - 0.10, -0.73 - (littleFinger * 1), 0.01);
-    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-    //     }
-    //     glPopMatrix();
-    // }
-    // glPopMatrix();
 }
 
 void drawArm()
@@ -790,24 +670,68 @@ void drawArm()
     }
     glPopMatrix();
 
-    drawBracers();
+    glPushMatrix();
+    {
+        drawBracers();
+    }
+    glPopMatrix();
 
-    drawFingers();
+    glPushMatrix();
+    {
+        glRotatef(0 + handDegree, 1, 0, 0);
+        glPushMatrix();
+        {
+            glRotatef(90, 0, 1, 0);
+            glTranslatef(-0.04, -0.78, -0.18);
+            drawCuboid(0.35, 0.21);
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            glTranslatef(-0.1, -0.71, 0.03);
+            glScalef(0.37, 0.37, 0.37);
+            drawFingers();
+        }
+        glPopMatrix();
+    }
+    glPopMatrix();
 }
 
 void drawShoe()
 {
     glPushMatrix();
     {
-    glScalef(1, 0.3, 1);
-    drawCuboid(0.5, 2);
+        glScalef(1, 0.3, 1);
+        glTranslatef(0, 0, -0.05);
+        drawCuboid(0.5, 2);
     }
     glPopMatrix();
+
     glPushMatrix();
     {
         glTranslatef(0.1, 0.3 * 0.5, 0);
         glScalef(0.7, 0.3, 0.8);
         drawCuboid(0.5, 2);
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        int jointSliceStack = 10;
+        float jointRadius = 0.1;
+        glTranslatef(0.09, 0.210000, 0.39);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        glTranslatef(0, 0, -0.2);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        glTranslatef(0, 0, -0.2);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        drawPyramid();
     }
     glPopMatrix();
 }
@@ -823,11 +747,21 @@ void display()
 
     glPushMatrix();
     {
-        // drawFingers();
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0, 0, 0.7);
         drawShoe();
     }
     glPopMatrix();
 
+    glPushMatrix();
+    {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0, 0, -0.7);
+        drawShoe();
+    }
+    glPopMatrix();
+
+    /////////////////////////////// arm
     // glPushMatrix();
     // {
     //     glRotatef(90, 0, 1, 0);
@@ -843,12 +777,7 @@ void display()
     //     drawArm();
     // }
     // glPopMatrix();
-
-    // glPushMatrix();
-    // {
-    //         drawBridgeCuboid(1.5, 4, 10, 1);
-    // }
-    // glPopMatrix();
+    ///////////////////////////////
 }
 
 int main(int argc, char **argv)

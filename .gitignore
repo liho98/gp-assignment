@@ -19,3 +19,8 @@ gipsydanger
 !include/.gitkeep 
 !model/.gitkeep 
 
+lib/libglfw3.a
+lib/libGLEW.so
+lib/libGLEW.a
+lib/libglad.a
+lib/libassimp.so

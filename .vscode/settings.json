@@ -3,7 +3,10 @@
         "string": "cpp",
         "fstream": "cpp",
         "iostream": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "array": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp"
     },
     "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\cmd.exe",
 }
