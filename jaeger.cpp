@@ -17,9 +17,16 @@ bool rotate = false;
 bool isOrtho = false;
 bool isLift = false;
 
+int mode = 0, moveFinger = 0;
+
+float fingerDegree = 0, handDegree = 0;
+
 double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
+
+float v = -0.20;
+float v1 = -0.7;
 
 // use dedicated GPU to run
 extern "C"
@@ -34,59 +41,122 @@ extern "C"
 void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS || action == GLFW_REPEAT)
-        if (key == GLFW_KEY_ESCAPE)
-            glfwSetWindowShouldClose(window, GL_TRUE);
-        else if (key == GLFW_KEY_F1)
+    {
+        switch (key)
         {
+        case GLFW_KEY_ESCAPE:
+            printf("v: %f\n", v);
+            printf("v1: %f\n", v1);
+
+            glfwSetWindowShouldClose(window, GL_TRUE);
+            break;
+        case GLFW_KEY_F1:
+            mode = 0;
             if (isOrtho)
                 isOrtho = false;
             else
                 isOrtho = true;
-        }
-        else if (key == GLFW_KEY_F2)
-        {
-            if (isLift)
-                isLift = false;
-            else
-                isLift = true;
-        }
-        else if (key == GLFW_KEY_SPACE)
-        {
+            break;
+        case GLFW_KEY_F2:
+            mode = 1;
+            break;
+        case GLFW_KEY_F3:
+            mode = 2;
+            break;
+        case GLFW_KEY_F4:
+            mode = 3;
+            break;
+        case GLFW_KEY_SPACE:
             if (rotate)
                 rotate = false;
             else
                 rotate = true;
-        }
-        else if (key == GLFW_KEY_RIGHT)
-        {
-            perspectiveX -= 0.1;
-            orthoX -= 0.1;
-        }
-        else if (key == GLFW_KEY_LEFT)
-        {
+            break;
+        case GLFW_KEY_RIGHT:
             perspectiveX += 0.1;
             orthoX += 0.1;
-        }
-        else if (key == GLFW_KEY_UP)
-        {
-            perspectiveY -= 0.1;
-            orthoY -= 0.1;
-        }
-        else if (key == GLFW_KEY_DOWN)
-        {
-            perspectiveY += 0.1;
-            orthoY += 0.1;
-        }
-        else if (key == GLFW_KEY_KP_8)
-        {
+            break;
+        case GLFW_KEY_LEFT:
+            perspectiveX -= 0.1;
+            orthoX -= 0.1;
+            break;
+        case GLFW_KEY_UP:
+            switch (mode)
+            {
+            case 0:
+                perspectiveY += 0.1;
+                orthoY += 0.1;
+                break;
+            case 1:
+                fingerDegree += 1;
+                break;
+            case 2:
+                handDegree += 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        case GLFW_KEY_DOWN:
+            switch (mode)
+            {
+            case 0:
+                perspectiveY -= 0.1;
+                orthoY -= 0.1;
+                break;
+            case 1:
+                fingerDegree -= 1;
+                break;
+            case 2:
+                handDegree -= 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        case GLFW_KEY_KP_8:
             perspectiveZ += 0.1;
             orthoZ += 0.1;
-        }
-        else if (key == GLFW_KEY_KP_2)
-        {
+            break;
+        case GLFW_KEY_KP_2:
             perspectiveZ -= 0.1;
             orthoZ -= 0.1;
+            break;
+        case GLFW_KEY_1:
+            moveFinger = 0;
+            break;
+        case GLFW_KEY_2:
+            moveFinger = 1;
+            break;
+        case GLFW_KEY_3:
+            moveFinger = 2;
+            break;
+        case GLFW_KEY_4:
+            moveFinger = 3;
+            break;
+        case GLFW_KEY_5:
+            moveFinger = 4;
+            break;
+        default:
+            break;
         }
+        // else if (key == GLFW_KEY_T)
+        // {
+        //     v += 0.01;
+        // }
+        // else if (key == GLFW_KEY_G)
+        // {
+        //     v -= 0.01;
+        // }
+        // else if (key == GLFW_KEY_Y)
+        // {
+        //     v1 += 0.01;
+        // }
+        // else if (key == GLFW_KEY_H)
+        // {
+        //     v1 -= 0.01;
+        // }
+    }
 }
 
 GLFWwindow *initWindow(const int resX, const int resY)
@@ -99,7 +169,7 @@ GLFWwindow *initWindow(const int resX, const int resY)
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
 
     // Open a window and create its OpenGL context
-    GLFWwindow *window = glfwCreateWindow(resX, resY, "Jaeger", glfwGetPrimaryMonitor(), NULL);
+    GLFWwindow *window = glfwCreateWindow(resX, resY, "Jaeger", NULL, NULL);
 
     if (window == NULL)
     {
@@ -214,44 +284,66 @@ void drawCone()
     // glPopMatrix();
 }
 
-void drawCuboid(float x, float widthness, float thickness, float longness)
+void drawCuboid(float size, float widthScale)
 {
-    glBegin(GL_LINE_LOOP);
-    // front
-    glVertex3f(0, 0, x + widthness);
-    glVertex3f(x + thickness, 0, x + widthness);
-    glVertex3f(x + thickness, 0, 0);
+    glBegin(GL_LINES);
+    // front top
+    glColor3ub(30, 136, 229);
+    glVertex3f(0, 0, size);
+    glVertex3f(size * widthScale, 0, size);
+
+    // front right
+    glVertex3f(size * widthScale, 0, size);
+    glVertex3f(size * widthScale, 0, 0);
+
+    // front bottom
+    glVertex3f(size * widthScale, 0, 0);
     glVertex3f(0, 0, 0);
 
-    // left
-    glVertex3f(0, x + longness, x + widthness);
-    glVertex3f(0, 0, x + widthness);
+    // front left
     glVertex3f(0, 0, 0);
-    glVertex3f(0, x + longness, 0);
+    glVertex3f(0, 0, size);
 
-    // bottom
-    glVertex3f(0, x + longness, 0);
-    glVertex3f(x + thickness, x + longness, 0);
-    glVertex3f(x + thickness, 0, 0);
+    // left top
+    glVertex3f(0, size, size);
+    glVertex3f(0, 0, size);
+
+    // left right
+    glVertex3f(0, 0, size);
     glVertex3f(0, 0, 0);
+
+    // left bottom
+    glVertex3f(0, 0, 0);
+    glVertex3f(0, size, 0);
+
+    // left left
+    glVertex3f(0, size, 0);
+    glVertex3f(0, size, size);
 
     // right
-    glVertex3f(x + thickness, 0, x + widthness);
-    glVertex3f(x + thickness, x + longness, x + widthness);
-    glVertex3f(x + thickness, x + longness, 0);
-    glVertex3f(x + thickness, 0, 0);
+    // right top
+    glVertex3f(size * widthScale, 0, size);
+    glVertex3f(size * widthScale, size, size);
 
-    // behind
-    glVertex3f(x + thickness, x + longness, x + widthness);
-    glVertex3f(0, x + longness, x + widthness);
-    glVertex3f(0, x + longness, 0);
-    glVertex3f(x + thickness, x + longness, 0);
+    // right right
+    glVertex3f(size * widthScale, size, size);
+    glVertex3f(size * widthScale, size, 0);
 
-    // top
-    glVertex3f(0, x + longness, x + widthness);
-    glVertex3f(x + thickness, x + longness, x + widthness);
-    glVertex3f(x + thickness, 0, x + widthness);
-    glVertex3f(0, 0, x + widthness);
+    // right bottom
+    glVertex3f(size * widthScale, size, 0);
+    glVertex3f(size * widthScale, 0, 0);
+
+    // right left
+    glVertex3f(size * widthScale, 0, 0);
+    glVertex3f(size * widthScale, 0, size);
+
+    // behind top
+    glVertex3f(0, size, size);
+    glVertex3f(size * widthScale, size, size);
+
+    // behind bottom
+    glVertex3f(0, size, 0);
+    glVertex3f(size * widthScale, size, 0);
 
     glEnd();
 }
@@ -340,6 +432,7 @@ void drawClouds()
     }
     glPopMatrix();
 }
+
 void drawBracers()
 {
     // hand
@@ -406,215 +499,285 @@ void drawBracers()
     // glPopMatrix();
 }
 
+void drawFinger(float fingerSize, float fingerWidthScale)
+{
+    // float fingerSize = 0.3;
+    // float fingerWidthScale = 2.5;
+
+    int jointSliceStack = 10;
+    float jointRadius = 0.15;
+
+    float fingerGap = fingerSize * fingerWidthScale + jointRadius;
+    float jointGap = fingerGap - (jointRadius * 0.5);
+
+    glScalef(0.7, 0.5, 0.5);
+    glPushMatrix();
+    {
+        drawCuboid(fingerSize, fingerWidthScale);
+    }
+    glPopMatrix();
+    glPushMatrix();
+    {
+        glTranslatef(jointGap, fingerSize / 2, fingerSize / 2);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    }
+    glPopMatrix();
+    glPushMatrix();
+    {
+        glTranslatef(fingerGap, 0, 0);
+        glRotatef(0 + fingerDegree, 0, 0, 1);
+        drawCuboid(fingerSize, fingerWidthScale);
+    }
+    glPopMatrix();
+}
+
 void drawFingers()
 {
-    // longness of finger
-    float indexRingFinger = 0;
+    // // longness of finger
+
+    // float indexRingFinger = 0;
     float middleFinger = 0.01;
-    float littleFinger = -0.02;
-    float thumb = -0.02;
-    float secondY = -0.04, secondZ = 0.2;
+    // float littleFinger = -0.02;
+    // float thumb = -0.02;
+    // float secondY = -0.04, secondZ = 0.2;
 
-    // first level fingers
+    glRotatef(0 + handDegree, 0, 0, 1);
+
     glPushMatrix();
     {
-        glPushMatrix();
-        {
-            glTranslatef(0, -0.6 - (middleFinger * 1), 0);
-            drawCuboid(0.04, 0, 0, 0.1 + middleFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(0.05, -0.6 - (indexRingFinger * 1), 0);
-            drawCuboid(0.04, 0, 0, 0.1 + indexRingFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(-0.05, -0.6 - (indexRingFinger * 1), 0);
-            drawCuboid(0.04, 0, 0, 0.1 + indexRingFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(-0.10, -0.6 - (littleFinger * 1), 0);
-            drawCuboid(0.04, 0, 0, 0.1 + littleFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(0.12, -0.55 - (thumb * 1), 0);
-            glRotatef(35, 0, 0, 1);
-            drawCuboid(0.04, 0, 0, 0.1 + thumb);
-        }
-        glPopMatrix();
+        glTranslatef(0, 0, -0.2);
+        drawFinger(0.3, 2);
     }
     glPopMatrix();
 
-    // second level fingers
     glPushMatrix();
     {
-        glTranslatef(0, secondY, secondZ);
-        glRotatef(20, 1, 0, 0);
-        glPushMatrix();
-        {
-            glTranslatef(0, -0.73 - (middleFinger * 2), 0);
-            drawCuboid(0.04, 0, 0, 0.08 + middleFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(0.05, -0.73 - (indexRingFinger * 2), 0);
-            drawCuboid(0.04, 0, 0, 0.08 + indexRingFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(-0.05, -0.73 - (indexRingFinger * 2), 0);
-            drawCuboid(0.04, 0, 0, 0.08 + indexRingFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(-0.10, -0.73 - (littleFinger * 2), 0);
-            drawCuboid(0.04, 0, 0, 0.08 + littleFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(0.12, -0.7 - (thumb * 2), 0);
-            glRotatef(0, 0, 0, 1);
-            drawCuboid(0.04, 0, 0, 0.1 + thumb);
-        }
-        glPopMatrix();
+        drawFinger(0.3, 2.5);
     }
     glPopMatrix();
 
-    // third level fingers
     glPushMatrix();
     {
-        glTranslatef(0, secondY * 4, secondZ * 2);
-        glRotatef(40, 1, 0, 0);
-        glPushMatrix();
-        {
-            glTranslatef(0, -0.83 - (middleFinger * 3), 0);
-            drawCuboid(0.04, 0, 0, 0.05 + middleFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(0.05, -0.83 - (indexRingFinger * 3), 0);
-            drawCuboid(0.04, 0, 0, 0.05 + indexRingFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(-0.05, -0.83 - (indexRingFinger * 3), 0);
-            drawCuboid(0.04, 0, 0, 0.05 + indexRingFinger);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(-0.10, -0.83 - (littleFinger * 3), 0);
-            drawCuboid(0.04, 0, 0, 0.05 + littleFinger);
-        }
-        glPopMatrix();
+        glTranslatef(0, 0, 0.2);
+        drawFinger(0.3, 3);
     }
     glPopMatrix();
 
-    // first and second level finger joint
     glPushMatrix();
     {
-        int jointSliceStack = 10;
-        float jointRadius = 0.025;
-        float jointX = 0.015;
-        glPushMatrix();
-        {
-            glTranslatef(jointX, -0.6 - (middleFinger * 1), 0.01);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(jointX + 0.05, -0.6 - (indexRingFinger * 1), 0.01);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(jointX - 0.05, -0.6 - (indexRingFinger * 1), 0.01);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(jointX - 0.10, -0.6 - (littleFinger * 1), 0.01);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(jointX + 0.12, -0.55 - (thumb * 1), 0.02);
-            glRotatef(35, 0, 0, 1);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
+        glTranslatef(0, 0, 0.4);
+        drawFinger(0.3, 2.5);
     }
     glPopMatrix();
 
-    // second and third level finger joint
     glPushMatrix();
     {
-        float jointX = 0.015;
-        int jointSliceStack = 10;
-        float jointRadius = 0.025;
-        glTranslatef(0, secondY, secondZ);
-        glRotatef(20, 1, 0, 0);
-        glPushMatrix();
-        {
-            glTranslatef(jointX, -0.73 - (middleFinger * 1), 0.01);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(jointX + 0.05, -0.73 - (indexRingFinger * 1), 0.01);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(jointX - 0.05, -0.73 - (indexRingFinger * 1), 0.01);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
-
-        glPushMatrix();
-        {
-            glTranslatef(jointX - 0.10, -0.73 - (littleFinger * 1), 0.01);
-            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
-        }
-        glPopMatrix();
+        glTranslatef(0, 0, 0.6);
+        drawFinger(0.3, 2);
     }
     glPopMatrix();
+
+    // // first level fingers
+    // glPushMatrix();
+    // {
+    //     glRotatef(40, 1, 0, 0);
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(0, -0.6 - (middleFinger * 1), 0);
+    //         drawCuboid(0.04, 0, 0, 0.1 + middleFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(0.05, -0.6 - (indexRingFinger * 1), 0);
+    //         drawCuboid(0.04, 0, 0, 0.1 + indexRingFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(-0.05, -0.6 - (indexRingFinger * 1), 0);
+    //         drawCuboid(0.04, 0, 0, 0.1 + indexRingFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(-0.10, -0.6 - (littleFinger * 1), 0);
+    //         drawCuboid(0.04, 0, 0, 0.1 + littleFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glRotatef(35, 0, 0, 1);
+    //         glTranslatef(-0.19, -0.54 - (thumb * 1), 0);
+    //         drawCuboid(0.04, 0, 0, 0.1 + thumb);
+    //     }
+    //     glPopMatrix();
+    // }
+    // glPopMatrix();
+
+    // // second level fingers888888888888
+    // glPushMatrix();
+    // {
+    //     glTranslatef(0, secondY, secondZ);
+    //     glRotatef(20, 1, 0, 0);
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(0, -0.73 - (middleFinger * 2), 0);
+    //         drawCuboid(0.04, 0, 0, 0.08 + middleFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(0.05, -0.73 - (indexRingFinger * 2), 0);
+    //         drawCuboid(0.04, 0, 0, 0.08 + indexRingFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(-0.05, -0.73 - (indexRingFinger * 2), 0);
+    //         drawCuboid(0.04, 0, 0, 0.08 + indexRingFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(-0.10, -0.73 - (littleFinger * 2), 0);
+    //         drawCuboid(0.04, 0, 0, 0.08 + littleFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(0.12, -0.7 - (thumb * 2), 0);
+    //         glRotatef(0, 0, 0, 1);
+    //         drawCuboid(0.04, 0, 0, 0.1 + thumb);
+    //     }
+    //     glPopMatrix();
+    // }
+    // glPopMatrix();
+
+    // // third level fingers
+    // glPushMatrix();
+    // {
+    //     glTranslatef(0, secondY * 4, secondZ * 2);
+    //     glRotatef(40, 1, 0, 0);
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(0, -0.83 - (middleFinger * 3), 0);
+    //         drawCuboid(0.04, 0, 0, 0.05 + middleFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(0.05, -0.83 - (indexRingFinger * 3), 0);
+    //         drawCuboid(0.04, 0, 0, 0.05 + indexRingFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(-0.05, -0.83 - (indexRingFinger * 3), 0);
+    //         drawCuboid(0.04, 0, 0, 0.05 + indexRingFinger);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(-0.10, -0.83 - (littleFinger * 3), 0);
+    //         drawCuboid(0.04, 0, 0, 0.05 + littleFinger);
+    //     }
+    //     glPopMatrix();
+    // }
+    // glPopMatrix();
+
+    // // first and second level finger joint
+    // glPushMatrix();
+    // {
+    //     int jointSliceStack = 10;
+    //     float jointRadius = 0.025;
+    //     float jointX = 0.015;
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX, -0.6 - (middleFinger * 1), 0.01);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX + 0.05, -0.6 - (indexRingFinger * 1), 0.01);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX - 0.05, -0.6 - (indexRingFinger * 1), 0.01);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX - 0.10, -0.6 - (littleFinger * 1), 0.01);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX + 0.12, -0.55 - (thumb * 1), 0.02);
+    //         glRotatef(35, 0, 0, 1);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+    // }
+    // glPopMatrix();
+
+    // // second and third level finger joint
+    // glPushMatrix();
+    // {
+    //     float jointX = 0.015;
+    //     int jointSliceStack = 10;
+    //     float jointRadius = 0.025;
+    //     glTranslatef(0, secondY, secondZ);
+    //     glRotatef(20, 1, 0, 0);
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX, -0.73 - (middleFinger * 1), 0.01);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX + 0.05, -0.73 - (indexRingFinger * 1), 0.01);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX - 0.05, -0.73 - (indexRingFinger * 1), 0.01);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+
+    //     glPushMatrix();
+    //     {
+    //         glTranslatef(jointX - 0.10, -0.73 - (littleFinger * 1), 0.01);
+    //         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    //     }
+    //     glPopMatrix();
+    // }
+    // glPopMatrix();
 }
 
 void drawArm()
@@ -626,8 +789,27 @@ void drawArm()
         drawCylinder(0.15, 0.22, 1, 20, 10);
     }
     glPopMatrix();
+
     drawBracers();
+
     drawFingers();
+}
+
+void drawShoe()
+{
+    glPushMatrix();
+    {
+    glScalef(1, 0.3, 1);
+    drawCuboid(0.5, 2);
+    }
+    glPopMatrix();
+    glPushMatrix();
+    {
+        glTranslatef(0.1, 0.3 * 0.5, 0);
+        glScalef(0.7, 0.3, 0.8);
+        drawCuboid(0.5, 2);
+    }
+    glPopMatrix();
 }
 
 void display()
@@ -641,19 +823,26 @@ void display()
 
     glPushMatrix();
     {
-        glRotatef(90, 0, 1, 0);
-        glTranslatef(0.7, 0, 0);
-        drawArm();
+        // drawFingers();
+        drawShoe();
     }
     glPopMatrix();
 
-    glPushMatrix();
-    {
-        glRotatef(90, 0, 1, 0);
-        glTranslatef(-0.7, 0, 0);
-        drawArm();
-    }
-    glPopMatrix();
+    // glPushMatrix();
+    // {
+    //     glRotatef(90, 0, 1, 0);
+    //     glTranslatef(0.7, 0, 0);
+    //     drawArm();
+    // }
+    // glPopMatrix();
+
+    // glPushMatrix();
+    // {
+    //     glRotatef(90, 0, 1, 0);
+    //     glTranslatef(-0.7, 0, 0);
+    //     drawArm();
+    // }
+    // glPopMatrix();
 
     // glPushMatrix();
     // {
