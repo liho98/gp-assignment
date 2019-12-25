@@ -25,10 +25,12 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0.5;
-float v1 = 0.5;
-float v2 = 0.5;
-float v3 = 0.5;
+float v = 0.16;
+float v1 = 0.13;
+float v2 = 0.57;
+float v3 = -0.49;
+float v4 = 8.38;
+float v5 = 0.92;
 
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
 int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
@@ -55,6 +57,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         case GLFW_KEY_ESCAPE:
             printf("v: %f\n", v);
             printf("v1: %f\n", v1);
+            printf("v2: %f\n", v2);
+            printf("v3: %f\n", v3);
+            printf("v4: %f\n", v4);
+            printf("v5: %f\n", v5);
 
             glfwSetWindowShouldClose(window, GL_TRUE);
             break;
@@ -177,6 +183,18 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_K:
             v3 -= 0.01;
+            break;
+        case GLFW_KEY_O:
+            v4 += 0.01;
+            break;
+        case GLFW_KEY_L:
+            v4 -= 0.01;
+            break;
+        case GLFW_KEY_P:
+            v5 += 0.01;
+            break;
+        case GLFW_KEY_SEMICOLON:
+            v5 -= 0.01;
             break;
         default:
             break;
@@ -378,7 +396,7 @@ void drawPyramid()
     glPushMatrix();
     glTranslatef(0, -0.5f, 0);
     //glRotatef(rotateDeg, 1, 1, 1);
-    glBegin(GL_POLYGON);
+    glBegin(selectedGlDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
         glVertex3f(0, 1, -0.5);
@@ -410,7 +428,7 @@ void drawPyramid()
     }
     glEnd();
 
-    glBegin(GL_QUADS);
+    glBegin(selectedGlDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
         glVertex3f(-0.5, 0, -1);
@@ -711,7 +729,7 @@ void drawShoe()
     glPushMatrix();
     {
         glTranslatef(0.1, 0.3 * 0.5, 0);
-        glScalef(0.7, 0.3, 0.8);
+        glScalef(0.7, 0.6, 0.8);
         drawCuboid(0.5, 2);
     }
     glPopMatrix();
@@ -731,6 +749,57 @@ void drawShoe()
 
     glPushMatrix();
     {
+        float pyramidSize = 0.1;
+        glRotatef(90, 0, 0, 1);
+        glScalef(0.2, 0.2, 0.15);
+        glTranslatef(0.52, 0.46, 0.85);
+        drawPyramid();
+        glTranslatef(0, 0, 1.0);
+        drawPyramid();
+        glTranslatef(0, 0, 1.0);
+        drawPyramid();
+    }
+    glPopMatrix();
+    glPushMatrix();
+    {
+        float pyramidSize = 0.1;
+        glRotatef(90, 1, 0, 0);
+        glScalef(0.2, 0.2, 0.15);
+        glTranslatef(0.5, 2.74, 0.02);
+        drawPyramid();
+        glTranslatef(1, 0, 0);
+        drawPyramid();
+        glTranslatef(1, 0, 0);
+        drawPyramid();
+        glTranslatef(1, 0, 0);
+        drawPyramid();
+        glTranslatef(1, 0, 0);
+        drawPyramid();
+    }
+    glPopMatrix();
+    glPushMatrix();
+    {
+        float pyramidSize = 0.1;
+        glRotatef(-90, 1, 0, 0);
+        glScalef(0.2, 0.2, 0.15);
+        glTranslatef(0.57, 0.65, 0.98);
+        drawPyramid();
+        glTranslatef(1, 0, 0);
+        drawPyramid();
+        glTranslatef(1, 0, 0);
+        drawPyramid();
+        glTranslatef(1, 0, 0);
+        drawPyramid();
+        glTranslatef(1, 0, 0);
+        drawPyramid();
+    }
+    glPopMatrix();
+    glPushMatrix();
+    {
+        float pyramidSize = 0.1;
+        glRotatef(-90, 0, 0, 1);
+        glScalef(0.15, 0.13, 0.48);
+        glTranslatef(-0.49, 8.21, 0.95);
         drawPyramid();
     }
     glPopMatrix();
@@ -753,13 +822,13 @@ void display()
     }
     glPopMatrix();
 
-    glPushMatrix();
-    {
-        glRotatef(90, 0, 1, 0);
-        glTranslatef(0, 0, -0.7);
-        drawShoe();
-    }
-    glPopMatrix();
+    // glPushMatrix();
+    // {
+    //     glRotatef(90, 0, 1, 0);
+    //     glTranslatef(0, 0, -0.7);
+    //     drawShoe();
+    // }
+    // glPopMatrix();
 
     /////////////////////////////// arm
     // glPushMatrix();
