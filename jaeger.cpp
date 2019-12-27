@@ -14,6 +14,9 @@ float orthoX = 0, orthoY = 0.5, orthoZ = 0;
 float bridgeDegree = 0, bridgeLineUp = 0;
 
 bool rotate = false;
+bool rotateLeft = false;
+bool rotateRight = false;
+
 bool isOrtho = false;
 bool isLift = false;
 
@@ -25,17 +28,22 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0.16;
-float v1 = 0.13;
-float v2 = 0.57;
-float v3 = -0.49;
-float v4 = 8.38;
-float v5 = 0.92;
+float v = 0;
+float v1 = 1;
+float v2 = 1;
+float v3 = 0.15;
+float v4 = 0.13;
+float v5 = 0.48;
 
+//
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
 int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
+int glewDrawStyles[4] = {0x0009, 0x0000, 0x0002, 0x0001};
+
 int selectedGluDrawStyles = 100011;
 int selectedGlDrawStyles = 0x0002;
+int selectedGlewDrawStyles = 0x0002;
+
 int stylesNo = 0;
 
 // use dedicated GPU to run
@@ -72,6 +80,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             }
             selectedGluDrawStyles = gluDrawStyles[stylesNo];
             selectedGlDrawStyles = glDrawStyles[stylesNo];
+            selectedGlewDrawStyles = glewDrawStyles[stylesNo];
             break;
         case GLFW_KEY_F1:
             mode = 0;
@@ -94,6 +103,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 rotate = false;
             else
                 rotate = true;
+            break;
+        case GLFW_KEY_COMMA:
+            speed -= 1;
+            break;
+        case GLFW_KEY_PERIOD:
+            speed += 1;
             break;
         case GLFW_KEY_RIGHT:
             perspectiveX += 0.1;
@@ -396,7 +411,7 @@ void drawPyramid()
     glPushMatrix();
     glTranslatef(0, -0.5f, 0);
     //glRotatef(rotateDeg, 1, 1, 1);
-    glBegin(selectedGlDrawStyles);
+    glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
         glVertex3f(0, 1, -0.5);
@@ -428,7 +443,7 @@ void drawPyramid()
     }
     glEnd();
 
-    glBegin(selectedGlDrawStyles);
+    glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
         glVertex3f(-0.5, 0, -1);
@@ -441,6 +456,62 @@ void drawPyramid()
 
         glTexCoord2f(0.0f, 0.0f);
         glVertex3f(0.5, 0, -1);
+    }
+    glEnd();
+
+    glPopMatrix();
+}
+
+void drawRightPyramid(float length)
+{
+    glPushMatrix();
+    glTranslatef(0, -0.5f, 0);
+    //glRotatef(rotateDeg, 1, 1, 1);
+    glBegin(selectedGlewDrawStyles);
+    {
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(-0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(0.5, 0, 0);
+
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(-0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(-0.5, 0, length);
+
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(0.5, 0, length);
+
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(0.5, 0, length);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(-0.5, 0, length);
+    }
+    glEnd();
+
+    glBegin(selectedGlewDrawStyles);
+    {
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(-0.5, 0, length);
+
+        glTexCoord2f(1, 1);
+        glVertex3f(-0.5, 0, 0);
+
+        glTexCoord2f(1, 0.0f);
+        glVertex3f(0.5, 0, 0);
+
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(0.5, 0, length);
     }
     glEnd();
 
@@ -720,17 +791,40 @@ void drawShoe()
 {
     glPushMatrix();
     {
-        glScalef(1, 0.3, 1);
-        glTranslatef(0, 0, -0.05);
-        drawCuboid(0.5, 2);
+        // TODO: limit calfHeight to reasonable value
+        float calfHeight = v;
+        glPushMatrix();
+        {
+            glTranslatef(0.1, 0.45, 0);
+            glScalef(0.5, 2.42 + calfHeight * 3, 0.8);
+            drawCuboid(0.5, 1.51);
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            float cylinderHeight = 1.5;
+            glRotatef(180, 0, 1, 1);
+            glTranslatef(-0.06, 0, 0.16);
+            glScalef(1, 1, 1 + calfHeight);
+            drawCylinder(0.05, 0.05, cylinderHeight, 20, 10);
+            glTranslatef(0, 0.19, 0);
+            drawCylinder(0.05, 0.05, cylinderHeight, 20, 10);
+            glTranslatef(0, 0.19, 0);
+            drawCylinder(0.05, 0.05, cylinderHeight, 20, 10);
+        }
+        glPopMatrix();
     }
     glPopMatrix();
 
-    glPushMatrix();
+    // triangle shoe slope
+    glPushMatrix(); // front shoe pyramid
     {
-        glTranslatef(0.1, 0.3 * 0.5, 0);
-        glScalef(0.7, 0.6, 0.8);
-        drawCuboid(0.5, 2);
+        float pyramidSize = 0.1;
+        glRotatef(270, 0, 1, 0);
+        glScalef(0.39, 0.58, 0.48);
+        glTranslatef(0.48, 1.27, -1.0);
+        drawRightPyramid(-0.67);
     }
     glPopMatrix();
 
@@ -744,6 +838,21 @@ void drawShoe()
         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
         glTranslatef(0, 0, -0.2);
         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        glScalef(1, 0.3, 1);
+        glTranslatef(0, 0, -0.05);
+        drawCuboid(0.5, 2);
+    }
+    glPopMatrix();
+    glPushMatrix();
+    {
+        glTranslatef(0.1, 0.3 * 0.5, 0);
+        glScalef(0.7, 0.6, 0.8);
+        drawCuboid(0.5, 2);
     }
     glPopMatrix();
 
@@ -794,13 +903,28 @@ void drawShoe()
         drawPyramid();
     }
     glPopMatrix();
-    glPushMatrix();
+    glPushMatrix(); // front shoe pyramid
     {
         float pyramidSize = 0.1;
         glRotatef(-90, 0, 0, 1);
         glScalef(0.15, 0.13, 0.48);
         glTranslatef(-0.49, 8.21, 0.95);
         drawPyramid();
+    }
+    glPopMatrix();
+}
+
+void drawBackground()
+{
+    // draw fence
+    glPushMatrix();
+    {
+        float cylinderHeight = 0.6;
+        glRotatef(180, 0, 1, 1);
+        glTranslatef(0.04, 0.15, 0.06);
+        drawCylinder(8.41, 8.41, cylinderHeight, 20, 10);
+        glTranslatef(1, 0, 0);
+        drawCylinder(8.41, 8.41, cylinderHeight, 20, 10);
     }
     glPopMatrix();
 }
