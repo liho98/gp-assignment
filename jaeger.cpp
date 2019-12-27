@@ -23,17 +23,19 @@ bool isLift = false;
 int mode = 0, moveFinger = 0;
 
 float fingerDegree = 0, handDegree = 0;
+float robotHeight = 0.5;
+float calfDegree = 0, thighDegree = 0;
 
 double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
 float v = 0;
-float v1 = 1;
-float v2 = 1;
-float v3 = 0.15;
-float v4 = 0.13;
-float v5 = 0.48;
+float v1 =0;
+float v2 = 0;
+float v3 = 1;
+float v4 = 1;
+float v5 = 1;
 
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
@@ -63,12 +65,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         switch (key)
         {
         case GLFW_KEY_ESCAPE:
-            printf("v: %f\n", v);
-            printf("v1: %f\n", v1);
-            printf("v2: %f\n", v2);
-            printf("v3: %f\n", v3);
-            printf("v4: %f\n", v4);
-            printf("v5: %f\n", v5);
+            printf("v: %f\tv1: %f\tv2: %f\n", v, v1, v2);
+            printf("v3: %f\tv4: %f\tv5: %f\n", v3, v4, v5);
 
             glfwSetWindowShouldClose(window, GL_TRUE);
             break;
@@ -97,6 +95,9 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_F4:
             mode = 3;
+            break;
+        case GLFW_KEY_F5:
+            mode = 4;
             break;
         case GLFW_KEY_SPACE:
             if (rotate)
@@ -131,6 +132,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             case 2:
                 handDegree += 1;
                 break;
+            case 3:
+                robotHeight += 0.1;
+                break;
+            case 4:
+                calfDegree += 1;
+                break;
+            case 5:
+                thighDegree += 0.1;
+                break;
             default:
                 break;
             }
@@ -147,6 +157,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 break;
             case 2:
                 handDegree -= 1;
+                break;
+            case 3:
+                robotHeight -= 0.1;
+                break;
+            case 4:
+                calfDegree -= 1;
+                break;
+            case 5:
+                thighDegree += 0.1;
                 break;
             default:
                 break;
@@ -787,12 +806,14 @@ void drawArm()
     glPopMatrix();
 }
 
-void drawShoe()
+void drawCalf()
 {
+    glRotatef(0 + calfDegree, 0, 0, 1);
+    glTranslatef(-0.15, -2.45, 0);
     glPushMatrix();
     {
         // TODO: limit calfHeight to reasonable value
-        float calfHeight = v;
+        float calfHeight = robotHeight;
         glPushMatrix();
         {
             glTranslatef(0.1, 0.45, 0);
@@ -814,6 +835,45 @@ void drawShoe()
             drawCylinder(0.05, 0.05, cylinderHeight, 20, 10);
         }
         glPopMatrix();
+
+        ///////////////////////
+        // draw calf joint
+        // one cylinder and two sphere
+        glPushMatrix();
+        {
+            float cylinderHeight = 0.31;
+            glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.04);
+            glScalef(1, 1, 1);
+            drawCylinder(0.16, 0.16, cylinderHeight, 20, 10);
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            int jointSliceStack = 10;
+            float jointRadius = 0.16;
+            glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
+            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+            glTranslatef(0, 0, -0.27);
+            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            // triangle cover the cylinder joint
+            float pyramidSize = 0.1;
+            glRotatef(270, 0, 1, 0);
+            glScalef(0.39, 0.58, 0.48);
+            glTranslatef(0.50, 3.4 + calfHeight * 2.5, -0.04);
+            drawRightPyramid(-0.82);
+
+            glRotatef(180, 0, 1, 0);
+            glTranslatef(-0.07, 0, 0.92);
+            drawRightPyramid(-0.82);
+        }
+        glPopMatrix();
+        ///////////////////////
     }
     glPopMatrix();
 
@@ -920,11 +980,50 @@ void drawBackground()
     glPushMatrix();
     {
         float cylinderHeight = 0.6;
-        glRotatef(180, 0, 1, 1);
-        glTranslatef(0.04, 0.15, 0.06);
-        drawCylinder(8.41, 8.41, cylinderHeight, 20, 10);
-        glTranslatef(1, 0, 0);
-        drawCylinder(8.41, 8.41, cylinderHeight, 20, 10);
+        glRotatef(-90, 1, 0, 0);
+        glScalef(0.2, 0.2, 0.15);
+        glTranslatef(0.57, 0.65, 0.98);
+        drawPyramid();
+    }
+    glPopMatrix();
+}
+
+void drawThigh()
+{
+    glPushMatrix();
+    {
+        glTranslatef(-0.1, -0.43 + robotHeight * 1.5, -0.02);
+        glScalef(0.5, 3.18, 0.8);
+        drawCuboid(0.5, 1.51);
+    }
+    glPopMatrix();
+}
+
+void drawHipJoint()
+{
+    glPushMatrix();
+    {
+        glTranslatef(0, -0.17, 0.04);
+        glPushMatrix();
+        {
+            float cylinderHeight = 1.46;
+            glRotatef(90, 0, 1, 0);
+            glTranslatef(0.12, 1.48 + robotHeight * 1.45, -0.47);
+            glScalef(1, 1, 1);
+            drawCylinder(0.22, 0.22, cylinderHeight, 20, 10);
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            int jointSliceStack = 10;
+            float jointRadius = 0.22;
+            glTranslatef(0.95, 1.48 + robotHeight * 1.45, -0.12);
+            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+            glTranslatef(-1.37, 0, 0);
+            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        }
+        glPopMatrix();
     }
     glPopMatrix();
 }
@@ -938,13 +1037,49 @@ void display()
     glRotatef(speed, 0, 1, 0);
     glRotatef(90, 0, 1, 0);
 
+    glScalef(0.7, 0.7, 0.7);
+
     glPushMatrix();
     {
         glRotatef(90, 0, 1, 0);
         glTranslatef(0, 0, 0.7);
-        drawShoe();
+        drawCalf();
     }
     glPopMatrix();
+
+    glPushMatrix();
+    {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0, 0, -0.7);
+        drawCalf();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0, 0, 0.7);
+        drawThigh();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0, 0, -0.7);
+        drawThigh();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        glTranslatef(-0.12, -0.12, 0);
+        glScalef(1.11, 1, 1);
+        drawHipJoint();
+    }
+    glPopMatrix();
+
+
 
     // glPushMatrix();
     // {
