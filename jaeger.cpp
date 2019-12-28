@@ -34,14 +34,14 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0.09;
-float v1 = 1.1;
-float v2 = -0.01;
-float v3 = 0.26;
-float v4 = 0.12;
-float v5 = -0.28;
-float v6 = 0;
-float v7 = 0;
+float v = 0.12;
+float v1 = -0.05;
+float v2 = -5.28;
+float v3 = 1.53;
+float v4 = 1.64;
+float v5 = 1.21;
+float v6 = 0.12;
+float v7 = 0.27;
 
 int fingerNo = 0; // individual finger control on, 1 - 10
 bool fingerControl = false;
@@ -1393,6 +1393,32 @@ void drawBody()
         drawCuboid(0.89, 4.83);
     }
     glPopMatrix();
+
+    glPushMatrix();
+    {
+        glRotatef(90, 1, 0, 0);
+        glRotatef(90, 0, 0, 1);
+        glTranslatef(-0.08, 0.91, -4.44);
+        glScalef(1.08, 0.64, 1.25);
+        drawRightPyramid(0.5);
+
+        glRotatef(180, 0, 0, 1);
+        glTranslatef(0, 3.36, 0);
+        drawRightPyramid(0.5);
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0.09, 3.52, -0.61);
+        drawCapsule(1.55, 0.12);
+        glTranslatef(0, -0.31, 0);
+        drawCapsule(1.55, 0.12);
+        glTranslatef(0, -0.31, 0);
+        drawCapsule(1.55, 0.12);
+    }
+    glPopMatrix();
 }
 
 void drawShoulderJoint()
@@ -1525,6 +1551,37 @@ void drawArms()
     glPopMatrix();
 }
 
+void drawHead()
+{
+    glPushMatrix();
+    {
+        glRotatef(90, 1, 0, 0);
+        glScalef(1.53, 1.64, 1.21);
+        glTranslatef(0.12, -0.05, -5.51);
+        float height = 0.16;
+        float width = 0.5;
+        glPushMatrix();
+        {
+            // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.04);
+            glScalef(1, 1, 1);
+            drawCylinder(height, height * 1.5, width, 20, 10);
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            int jointSliceStack = 10;
+            // float jointRadius = 0.12;
+            // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
+            drawSphere(height, jointSliceStack, jointSliceStack);
+            glTranslatef(0, 0, width);
+            drawSphere(height, jointSliceStack, jointSliceStack);
+        }
+        glPopMatrix();
+    }
+    glPopMatrix();
+}
+
 void display()
 {
     glClearColor(0, 0, 0, 0);
@@ -1564,6 +1621,7 @@ void display()
     drawLegs();
     drawArms();
     drawBody();
+    drawHead();
     drawShoulderJoint();
 }
 
