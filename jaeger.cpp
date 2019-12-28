@@ -30,12 +30,13 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = -0.29;
-float v1 =-2.47;
+float v = -1;
+float v1 = 0;
 float v2 = 0;
-float v3 = 0;
-float v4 = 0;
-float v5 = 0;
+float v3 = 1;
+float v4 = 1;
+float v5 = 1;
+float v6 = -1;
 
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
@@ -66,7 +67,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         {
         case GLFW_KEY_ESCAPE:
             printf("v: %f\tv1: %f\tv2: %f\n", v, v1, v2);
-            printf("v3: %f\tv4: %f\tv5: %f\n", v3, v4, v5);
+            printf("v3: %f\tv4: %f\tv5: %f\tv6: %f\n", v3, v4, v5, v6);
 
             glfwSetWindowShouldClose(window, GL_TRUE);
             break;
@@ -233,6 +234,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_SEMICOLON:
             v5 -= 0.01;
+            break;
+        case GLFW_KEY_LEFT_BRACKET:
+            v6 += 0.01;
+            break;
+        case GLFW_KEY_APOSTROPHE:
+            v6 -= 0.01;
             break;
         default:
             break;
@@ -541,6 +548,69 @@ void drawRightPyramid(float length)
     glPopMatrix();
 }
 
+void drawTrianglePyramid(float length)
+{
+    glPushMatrix();
+    glTranslatef(0, -0.5f, 0);
+    //glRotatef(rotateDeg, 1, 1, 1);
+    glBegin(selectedGlewDrawStyles);
+    {
+        // left
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, length);
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(-0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(0.5, 0, 0);
+
+        // front
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(-0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(-0.5, 0, length);
+
+        // right
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, length);
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(0.5, 0, 0);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(0.5, 0, length);
+
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, length);
+        glTexCoord2f(-0.5f, 0);
+        glVertex3f(0.5, 0, length);
+        glTexCoord2f(0.5f, 0);
+        glVertex3f(-0.5, 0, length);
+    }
+    glEnd();
+
+    glBegin(selectedGlewDrawStyles);
+    {
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(-0.5, 0, length);
+
+        glTexCoord2f(1, 1);
+        glVertex3f(-0.5, 0, 0);
+
+        glTexCoord2f(1, 0.0f);
+        glVertex3f(0.5, 0, 0);
+
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(0.5, 0, length);
+    }
+    glEnd();
+
+    glPopMatrix();
+}
+
 void drawMoon()
 {
     float x = 0, y = 0, z = -15, GL_PI = 3.142, radius = 0.4;
@@ -819,7 +889,7 @@ void drawCalf()
     glTranslatef(0, -2.04, 0); //-1.84
     glPushMatrix();
     {
-        glTranslatef(0.16,  0.2, 0);
+        glTranslatef(0.16, 0.2, 0);
         glRotatef(0 + calfDegree, 0, 0, 1);
         glTranslatef(-0.31, -2.62, 0); //-1.84
         // TODO: limit calfHeight to reasonable value
@@ -1045,6 +1115,21 @@ void drawHipJoint()
     glPopMatrix();
 }
 
+void drawBody()
+{
+    // hip
+    glPushMatrix();
+    {
+        glRotatef(180, 0, 0, 1);
+        glTranslatef(-0.17, -1.93, 0.42);
+        glScalef(1.28, 1.32, 1);
+        drawTrianglePyramid(-1);
+    }
+    glPopMatrix();
+
+
+}
+
 void display()
 {
     glClearColor(0, 0, 0, 0);
@@ -1054,7 +1139,7 @@ void display()
     glRotatef(speed, 0, 1, 0);
     glRotatef(90, 0, 1, 0);
 
-    // glScalef(0.7, 0.7, 0.7);
+    glScalef(0.7, 0.7, 0.7);
 
     glPushMatrix();
     {
@@ -1093,6 +1178,12 @@ void display()
             drawHipJoint();
         }
         glPopMatrix();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        drawBody();
     }
     glPopMatrix();
 
