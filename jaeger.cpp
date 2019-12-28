@@ -26,9 +26,9 @@ bool isTexture = false;
 
 int mode = 0, moveFinger = 0;
 
-float fingerDegree = 0, handDegree = 0, armDegree = 0;
+float fingerDegree[10] = {}, handDegree[2] = {}, armDegree[2] = {};
 float robotHeight = 0.5;
-float calfDegree = 0, thighDegree = 0;
+float calfDegree[2] = {}, thighDegree[2] = {};
 
 double w = 1920;
 double h = 1080;
@@ -42,6 +42,21 @@ float v4 = 0;
 float v5 = 0;
 float v6 = 0.48;
 float v7 = 2.64;
+
+int fingerNo = 0; // individual finger control on, 1 - 10
+bool fingerControl = false;
+int fingerCounter = 0;
+
+int armNo = 0; // individual arm control on, 1 - 2
+bool armControl = false;
+bool armRotate = false;
+int handCounter = 0;
+int armCounter = 0;
+
+int legNo = 0; // individual leg control on, 1 - 2
+bool legControl = false;
+int calfCounter = 0;
+int thighCounter = 0;
 
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
@@ -83,6 +98,15 @@ void initTexture(int textureNo)
     GetObject(hBMP, sizeof(BMP), &BMP);
 }
 
+void incrementArray(float *arr, float value, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        arr[i] += value;
+        printf("%f\n", arr[i]);
+    }
+}
+
 void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -109,12 +133,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 
             glfwSetWindowShouldClose(window, GL_TRUE);
             break;
-        case GLFW_KEY_GRAVE_ACCENT:
+        case GLFW_KEY_GRAVE_ACCENT: // key ` (~)
             stylesNo += 1;
             if (stylesNo % 4 == 0)
-            {
                 stylesNo = 0;
-            }
             selectedGluDrawStyles = gluDrawStyles[stylesNo];
             selectedGlDrawStyles = glDrawStyles[stylesNo];
             selectedGlewDrawStyles = glewDrawStyles[stylesNo];
@@ -126,20 +148,66 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             else
                 isOrtho = true;
             break;
-        case GLFW_KEY_F2:
+        case GLFW_KEY_F2: // finger
             mode = 1;
+            printf("mode = %d\n", mode);
             break;
-        case GLFW_KEY_F3:
+        case GLFW_KEY_F3: // hand
             mode = 2;
+            printf("mode = %d\n", mode);
             break;
-        case GLFW_KEY_F4:
+        case GLFW_KEY_F4: // arm
             mode = 3;
+            printf("mode = %d\n", mode);
             break;
-        case GLFW_KEY_F5:
+        case GLFW_KEY_F5: // calf
             mode = 4;
+            printf("mode = %d\n", mode);
             break;
-        case GLFW_KEY_F6:
+        case GLFW_KEY_F6: // thigh
             mode = 5;
+            printf("mode = %d\n", mode);
+            break;
+        case GLFW_KEY_F7: // finger control
+            if (fingerControl)
+            {
+                fingerControl = false;
+                mode = 0;
+                printf("fingerControl = %s\tmode = %d\n", fingerControl, mode);
+            }
+            else
+            {
+                fingerControl = true;
+                armControl = false;
+                legControl = false;
+                mode = 1;
+            }
+            break;
+        case GLFW_KEY_F8: // arm control
+            if (armControl)
+            {
+                armControl = false;
+                mode = 0;
+            }
+            else // user need to press F3 or F4
+            {
+                fingerControl = false;
+                armControl = true;
+                legControl = false;
+            }
+            break;
+        case GLFW_KEY_F9: // leg control
+            if (legControl)
+            {
+                legControl = false;
+                mode = 0;
+            }
+            else // user need to press F5 or F6
+            {
+                fingerControl = false;
+                armControl = false;
+                legControl = true;
+            }
             break;
         case GLFW_KEY_F12:
             if (isTexture)
@@ -175,22 +243,41 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 orthoY += 0.1;
                 break;
             case 1:
-                fingerDegree += 1;
+                if (fingerControl)
+                    fingerDegree[fingerNo - 1] += 2;
+                else
+                    incrementArray(fingerDegree, 2, 10);
                 break;
             case 2:
-                handDegree += 1;
+                if (armControl)
+                    handDegree[armNo - 1] += 1;
+                else
+                    incrementArray(handDegree, 1, 2);
                 break;
             // case 3:
             //     robotHeight += 0.1;
             //     break;
             case 3:
-                armDegree += 1;
+                if (armControl)
+                {
+                    armDegree[armNo - 1] += 1;
+                    // printf("armDegree1 = %f\tarmDegree2 = %f\tCurrent = %d\n",
+                    //        armDegree[0], armDegree[1], armNo - 1);
+                }
+                else
+                    incrementArray(armDegree, 1, 2);
                 break;
             case 4:
-                calfDegree += 1;
+                if (legControl)
+                    calfDegree[legNo - 1] += 1;
+                else
+                    incrementArray(calfDegree, 1, 2);
                 break;
             case 5:
-                thighDegree += 1;
+                if (legControl)
+                    thighDegree[legNo - 1] += 1;
+                else
+                    incrementArray(thighDegree, 1, 2);
                 break;
             default:
                 break;
@@ -204,22 +291,37 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 orthoY -= 0.1;
                 break;
             case 1:
-                fingerDegree -= 1;
+                if (fingerControl)
+                    fingerDegree[fingerNo - 1] -= 2;
+                else
+                    incrementArray(fingerDegree, -2, 10);
                 break;
             case 2:
-                handDegree -= 1;
+                if (armControl)
+                    handDegree[armNo - 1] -= 1;
+                else
+                    incrementArray(handDegree, -1, 2);
                 break;
             // case 3:
             //     robotHeight -= 0.1;
             //     break;
             case 3:
-                armDegree -= 1;
+                if (armControl)
+                    armDegree[armNo - 1] -= 1;
+                else
+                    incrementArray(armDegree, -1, 2);
                 break;
             case 4:
-                calfDegree -= 1;
+                if (legControl)
+                    calfDegree[legNo - 1] -= 1;
+                else
+                    incrementArray(calfDegree, -1, 2);
                 break;
             case 5:
-                thighDegree -= 1;
+                if (legControl)
+                    thighDegree[legNo - 1] -= 1;
+                else
+                    incrementArray(thighDegree, -1, 2);
                 break;
             default:
                 break;
@@ -234,19 +336,56 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             orthoZ -= 10;
             break;
         case GLFW_KEY_1:
-            moveFinger = 0;
+            if (fingerControl)
+                fingerNo = 1;
+            else if (armControl)
+                armNo = 1;
+            else if (legControl)
+                legNo = 1;
+            printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
+                   fingerNo, armNo, legNo);
             break;
         case GLFW_KEY_2:
-            moveFinger = 1;
+            if (fingerControl)
+                fingerNo = 2;
+            else if (armControl)
+                armNo = 2;
+            else if (legControl)
+                legNo = 2;
+            printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
+                   fingerNo, armNo, legNo);
             break;
         case GLFW_KEY_3:
-            moveFinger = 2;
+            if (fingerControl)
+                fingerNo = 3;
             break;
         case GLFW_KEY_4:
-            moveFinger = 3;
+            if (fingerControl)
+                fingerNo = 4;
             break;
         case GLFW_KEY_5:
-            moveFinger = 4;
+            if (fingerControl)
+                fingerNo = 5;
+            break;
+        case GLFW_KEY_6:
+            if (fingerControl)
+                fingerNo = 6;
+            break;
+        case GLFW_KEY_7:
+            if (fingerControl)
+                fingerNo = 7;
+            break;
+        case GLFW_KEY_8:
+            if (fingerControl)
+                fingerNo = 8;
+            break;
+        case GLFW_KEY_9:
+            if (fingerControl)
+                fingerNo = 9;
+            break;
+        case GLFW_KEY_0:
+            if (fingerControl)
+                fingerNo = 10;
             break;
         case GLFW_KEY_T:
             v += 0.01;
@@ -877,7 +1016,7 @@ void drawBracers()
     // glPopMatrix();
 }
 
-void drawFinger(float fingerSize, float fingerWidthScale)
+void drawFinger(float fingerSize, float fingerWidthScale, int fingerNo)
 {
     // float fingerSize = 0.3;
     // float fingerWidthScale = 2.5;
@@ -903,7 +1042,7 @@ void drawFinger(float fingerSize, float fingerWidthScale)
     glPushMatrix();
     {
         glTranslatef(fingerGap, 0, 0);
-        glRotatef(0 + fingerDegree, 0, 0, 1);
+        glRotatef(0 + fingerDegree[fingerNo], 0, 0, 1);
         drawCuboid(fingerSize, fingerWidthScale);
     }
     glPopMatrix();
@@ -925,34 +1064,34 @@ void drawFingers()
     glPushMatrix();
     {
         glTranslatef(0, 0, -0.2);
-        drawFinger(0.3, 2);
+        drawFinger(0.3, 2, fingerCounter++);
     }
     glPopMatrix();
 
     glPushMatrix();
     {
-        drawFinger(0.3, 2.5);
+        drawFinger(0.3, 2.5, fingerCounter++);
     }
     glPopMatrix();
 
     glPushMatrix();
     {
         glTranslatef(0, 0, 0.2);
-        drawFinger(0.3, 3);
+        drawFinger(0.3, 3, fingerCounter++);
     }
     glPopMatrix();
 
     glPushMatrix();
     {
         glTranslatef(0, 0, 0.4);
-        drawFinger(0.3, 2.5);
+        drawFinger(0.3, 2.5, fingerCounter++);
     }
     glPopMatrix();
 
     glPushMatrix();
     {
         glTranslatef(0, 0, 0.6);
-        drawFinger(0.3, 2);
+        drawFinger(0.3, 2, fingerCounter++);
     }
     glPopMatrix();
 }
@@ -976,7 +1115,7 @@ void drawArm()
     glPushMatrix();
     {
         glTranslatef(0, -0.44, 0);
-        glRotatef(0 + handDegree, 1, 0, 0);
+        glRotatef(0 + handDegree[handCounter++], 1, 0, 0);
         glTranslatef(0, 0.49, 0);
         glPushMatrix();
         {
@@ -997,15 +1136,15 @@ void drawArm()
     glPopMatrix();
 }
 
-void drawCalf()
+void drawCalf(int thighNo)
 {
     glTranslatef(0, 2.04, 0);
-    glRotatef(0 + thighDegree, 0, 0, 1);
+    glRotatef(0 + thighDegree[thighNo], 0, 0, 1);
     glTranslatef(0, -2.04, 0); //-1.84
     glPushMatrix();
     {
         glTranslatef(0.16, 0.2, 0);
-        glRotatef(0 + calfDegree, 0, 0, 1);
+        glRotatef(0 + calfDegree[thighNo], 0, 0, 1);
         glTranslatef(-0.31, -2.62, 0); //-1.84
         // TODO: limit calfHeight to reasonable value
         float calfHeight = robotHeight;
@@ -1183,12 +1322,12 @@ void drawBackground()
     glPopMatrix();
 }
 
-void drawThigh()
+void drawThigh(int thighNo)
 {
     glPushMatrix();
     {
         glTranslatef(0, 2.04, 0);
-        glRotatef(0 + thighDegree, 0, 0, 1);
+        glRotatef(0 + thighDegree[thighNo], 0, 0, 1);
         glTranslatef(0, -2.04, 0); //-1.84
 
         // glRotatef(0 + thighDegree, 0, 0, 1);
@@ -1281,11 +1420,11 @@ void drawLegs()
         {
             glRotatef(90, 0, 1, 0);
             glTranslatef(0, 0, 0.7);
-            drawThigh();
+            drawThigh(0);
 
             glPushMatrix();
             {
-                drawCalf();
+                drawCalf(0);
             }
             glPopMatrix();
         }
@@ -1295,11 +1434,11 @@ void drawLegs()
         {
             glRotatef(90, 0, 1, 0);
             glTranslatef(0, 0, -0.7);
-            drawThigh();
+            drawThigh(1);
 
             glPushMatrix();
             {
-                drawCalf();
+                drawCalf(1);
             }
             glPopMatrix();
         }
@@ -1318,30 +1457,38 @@ void drawLegs()
 
 void drawArms()
 {
+    fingerCounter = 0;
+    handCounter = 0;
+    armCounter = 0;
     /////////////////////////// arm
     glPushMatrix();
     {
-        glTranslatef(0, 5.67, 0);
-        glRotatef(0 + armDegree, 1, 0, 0);
-        glTranslatef(0, -5.68, 0);
-
-        float handDistance = 1.64;
-        glTranslatef(0.23, 3.97, 0);
-        glScalef(1.15, 1.39, 1.16);
         glPushMatrix();
         {
-            // glRotatef(90, 0, 1, 0);
-            glTranslatef(handDistance, 0, 0);
-            drawArm();
+            glTranslatef(0, 5.67, 0);
+            glRotatef(0 + armDegree[0], 1, 0, 0);
+            glTranslatef(0, -5.68, 0);
+
+            float handDistance = 1.64;
+            glTranslatef(0.23, 3.97, 0);
+            glScalef(1.15, 1.39, 1.16);
 
             glPushMatrix();
             {
-                float pyramidSize = 0.1;
-                glRotatef(90, 0, 1, 0);
-                glRotatef(180, 0, 0, 1);
-                glScalef(0.80, 0.58, 0.48);
-                glTranslatef(-0.02, -1.95, 0.02);
-                drawRightPyramid(-1.29);
+                // glRotatef(90, 0, 1, 0);
+                glTranslatef(handDistance, 0, 0);
+                drawArm();
+
+                glPushMatrix();
+                {
+                    float pyramidSize = 0.1;
+                    glRotatef(90, 0, 1, 0);
+                    glRotatef(180, 0, 0, 1);
+                    glScalef(0.80, 0.58, 0.48);
+                    glTranslatef(-0.02, -1.95, 0.02);
+                    drawRightPyramid(-1.29);
+                }
+                glPopMatrix();
             }
             glPopMatrix();
         }
@@ -1349,18 +1496,30 @@ void drawArms()
 
         glPushMatrix();
         {
-            // glRotatef(90, 0, 1, 0);
-            glTranslatef(-handDistance, 0, 0);
-            drawArm();
+            glTranslatef(0, 5.67, 0);
+            glRotatef(0 + armDegree[1], 1, 0, 0);
+            glTranslatef(0, -5.68, 0);
+
+            float handDistance = 1.64;
+            glTranslatef(0.23, 3.97, 0);
+            glScalef(1.15, 1.39, 1.16);
 
             glPushMatrix();
             {
-                float pyramidSize = 0.1;
-                glRotatef(270, 0, 1, 0);
-                glRotatef(180, 0, 0, 1);
-                glScalef(0.80, 0.58, 0.48);
-                glTranslatef(0.02, -1.95, 0.07);
-                drawRightPyramid(-1.29);
+                // glRotatef(90, 0, 1, 0);
+                glTranslatef(-handDistance, 0, 0);
+                drawArm();
+
+                glPushMatrix();
+                {
+                    float pyramidSize = 0.1;
+                    glRotatef(270, 0, 1, 0);
+                    glRotatef(180, 0, 0, 1);
+                    glScalef(0.80, 0.58, 0.48);
+                    glTranslatef(0.02, -1.95, 0.07);
+                    drawRightPyramid(-1.29);
+                }
+                glPopMatrix();
             }
             glPopMatrix();
         }
