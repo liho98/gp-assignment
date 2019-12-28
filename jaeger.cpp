@@ -22,7 +22,7 @@ bool isLift = false;
 
 int mode = 0, moveFinger = 0;
 
-float fingerDegree = 0, handDegree = 0;
+float fingerDegree = 0, handDegree = 0, armDegree = 0;
 float robotHeight = 0.5;
 float calfDegree = 0, thighDegree = 0;
 
@@ -32,11 +32,11 @@ double ar = w / h; // aspect ratio
 
 float v = 0;
 float v1 = 0;
-float v2 = 5.73;
+float v2 = 0;
 float v3 = 0;
-float v4 = 0.31;
-float v5 = 0.16;
-float v6 = 0.88;
+float v4 = 0;
+float v5 = 0;
+float v6 = 0.48;
 float v7 = 2.64;
 
 //
@@ -138,8 +138,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             case 2:
                 handDegree += 1;
                 break;
+            // case 3:
+            //     robotHeight += 0.1;
+            //     break;
             case 3:
-                robotHeight += 0.1;
+                armDegree += 1;
                 break;
             case 4:
                 calfDegree += 1;
@@ -164,8 +167,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             case 2:
                 handDegree -= 1;
                 break;
+            // case 3:
+            //     robotHeight -= 0.1;
+            //     break;
             case 3:
-                robotHeight -= 0.1;
+                armDegree -= 1;
                 break;
             case 4:
                 calfDegree -= 1;
@@ -1202,6 +1208,7 @@ void display()
 
     glScalef(0.7, 0.7, 0.7);
 
+    //  leg
     glPushMatrix();
     {
         glPushMatrix();
@@ -1245,6 +1252,10 @@ void display()
     /////////////////////////// arm
     glPushMatrix();
     {
+        glTranslatef(0, 5.67, 0);
+        glRotatef(0 + armDegree, 1, 0, 0);
+        glTranslatef(0, -5.68, 0);
+
         float handDistance = 1.64;
         glTranslatef(0.23, 3.97, 0);
         glScalef(1.15, 1.39, 1.16);
@@ -1253,6 +1264,17 @@ void display()
             // glRotatef(90, 0, 1, 0);
             glTranslatef(handDistance, 0, 0);
             drawArm();
+
+            glPushMatrix();
+            {
+                float pyramidSize = 0.1;
+                glRotatef(90, 0, 1, 0);
+                glRotatef(180, 0, 0, 1);
+                glScalef(0.80, 0.58, 0.48);
+                glTranslatef(-0.02, -1.95, 0.02);
+                drawRightPyramid(-1.29);
+            }
+            glPopMatrix();
         }
         glPopMatrix();
 
@@ -1261,6 +1283,17 @@ void display()
             // glRotatef(90, 0, 1, 0);
             glTranslatef(-handDistance, 0, 0);
             drawArm();
+
+            glPushMatrix();
+            {
+                float pyramidSize = 0.1;
+                glRotatef(270, 0, 1, 0);
+                glRotatef(180, 0, 0, 1);
+                glScalef(0.80, 0.58, 0.48);
+                glTranslatef(0.02, -1.95, 0.07);
+                drawRightPyramid(-1.29);
+            }
+            glPopMatrix();
         }
         glPopMatrix();
     }
