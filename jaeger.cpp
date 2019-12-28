@@ -34,14 +34,14 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0;
-float v1 = 0;
-float v2 = 0;
-float v3 = 0;
-float v4 = 0;
-float v5 = 0;
-float v6 = 0.48;
-float v7 = 2.64;
+float v = 0.09;
+float v1 = 1.1;
+float v2 = -0.01;
+float v3 = 0.26;
+float v4 = 0.12;
+float v5 = -0.28;
+float v6 = 0;
+float v7 = 0;
 
 int fingerNo = 0; // individual finger control on, 1 - 10
 bool fingerControl = false;
@@ -88,14 +88,31 @@ extern "C"
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
-void initTexture(int textureNo)
+void initTexture(string textureName)
 {
+    glDisable(GL_TEXTURE_2D);
+    glDeleteTextures(1, &texture);
+
     strcpy(temp, projectRoot.c_str());
-    strcat(temp, textures[textureNo].c_str());
+    strcat(temp, textureName.c_str());
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     HBITMAP hBMP = (HBITMAP)LoadImage(GetModuleHandle(NULL), temp, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
     GetObject(hBMP, sizeof(BMP), &BMP);
+
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                    GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, BMP.bmWidth,
+                 BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
+
+    DeleteObject(hBMP);
 }
 
 void incrementArray(float *arr, float value, int size)
@@ -119,12 +136,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             {
                 textureNo = 0;
             }
-            strcpy(temp, projectRoot.c_str());
-            strcat(temp, textures[textureNo].c_str());
-            printf("%d\n", textureNo);
-            printf("%s\n", temp);
+            // strcpy(temp, projectRoot.c_str());
+            // strcat(temp, textures[textureNo].c_str());
+            // printf("%d\n", textureNo);
+            // printf("%s\n", temp);
 
-            initTexture(textureNo);
+            initTexture(textures[textureNo]);
             break;
         case GLFW_KEY_ESCAPE:
             printf("v: %f\tv1: %f\tv2: %f\tv3: %f\n", v, v1, v2, v3);
@@ -969,51 +986,15 @@ void drawBracers()
         drawCylinder(0.05, 0.05, 0.21, 20, 10);
     }
     glPopMatrix();
-    // glPushMatrix();
-    // {
-    //     glRotatef(180, 0, 1, 1);
-    //     glTranslatef(0, 0, -0.2);
-    //     drawCylinder(0.15, 0.2, 0.4, 20, 10);
-    // }
-    // glPopMatrix();
-    // hand
-    // glPushMatrix();
-    // {
-    //     glRotatef(180, 0, 1, 1);
-    //     glTranslatef(0, 0, -0.25);
-    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    // }
-    // glPopMatrix();
 
-    // glPushMatrix();
-    // {
-    //     glRotatef(180, 0, 1, 1);
-    //     glTranslatef(0, 0, -0.3);
-    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    // }
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // {
-    //     glRotatef(180, 0, 1, 1);
-    //     glTranslatef(0, 0, -0.35);
-    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    // }
-    // glPopMatrix();
-    // glPushMatrix();
-    // {
-    //     glRotatef(180, 0, 1, 1);
-    //     glTranslatef(0, 0, -0.4);
-    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    // }
-    // glPopMatrix();
-    // glPushMatrix();
-    // {
-    //     glRotatef(180, 0, 1, 1);
-    //     glTranslatef(0, 0, -0.45);
-    //     drawCylinder(0.15, 0.2, 0.2, 20, 10);
-    // }
-    // glPopMatrix();
+    glPushMatrix();
+    {
+        int jointSliceStack = 10;
+        float jointRadius = 0.22;
+        glTranslatef(0, 1.04, 0);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+    }
+    glPopMatrix();
 }
 
 void drawFinger(float fingerSize, float fingerWidthScale, int fingerNo)
@@ -1333,9 +1314,25 @@ void drawThigh(int thighNo)
         // glRotatef(0 + thighDegree, 0, 0, 1);
         // glTranslatef(0, -1.81, 0);
 
-        glTranslatef(-0.1, -0.43 + robotHeight * 1.5, -0.02);
-        glScalef(0.5, 3.18, 0.8);
-        drawCuboid(0.5, 1.51);
+        glPushMatrix();
+        {
+            glTranslatef(-0.1, -0.43 + robotHeight * 1.5, -0.02);
+            glScalef(0.5, 3.18, 0.8);
+            drawCuboid(0.5, 1.51);
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            // glRotatef(90, 0, 1, 0);
+            glTranslatef(0.09, 1.26, 0.05);
+            drawCapsule(0.27, 0.12);
+            glTranslatef(0., -0.28, 0);
+            drawCapsule(0.27, 0.12);
+            glTranslatef(0., -0.28, 0);
+            drawCapsule(0.27, 0.12);
+        }
+        glPopMatrix();
     }
     glPopMatrix();
 }
@@ -1536,20 +1533,22 @@ void display()
 
     if (isTexture)
     {
+        glColor3f(1, 1, 1);
         selectedGluDrawStyles = gluDrawStyles[0];
         selectedGlDrawStyles = glDrawStyles[0];
         selectedGlewDrawStyles = glewDrawStyles[0];
+        initTexture(textures[2]);
 
-        glEnable(GL_TEXTURE_2D);
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        // glEnable(GL_TEXTURE_2D);
+        // glGenTextures(1, &texture);
+        // glBindTexture(GL_TEXTURE_2D, texture);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                        GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                        GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, BMP.bmWidth,
-                     BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+        //                 GL_LINEAR);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+        //                 GL_LINEAR);
+        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, BMP.bmWidth,
+        //  BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
     }
     else
     {
@@ -1574,7 +1573,7 @@ int main(int argc, char **argv)
 
     if (NULL != window)
     {
-        initTexture(textureNo);
+        initTexture(textures[textureNo]);
         while (!glfwWindowShouldClose(window))
         {
             // Scale to window size
