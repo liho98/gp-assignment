@@ -30,13 +30,14 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = -1;
+float v = 0;
 float v1 = 0;
-float v2 = 0;
-float v3 = 1;
-float v4 = 1;
-float v5 = 1;
-float v6 = -1;
+float v2 = 5.73;
+float v3 = 0;
+float v4 = 0.31;
+float v5 = 0.16;
+float v6 = 0.88;
+float v7 = 2.64;
 
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
@@ -66,8 +67,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         switch (key)
         {
         case GLFW_KEY_ESCAPE:
-            printf("v: %f\tv1: %f\tv2: %f\n", v, v1, v2);
-            printf("v3: %f\tv4: %f\tv5: %f\tv6: %f\n", v3, v4, v5, v6);
+            printf("v: %f\tv1: %f\tv2: %f\tv3: %f\n", v, v1, v2, v3);
+            printf("v4: %f\tv5: %f\tv6: %f\tv7: %f\n", v4, v5, v6, v7);
 
             glfwSetWindowShouldClose(window, GL_TRUE);
             break;
@@ -240,6 +241,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_APOSTROPHE:
             v6 -= 0.01;
+            break;
+        case GLFW_KEY_RIGHT_BRACKET:
+            v7 += 0.01;
+            break;
+        case GLFW_KEY_BACKSLASH:
+            v7 -= 0.01;
             break;
         default:
             break;
@@ -608,6 +615,33 @@ void drawTrianglePyramid(float length)
     }
     glEnd();
 
+    glPopMatrix();
+}
+
+void drawCapsule(float width, float height)
+{
+    glPushMatrix();
+    {
+        // one cylinder and two sphere
+        glPushMatrix();
+        {
+            // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.04);
+            glScalef(1, 1, 1);
+            drawCylinder(height, height, width, 20, 10);
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            int jointSliceStack = 10;
+            float jointRadius = height;
+            // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
+            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+            glTranslatef(0, 0, width);
+            drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        }
+        glPopMatrix();
+    }
     glPopMatrix();
 }
 
@@ -1127,7 +1161,34 @@ void drawBody()
     }
     glPopMatrix();
 
+    glPushMatrix();
+    {
+        glTranslatef(-0.59, 2.49, -0.62);
+        glScalef(0.65, 2.21, 1.23);
+        drawCuboid(0.88, 2.64);
+    }
+    glPopMatrix();
 
+    glPushMatrix();
+    {
+        glTranslatef(-1.23, 4.44, -0.62);
+        glScalef(0.65, 1.82, 1.26);
+        drawCuboid(0.89, 4.83);
+    }
+    glPopMatrix();
+}
+
+void drawShoulderJoint()
+{
+    glPushMatrix();
+    {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0.02, 5.67, 1.32);
+        drawCapsule(0.48, 0.16);
+        glTranslatef(0, 0, -2.79);
+        drawCapsule(0.48, 0.16);
+    }
+    glPopMatrix();
 }
 
 void display()
@@ -1181,9 +1242,40 @@ void display()
     }
     glPopMatrix();
 
+    /////////////////////////// arm
+    glPushMatrix();
+    {
+        float handDistance = 1.64;
+        glTranslatef(0.23, 3.97, 0);
+        glScalef(1.15, 1.39, 1.16);
+        glPushMatrix();
+        {
+            // glRotatef(90, 0, 1, 0);
+            glTranslatef(handDistance, 0, 0);
+            drawArm();
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            // glRotatef(90, 0, 1, 0);
+            glTranslatef(-handDistance, 0, 0);
+            drawArm();
+        }
+        glPopMatrix();
+    }
+    glPopMatrix();
+    ///////////////////////////
+
     glPushMatrix();
     {
         drawBody();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        drawShoulderJoint();
     }
     glPopMatrix();
 
@@ -1194,24 +1286,6 @@ void display()
     //     drawShoe();
     // }
     // glPopMatrix();
-
-    ///////////////////////////// arm
-    // glPushMatrix();
-    // {
-    //     glRotatef(90, 0, 1, 0);
-    //     glTranslatef(0.7, 0, 0);
-    //     drawArm();
-    // }
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // {
-    //     glRotatef(90, 0, 1, 0);
-    //     glTranslatef(-0.7, 0, 0);
-    //     drawArm();
-    // }
-    // glPopMatrix();
-    /////////////////////////////
 }
 
 int main(int argc, char **argv)
