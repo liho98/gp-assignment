@@ -1,5 +1,7 @@
+#include <Windows.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <gl/glext.h>
 
 #include <gl/GL.h>
 #include <gl/GLU.h>
@@ -7,6 +9,8 @@
 #include <string>
 
 #include <cstdio>
+
+using namespace std;
 
 float speed = 0;
 float perspectiveX = 0, perspectiveY = 0, perspectiveZ = -5;
@@ -18,7 +22,7 @@ bool rotateLeft = false;
 bool rotateRight = false;
 
 bool isOrtho = false;
-bool isLift = false;
+bool isTexture = false;
 
 int mode = 0, moveFinger = 0;
 
@@ -44,11 +48,20 @@ int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
 int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
 int glewDrawStyles[4] = {0x0009, 0x0000, 0x0002, 0x0001};
 
+// drawStyle
 int selectedGluDrawStyles = 100011;
 int selectedGlDrawStyles = 0x0002;
 int selectedGlewDrawStyles = 0x0002;
-
 int stylesNo = 0;
+
+// texture
+GLuint texture = 0;
+BITMAP BMP;
+HBITMAP hBMP = NULL;
+string textures[3] = {"Brick.bmp", "Wood.bmp", "Metal.bmp"};
+int textureNo = 0;
+string projectRoot = "D:\\TARUC\\Sem 5\\BACS2173 Graphics Programming\\gp-assignment\\texture\\";
+char temp[100];
 
 // use dedicated GPU to run
 extern "C"
@@ -60,15 +73,39 @@ extern "C"
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
+void initTexture(int textureNo)
+{
+    strcpy(temp, projectRoot.c_str());
+    strcat(temp, textures[textureNo].c_str());
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    HBITMAP hBMP = (HBITMAP)LoadImage(GetModuleHandle(NULL), temp, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+    GetObject(hBMP, sizeof(BMP), &BMP);
+}
+
 void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
         switch (key)
         {
+        case GLFW_KEY_S:
+            textureNo += 1;
+            if (textureNo % 3 == 0)
+            {
+                textureNo = 0;
+            }
+            strcpy(temp, projectRoot.c_str());
+            strcat(temp, textures[textureNo].c_str());
+            printf("%d\n", textureNo);
+            printf("%s\n", temp);
+
+            initTexture(textureNo);
+            break;
         case GLFW_KEY_ESCAPE:
             printf("v: %f\tv1: %f\tv2: %f\tv3: %f\n", v, v1, v2, v3);
             printf("v4: %f\tv5: %f\tv6: %f\tv7: %f\n", v4, v5, v6, v7);
+            printf("orthoZ: %f\n", orthoZ);
 
             glfwSetWindowShouldClose(window, GL_TRUE);
             break;
@@ -104,7 +141,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         case GLFW_KEY_F6:
             mode = 5;
             break;
-
+        case GLFW_KEY_F12:
+            if (isTexture)
+                isTexture = false;
+            else
+                isTexture = true;
+            break;
         case GLFW_KEY_SPACE:
             if (rotate)
                 rotate = false;
@@ -185,11 +227,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_KP_8:
             perspectiveZ += 0.1;
-            orthoZ += 0.1;
+            orthoZ += 10;
             break;
         case GLFW_KEY_KP_2:
             perspectiveZ -= 0.1;
-            orthoZ -= 0.1;
+            orthoZ -= 10;
             break;
         case GLFW_KEY_1:
             moveFinger = 0;
@@ -352,7 +394,6 @@ void drawCirle(float x1, float y1, float radius)
 {
     float x2 = x1, y2 = y1;
 
-    glColor3ub(246, 246, 246);
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(x1, y1);
     for (float angle = 0; angle <= 360; angle += 10)
@@ -368,6 +409,7 @@ void drawCylinder(double baseRadius, double topRadius, double height, int slices
 {
     GLUquadricObj *cylinder = NULL;
     cylinder = gluNewQuadric();
+    gluQuadricTexture(cylinder, GLU_TRUE);
     gluQuadricDrawStyle(cylinder, selectedGluDrawStyles);
     gluCylinder(cylinder, baseRadius, topRadius, height, slices, stacks);
     gluDeleteQuadric(cylinder);
@@ -377,6 +419,7 @@ void drawSphere(float radius, int slice, int slack)
 {
     GLUquadricObj *sphere = NULL;
     sphere = gluNewQuadric();
+    gluQuadricTexture(sphere, GLU_TRUE);
     gluQuadricDrawStyle(sphere, selectedGluDrawStyles);
     gluSphere(sphere, radius, slice, slack);
     gluDeleteQuadric(sphere);
@@ -405,45 +448,68 @@ void drawCuboid(float size, float widthScale)
 {
     glBegin(selectedGlDrawStyles);
     // front
-    glColor3ub(30, 136, 229);
+    glTexCoord2f(0.0f, 1);
     glVertex3f(0, 0, size);
+    glTexCoord2f(1, 1);
     glVertex3f(size * widthScale, 0, size);
+    glTexCoord2f(1, 0.0f);
     glVertex3f(size * widthScale, 0, 0);
-
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3f(0, 0, 0);
 
     // left
     // glColor3ub(223, 120, 239);
+    glTexCoord2f(0.0f, 1);
+
     glVertex3f(0, size, size);
+    glTexCoord2f(1, 1);
     glVertex3f(0, 0, size);
+    glTexCoord2f(1, 0.0f);
     glVertex3f(0, 0, 0);
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3f(0, size, 0);
 
     // bottom
     // glColor3ub(128, 226, 126);
+    glTexCoord2f(0.0f, 1);
     glVertex3f(0, size, 0);
+    glTexCoord2f(1, 1);
     glVertex3f(size * widthScale, size, 0);
+    glTexCoord2f(1, 0.0f);
     glVertex3f(size * widthScale, 0, 0);
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3f(0, 0, 0);
 
     // right
     // glColor3ub(255, 255, 114);
+    glTexCoord2f(0.0f, 1);
     glVertex3f(size * widthScale, 0, size);
+    glTexCoord2f(1, 1);
     glVertex3f(size * widthScale, size, size);
+    glTexCoord2f(1, 0.0f);
     glVertex3f(size * widthScale, size, 0);
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3f(size * widthScale, 0, 0);
 
     // behind
     // glColor3ub(255, 201, 71);
+    glTexCoord2f(0.0f, 1);
     glVertex3f(size * widthScale, size, size);
+    glTexCoord2f(1, 1);
     glVertex3f(0, size, size);
+    glTexCoord2f(1, 0.0f);
     glVertex3f(0, size, 0);
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3f(size * widthScale, size, 0);
 
     // top
+    glTexCoord2f(0.0f, 1);
     glVertex3f(0, size, size);
+    glTexCoord2f(1, 1);
     glVertex3f(size * widthScale, size, size);
+    glTexCoord2f(1, 0.0f);
     glVertex3f(size * widthScale, 0, size);
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3f(0, 0, size);
 
     glEnd();
@@ -563,39 +629,23 @@ void drawRightPyramid(float length)
 
 void drawTrianglePyramid(float length)
 {
+    glDisable(GL_SMOOTH);
     glPushMatrix();
     glTranslatef(0, -0.5f, 0);
-    //glRotatef(rotateDeg, 1, 1, 1);
+    // back and front
     glBegin(selectedGlewDrawStyles);
     {
-        // left
-        glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, length);
         glTexCoord2f(0.0f, 1);
         glVertex3f(0, 1, 0);
         glTexCoord2f(-0.5f, 0);
         glVertex3f(-0.5, 0, 0);
         glTexCoord2f(0.5f, 0);
         glVertex3f(0.5, 0, 0);
+    }
+    glEnd();
 
-        // front
-        glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, 0);
-        glTexCoord2f(-0.5f, 0);
-        glVertex3f(-0.5, 0, 0);
-        glTexCoord2f(0.5f, 0);
-        glVertex3f(-0.5, 0, length);
-
-        // right
-        glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, length);
-        glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, 0);
-        glTexCoord2f(-0.5f, 0);
-        glVertex3f(0.5, 0, 0);
-        glTexCoord2f(0.5f, 0);
-        glVertex3f(0.5, 0, length);
-
+    glBegin(selectedGlewDrawStyles);
+    {
         glTexCoord2f(0.0f, 1);
         glVertex3f(0, 1, length);
         glTexCoord2f(-0.5f, 0);
@@ -605,17 +655,42 @@ void drawTrianglePyramid(float length)
     }
     glEnd();
 
+    //  two sides
+    glBegin(selectedGlewDrawStyles);
+    {
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, length);
+        glTexCoord2f(1, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(1, 0.0f);
+        glVertex3f(0.5, 0, 0);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(0.5, 0, length);
+    }
+    glEnd();
+
+    glBegin(selectedGlewDrawStyles);
+    {
+        glTexCoord2f(0.0f, 1);
+        glVertex3f(0, 1, length);
+        glTexCoord2f(1, 1);
+        glVertex3f(0, 1, 0);
+        glTexCoord2f(1, 0.0f);
+        glVertex3f(-0.5, 0, 0);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(-0.5, 0, length);
+    }
+    glEnd();
+
+    // base
     glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
         glVertex3f(-0.5, 0, length);
-
         glTexCoord2f(1, 1);
         glVertex3f(-0.5, 0, 0);
-
         glTexCoord2f(1, 0.0f);
         glVertex3f(0.5, 0, 0);
-
         glTexCoord2f(0.0f, 0.0f);
         glVertex3f(0.5, 0, length);
     }
@@ -1197,17 +1272,8 @@ void drawShoulderJoint()
     glPopMatrix();
 }
 
-void display()
+void drawLegs()
 {
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-
-    glRotatef(speed, 0, 1, 0);
-    glRotatef(90, 0, 1, 0);
-
-    glScalef(0.7, 0.7, 0.7);
-
     //  leg
     glPushMatrix();
     {
@@ -1248,7 +1314,10 @@ void display()
         glPopMatrix();
     }
     glPopMatrix();
+}
 
+void drawArms()
+{
     /////////////////////////// arm
     glPushMatrix();
     {
@@ -1298,27 +1367,46 @@ void display()
         glPopMatrix();
     }
     glPopMatrix();
-    ///////////////////////////
+}
 
-    glPushMatrix();
+void display()
+{
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    if (isTexture)
     {
-        drawBody();
-    }
-    glPopMatrix();
+        selectedGluDrawStyles = gluDrawStyles[0];
+        selectedGlDrawStyles = glDrawStyles[0];
+        selectedGlewDrawStyles = glewDrawStyles[0];
 
-    glPushMatrix();
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                        GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                        GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, BMP.bmWidth,
+                     BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
+    }
+    else
     {
-        drawShoulderJoint();
+        glDisable(GL_TEXTURE_2D);
+        glColor3ub(30, 136, 229);
     }
-    glPopMatrix();
 
-    // glPushMatrix();
-    // {
-    //     glRotatef(90, 0, 1, 0);
-    //     glTranslatef(0, 0, -0.7);
-    //     drawShoe();
-    // }
-    // glPopMatrix();
+    glRotatef(speed, 0, 1, 0);
+    glRotatef(90, 0, 1, 0);
+
+    glScalef(0.7, 0.7, 0.7);
+
+    drawLegs();
+    drawArms();
+    drawBody();
+    drawShoulderJoint();
 }
 
 int main(int argc, char **argv)
@@ -1327,6 +1415,7 @@ int main(int argc, char **argv)
 
     if (NULL != window)
     {
+        initTexture(textureNo);
         while (!glfwWindowShouldClose(window))
         {
             // Scale to window size
@@ -1341,7 +1430,7 @@ int main(int argc, char **argv)
                 glLoadIdentity();
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
-                glOrtho(-2 * ar, 2 * ar, -2, 2, -2, 2);
+                glOrtho(-2 * ar, 2 * ar, -2, 2, -2, 2000);
 
                 glMatrixMode(GL_MODELVIEW);
                 glLoadIdentity();
@@ -1365,29 +1454,6 @@ int main(int argc, char **argv)
                 speed += 1;
             else
                 speed = speed;
-
-            if (isLift)
-            {
-                if (bridgeDegree < 35)
-                {
-                    bridgeDegree += 1;
-                }
-                if (bridgeLineUp < 0.26)
-                {
-                    bridgeLineUp += 0.008;
-                }
-            }
-            else
-            {
-                if (bridgeDegree > 0)
-                {
-                    bridgeDegree -= 1;
-                }
-                if (bridgeLineUp > 0)
-                {
-                    bridgeLineUp -= 0.008;
-                }
-            }
 
             // Update Screen
             glfwSwapBuffers(window);
