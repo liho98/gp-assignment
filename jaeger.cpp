@@ -58,6 +58,13 @@ bool legControl = false;
 int calfCounter = 0;
 int thighCounter = 0;
 
+bool animationControl = false;
+bool walkControl = false;
+int walkingFlag[2] = {0, 1};
+int walkDirection = 0;
+
+float targetDegree = 0;
+
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
 int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
@@ -130,7 +137,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
     {
         switch (key)
         {
-        case GLFW_KEY_S:
+        case GLFW_KEY_Z:
             textureNo += 1;
             if (textureNo % 3 == 0)
             {
@@ -140,7 +147,6 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             // strcat(temp, textures[textureNo].c_str());
             // printf("%d\n", textureNo);
             // printf("%s\n", temp);
-
             initTexture(textures[textureNo]);
             break;
         case GLFW_KEY_ESCAPE:
@@ -150,7 +156,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 
             glfwSetWindowShouldClose(window, GL_TRUE);
             break;
-        case GLFW_KEY_GRAVE_ACCENT: // key ` (~)
+        case GLFW_KEY_GRAVE_ACCENT: // key ` (~) change shape draw style
             stylesNo += 1;
             if (stylesNo % 4 == 0)
                 stylesNo = 0;
@@ -158,7 +164,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             selectedGlDrawStyles = glDrawStyles[stylesNo];
             selectedGlewDrawStyles = glewDrawStyles[stylesNo];
             break;
-        case GLFW_KEY_F1:
+        case GLFW_KEY_F1: // viewport control
             mode = 0;
             if (isOrtho)
                 isOrtho = false;
@@ -197,6 +203,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 fingerControl = true;
                 armControl = false;
                 legControl = false;
+                animationControl = false;
                 mode = 1;
             }
             break;
@@ -211,6 +218,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 fingerControl = false;
                 armControl = true;
                 legControl = false;
+                animationControl = false;
             }
             break;
         case GLFW_KEY_F9: // leg control
@@ -224,24 +232,42 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 fingerControl = false;
                 armControl = false;
                 legControl = true;
+                animationControl = false;
             }
             break;
-        case GLFW_KEY_F12:
+        case GLFW_KEY_F10: // animation
+            if (animationControl)
+            {
+                animationControl = false;
+                mode = 0;
+            }
+            else // user need to press F5 or F6
+            {
+                fingerControl = false;
+                armControl = false;
+                legControl = false;
+                animationControl = true;
+            }
+            break;
+        case GLFW_KEY_F11: // weapon, change shape
+
+            break;
+        case GLFW_KEY_F12: // enable texture
             if (isTexture)
                 isTexture = false;
             else
                 isTexture = true;
             break;
-        case GLFW_KEY_SPACE:
+        case GLFW_KEY_SPACE: // rotate world
             if (rotate)
                 rotate = false;
             else
                 rotate = true;
             break;
-        case GLFW_KEY_COMMA:
+        case GLFW_KEY_COMMA: // rotate world left / right
             speed -= 1;
             break;
-        case GLFW_KEY_PERIOD:
+        case GLFW_KEY_PERIOD: // rotate world left / right
             speed += 1;
             break;
         case GLFW_KEY_RIGHT:
@@ -359,6 +385,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 armNo = 1;
             else if (legControl)
                 legNo = 1;
+            else if (animationControl)
+            { // walk
+                if (walkControl)
+                    walkControl = false;
+                else
+                {
+                    walkControl = true;
+                }
+            }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
                    fingerNo, armNo, legNo);
             break;
@@ -404,6 +439,16 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             if (fingerControl)
                 fingerNo = 10;
             break;
+
+        case GLFW_KEY_W:
+            if (walkControl)
+                walkDirection = 1;
+            break;
+        case GLFW_KEY_S:
+            if (walkControl)
+                walkDirection = -1;
+            break;
+
         case GLFW_KEY_T:
             v += 0.01;
             break;
@@ -455,22 +500,22 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         default:
             break;
         }
-        // else if (key == GLFW_KEY_T)
-        // {
-        //     v += 0.01;
-        // }
-        // else if (key == GLFW_KEY_G)
-        // {
-        //     v -= 0.01;
-        // }
-        // else if (key == GLFW_KEY_Y)
-        // {
-        //     v1 += 0.01;
-        // }
-        // else if (key == GLFW_KEY_H)
-        // {
-        //     v1 -= 0.01;
-        // }
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        switch (key)
+        {
+        case GLFW_KEY_W:
+            if (walkControl)
+                walkDirection = 0;
+            break;
+        case GLFW_KEY_S:
+            if (walkControl)
+                walkDirection = 0;
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -507,6 +552,7 @@ GLFWwindow *initWindow(const int resX, const int resY)
     return window;
 }
 
+// Primitive shape
 void drawCube()
 {
     GLfloat vertices[] =
@@ -881,6 +927,126 @@ void drawCapsule(float width, float height)
     }
     glPopMatrix();
 }
+
+// animation
+void controlLeg(int legNo, float degree)
+{
+    if (legNo == 1)
+    {
+        for (int i = 0; i < degree; i++)
+        {
+            thighDegree[legNo] += 1;
+        }
+    }
+}
+
+void walk(int direction)
+{
+    if (direction == 1)
+    {
+        if (walkingFlag[1])
+        {
+            if (thighDegree[0] < 45)
+            {
+                thighDegree[0] += 1;
+            }
+            if (calfDegree[0] > -35)
+            {
+                calfDegree[0] -= 1;
+            }
+            if (thighDegree[1] > -35)
+            {
+                thighDegree[1] -= 1;
+            }
+            if (calfDegree[1] < 0)
+            {
+                calfDegree[1] += 1;
+            }
+            if (thighDegree[0] == 45)
+            {
+                walkingFlag[0] = 1;
+                walkingFlag[1] = 0;
+            }
+        }
+        if (walkingFlag[0])
+        {
+            if (thighDegree[0] > -35)
+            {
+                thighDegree[0] -= 1;
+            }
+            if (calfDegree[0] < 0)
+            {
+                calfDegree[0] += 1;
+            }
+            if (thighDegree[1] < 45)
+            {
+                thighDegree[1] += 1;
+            }
+            if (calfDegree[1] > -35)
+            {
+                calfDegree[1] -= 1;
+            }
+            if (thighDegree[1] == 45)
+            {
+                walkingFlag[0] = 0;
+                walkingFlag[1] = 1;
+            }
+        }
+    }
+    else if (direction == -1)
+    {
+        if (walkingFlag[0])
+        {
+            if (thighDegree[0] < 45)
+            {
+                thighDegree[0] += 1;
+            }
+            if (calfDegree[0] > -35)
+            {
+                calfDegree[0] -= 1;
+            }
+            if (thighDegree[1] > -35)
+            {
+                thighDegree[1] -= 1;
+            }
+            if (calfDegree[1] < 0)
+            {
+                calfDegree[1] += 1;
+            }
+            if (thighDegree[0] == 45)
+            {
+                walkingFlag[1] = 1;
+                walkingFlag[0] = 0;
+            }
+        }
+        if (walkingFlag[1])
+        {
+            if (thighDegree[0] > -35)
+            {
+                thighDegree[0] -= 1;
+            }
+            if (calfDegree[0] < 0)
+            {
+                calfDegree[0] += 1;
+            }
+            if (thighDegree[1] < 45)
+            {
+                thighDegree[1] += 1;
+            }
+            if (calfDegree[1] > -35)
+            {
+                calfDegree[1] -= 1;
+            }
+            if (thighDegree[1] == 45)
+            {
+                walkingFlag[1] = 0;
+                walkingFlag[0] = 1;
+            }
+        }
+    }
+}
+
+// model item
 
 void drawMoon()
 {
@@ -1663,6 +1829,12 @@ int main(int argc, char **argv)
                 glLoadIdentity();
                 glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
             }
+
+            // walk animation
+            if (walkDirection == 1)
+                walk(1);
+            else if (walkDirection == -1)
+                walk(-1);
 
             display();
 
