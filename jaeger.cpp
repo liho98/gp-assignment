@@ -60,6 +60,7 @@ int thighCounter = 0;
 
 bool animationControl = false;
 bool walkControl = false;
+bool runControl = false;
 int walkingFlag[2] = {0, 1};
 int walkDirection = 0;
 
@@ -390,6 +391,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 else
                 {
                     walkControl = true;
+                    runControl = false;
                 }
             }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
@@ -402,6 +404,16 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 armNo = 2;
             else if (legControl)
                 legNo = 2;
+            else if (animationControl)
+            { // walk
+                if (runControl)
+                    runControl = false;
+                else
+                {
+                    runControl = true;
+                    walkControl = false;
+                }
+            }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
                    fingerNo, armNo, legNo);
             break;
@@ -448,6 +460,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 }
                 walkDirection = 1;
             }
+            else if (runControl)
+            {
+                if (walkDirection != 2)
+                {
+                    walkingFlag[0] = 0;
+                    walkingFlag[1] = 1;
+                }
+                walkDirection = 2;
+            }
             break;
         case GLFW_KEY_S:
             if (walkControl)
@@ -458,6 +479,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[0] = 1;
                 }
                 walkDirection = -1;
+            }
+            else if (runControl)
+            {
+                if (walkDirection != -2)
+                {
+                    walkingFlag[0] = 0;
+                    walkingFlag[1] = 1;
+                }
+                walkDirection = -2;
             }
             break;
 
@@ -518,11 +548,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         switch (key)
         {
         case GLFW_KEY_W:
-            if (walkControl)
+            if (walkControl || runControl)
                 walkDirection = 0;
             break;
         case GLFW_KEY_S:
-            if (walkControl)
+            if (walkControl || runControl)
                 walkDirection = 0;
             break;
         default:
@@ -952,22 +982,28 @@ void controlLeg(int legNo, float degree)
     }
 }
 
-void walk(int direction)
+void walk(int speed)
 {
-    float legSpeed = 1;
-    float armSpeed = 0.2;
+    float legSpeed = 1 * speed;
+    float armSpeed = 0.2 * speed;
+    float armMoveDegree = 15;
+    if (speed > 1 || speed < -1)
+    {
+        // run
+        armMoveDegree = 25;
+    }
     if (walkingFlag[1])
     {
         // leg movement
-        if (thighDegree[0] < 45)
+        if (thighDegree[0] < 46)
         {
             thighDegree[0] += legSpeed;
         }
-        if (calfDegree[0] > -35)
+        if (calfDegree[0] > -36)
         {
             calfDegree[0] -= legSpeed;
         }
-        if (thighDegree[1] > -35)
+        if (thighDegree[1] > -36)
         {
             thighDegree[1] -= legSpeed;
         }
@@ -975,26 +1011,28 @@ void walk(int direction)
         {
             calfDegree[1] += legSpeed;
         }
-        if (thighDegree[0] == 45)
+
+        // hand movement
+        if (armDegree[1] < armMoveDegree)
+        {
+            armDegree[1] += armSpeed;
+        }
+        if (armDegree[0] > -armMoveDegree)
+        {
+            armDegree[0] -= armSpeed;
+        }
+        
+        if (thighDegree[0] > 45)
         {
             walkingFlag[0] = 1;
             walkingFlag[1] = 0;
         }
 
-        // hand movement
-        if (armDegree[1] < 15)
-        {
-            armDegree[1] += armSpeed;
-        }
-        if (armDegree[0] > -15)
-        {
-            armDegree[0] -= armSpeed;
-        }
     }
     if (walkingFlag[0])
     {
         // leg movement
-        if (thighDegree[0] > -35)
+        if (thighDegree[0] > -36)
         {
             thighDegree[0] -= legSpeed;
         }
@@ -1002,28 +1040,30 @@ void walk(int direction)
         {
             calfDegree[0] += legSpeed;
         }
-        if (thighDegree[1] < 45)
+        if (thighDegree[1] < 46)
         {
             thighDegree[1] += legSpeed;
         }
-        if (calfDegree[1] > -35)
+        if (calfDegree[1] > -36)
         {
             calfDegree[1] -= legSpeed;
         }
-        if (thighDegree[1] == 45)
-        {
-            walkingFlag[0] = 0;
-            walkingFlag[1] = 1;
-        }
+
 
         // hand movement
-        if (armDegree[0] < 15)
+        if (armDegree[0] < armMoveDegree)
         {
             armDegree[0] += armSpeed;
         }
-        if (armDegree[1] > -15)
+        if (armDegree[1] > -armMoveDegree)
         {
             armDegree[1] -= armSpeed;
+        }
+        
+        if (thighDegree[1] > 45)
+        {
+            walkingFlag[0] = 0;
+            walkingFlag[1] = 1;
         }
     }
 }
@@ -1813,10 +1853,20 @@ int main(int argc, char **argv)
             }
 
             // walk animation
-            if (walkDirection == 1)
-                walk(1);
-            else if (walkDirection == -1)
-                walk(-1);
+            if (walkControl)
+            {
+                if (walkDirection == 1)
+                    walk(1);
+                else if (walkDirection == -1)
+                    walk(1);
+            }
+            else if (runControl)
+            {
+                if (walkDirection == 2)
+                    walk(3);
+                else if (walkDirection == -2)
+                    walk(3);
+            }
 
             display();
 
