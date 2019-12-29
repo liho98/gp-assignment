@@ -63,8 +63,6 @@ bool walkControl = false;
 int walkingFlag[2] = {0, 1};
 int walkDirection = 0;
 
-float targetDegree = 0;
-
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
 int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
@@ -442,11 +440,25 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 
         case GLFW_KEY_W:
             if (walkControl)
+            {
+                if (walkDirection != 1)
+                {
+                    walkingFlag[0] = 0;
+                    walkingFlag[1] = 1;
+                }
                 walkDirection = 1;
+            }
             break;
         case GLFW_KEY_S:
             if (walkControl)
+            {
+                if (walkDirection != -1)
+                {
+                    walkingFlag[1] = 0;
+                    walkingFlag[0] = 1;
+                }
                 walkDirection = -1;
+            }
             break;
 
         case GLFW_KEY_T:
@@ -942,106 +954,52 @@ void controlLeg(int legNo, float degree)
 
 void walk(int direction)
 {
-    if (direction == 1)
+    if (walkingFlag[1])
     {
-        if (walkingFlag[1])
+        if (thighDegree[0] < 45)
         {
-            if (thighDegree[0] < 45)
-            {
-                thighDegree[0] += 1;
-            }
-            if (calfDegree[0] > -35)
-            {
-                calfDegree[0] -= 1;
-            }
-            if (thighDegree[1] > -35)
-            {
-                thighDegree[1] -= 1;
-            }
-            if (calfDegree[1] < 0)
-            {
-                calfDegree[1] += 1;
-            }
-            if (thighDegree[0] == 45)
-            {
-                walkingFlag[0] = 1;
-                walkingFlag[1] = 0;
-            }
+            thighDegree[0] += 1;
         }
-        if (walkingFlag[0])
+        if (calfDegree[0] > -35)
         {
-            if (thighDegree[0] > -35)
-            {
-                thighDegree[0] -= 1;
-            }
-            if (calfDegree[0] < 0)
-            {
-                calfDegree[0] += 1;
-            }
-            if (thighDegree[1] < 45)
-            {
-                thighDegree[1] += 1;
-            }
-            if (calfDegree[1] > -35)
-            {
-                calfDegree[1] -= 1;
-            }
-            if (thighDegree[1] == 45)
-            {
-                walkingFlag[0] = 0;
-                walkingFlag[1] = 1;
-            }
+            calfDegree[0] -= 1;
+        }
+        if (thighDegree[1] > -35)
+        {
+            thighDegree[1] -= 1;
+        }
+        if (calfDegree[1] < 0)
+        {
+            calfDegree[1] += 1;
+        }
+        if (thighDegree[0] == 45)
+        {
+            walkingFlag[0] = 1;
+            walkingFlag[1] = 0;
         }
     }
-    else if (direction == -1)
+    if (walkingFlag[0])
     {
-        if (walkingFlag[0])
+        if (thighDegree[0] > -35)
         {
-            if (thighDegree[0] < 45)
-            {
-                thighDegree[0] += 1;
-            }
-            if (calfDegree[0] > -35)
-            {
-                calfDegree[0] -= 1;
-            }
-            if (thighDegree[1] > -35)
-            {
-                thighDegree[1] -= 1;
-            }
-            if (calfDegree[1] < 0)
-            {
-                calfDegree[1] += 1;
-            }
-            if (thighDegree[0] == 45)
-            {
-                walkingFlag[1] = 1;
-                walkingFlag[0] = 0;
-            }
+            thighDegree[0] -= 1;
         }
-        if (walkingFlag[1])
+        if (calfDegree[0] < 0)
         {
-            if (thighDegree[0] > -35)
-            {
-                thighDegree[0] -= 1;
-            }
-            if (calfDegree[0] < 0)
-            {
-                calfDegree[0] += 1;
-            }
-            if (thighDegree[1] < 45)
-            {
-                thighDegree[1] += 1;
-            }
-            if (calfDegree[1] > -35)
-            {
-                calfDegree[1] -= 1;
-            }
-            if (thighDegree[1] == 45)
-            {
-                walkingFlag[1] = 0;
-                walkingFlag[0] = 1;
-            }
+            calfDegree[0] += 1;
+        }
+        if (thighDegree[1] < 45)
+        {
+            thighDegree[1] += 1;
+        }
+        if (calfDegree[1] > -35)
+        {
+            calfDegree[1] -= 1;
+        }
+        if (thighDegree[1] == 45)
+        {
+            walkingFlag[0] = 0;
+            walkingFlag[1] = 1;
         }
     }
 }
