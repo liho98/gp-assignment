@@ -954,52 +954,76 @@ void controlLeg(int legNo, float degree)
 
 void walk(int direction)
 {
+    float legSpeed = 1;
+    float armSpeed = 0.2;
     if (walkingFlag[1])
     {
+        // leg movement
         if (thighDegree[0] < 45)
         {
-            thighDegree[0] += 1;
+            thighDegree[0] += legSpeed;
         }
         if (calfDegree[0] > -35)
         {
-            calfDegree[0] -= 1;
+            calfDegree[0] -= legSpeed;
         }
         if (thighDegree[1] > -35)
         {
-            thighDegree[1] -= 1;
+            thighDegree[1] -= legSpeed;
         }
         if (calfDegree[1] < 0)
         {
-            calfDegree[1] += 1;
+            calfDegree[1] += legSpeed;
         }
         if (thighDegree[0] == 45)
         {
             walkingFlag[0] = 1;
             walkingFlag[1] = 0;
         }
+
+        // hand movement
+        if (armDegree[1] < 15)
+        {
+            armDegree[1] += armSpeed;
+        }
+        if (armDegree[0] > -15)
+        {
+            armDegree[0] -= armSpeed;
+        }
     }
     if (walkingFlag[0])
     {
+        // leg movement
         if (thighDegree[0] > -35)
         {
-            thighDegree[0] -= 1;
+            thighDegree[0] -= legSpeed;
         }
         if (calfDegree[0] < 0)
         {
-            calfDegree[0] += 1;
+            calfDegree[0] += legSpeed;
         }
         if (thighDegree[1] < 45)
         {
-            thighDegree[1] += 1;
+            thighDegree[1] += legSpeed;
         }
         if (calfDegree[1] > -35)
         {
-            calfDegree[1] -= 1;
+            calfDegree[1] -= legSpeed;
         }
         if (thighDegree[1] == 45)
         {
             walkingFlag[0] = 0;
             walkingFlag[1] = 1;
+        }
+
+        // hand movement
+        if (armDegree[0] < 15)
+        {
+            armDegree[0] += armSpeed;
+        }
+        if (armDegree[1] > -15)
+        {
+            armDegree[1] -= armSpeed;
         }
     }
 }
