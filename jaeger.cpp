@@ -17,6 +17,8 @@ float perspectiveX = 0, perspectiveY = 0, perspectiveZ = -5;
 float orthoX = 0, orthoY = 0.5, orthoZ = 0;
 float bridgeDegree = 0, bridgeLineUp = 0;
 
+float animationX = 0, animationY = 0, animationZ = 0;
+
 bool rotate = false;
 bool rotateLeft = false;
 bool rotateRight = false;
@@ -34,9 +36,9 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0.12;
-float v1 = -0.05;
-float v2 = -5.28;
+float v = 0;
+float v1 = 0;
+float v2 = 0;
 float v3 = 1.53;
 float v4 = 1.64;
 float v5 = 1.21;
@@ -63,6 +65,8 @@ bool walkControl = false;
 bool runControl = false;
 int walkingFlag[2] = {0, 1};
 int walkDirection = 0;
+bool insultControl = false;
+bool walkStationary = true;
 
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
@@ -405,7 +409,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             else if (legControl)
                 legNo = 2;
             else if (animationControl)
-            { // walk
+            {
                 if (runControl)
                     runControl = false;
                 else
@@ -417,9 +421,16 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
                    fingerNo, armNo, legNo);
             break;
-        case GLFW_KEY_3:
+        case GLFW_KEY_3: // real walk / run
             if (fingerControl)
                 fingerNo = 3;
+            else if (animationControl)
+            {
+                if (walkStationary)
+                    walkStationary = false;
+                else
+                    walkStationary = true;
+            }
             break;
         case GLFW_KEY_4:
             if (fingerControl)
@@ -445,13 +456,20 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             if (fingerControl)
                 fingerNo = 9;
             break;
-        case GLFW_KEY_0:
+        case GLFW_KEY_0: // insult animation
             if (fingerControl)
                 fingerNo = 10;
+            else if (animationControl)
+            {
+                if (insultControl)
+                    insultControl = false;
+                else
+                    insultControl = true;
+            }
             break;
 
         case GLFW_KEY_W:
-            if (walkControl)
+            if (walkControl || runControl)
             {
                 if (walkDirection != 1)
                 {
@@ -460,18 +478,18 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 }
                 walkDirection = 1;
             }
-            else if (runControl)
-            {
-                if (walkDirection != 2)
-                {
-                    walkingFlag[0] = 0;
-                    walkingFlag[1] = 1;
-                }
-                walkDirection = 2;
-            }
+            // else if (runControl)
+            // {
+            //     if (walkDirection != 2)
+            //     {
+            //         walkingFlag[0] = 0;
+            //         walkingFlag[1] = 1;
+            //     }
+            //     walkDirection = 2;
+            // }
             break;
         case GLFW_KEY_S:
-            if (walkControl)
+            if (walkControl || runControl)
             {
                 if (walkDirection != -1)
                 {
@@ -480,15 +498,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 }
                 walkDirection = -1;
             }
-            else if (runControl)
-            {
-                if (walkDirection != -2)
-                {
-                    walkingFlag[0] = 0;
-                    walkingFlag[1] = 1;
-                }
-                walkDirection = -2;
-            }
+            // else if (runControl)
+            // {
+            //     if (walkDirection != -2)
+            //     {
+            //         walkingFlag[0] = 0;
+            //         walkingFlag[1] = 1;
+            //     }
+            //     walkDirection = -2;
+            // }
             break;
 
         case GLFW_KEY_T:
@@ -1013,21 +1031,23 @@ void walk(int speed)
         }
 
         // hand movement
-        if (armDegree[1] < armMoveDegree)
+        if (!insultControl)
         {
-            armDegree[1] += armSpeed;
+            if (armDegree[1] < armMoveDegree)
+            {
+                armDegree[1] += armSpeed;
+            }
         }
+
         if (armDegree[0] > -armMoveDegree)
         {
             armDegree[0] -= armSpeed;
         }
-        
         if (thighDegree[0] > 45)
         {
             walkingFlag[0] = 1;
             walkingFlag[1] = 0;
         }
-
     }
     if (walkingFlag[0])
     {
@@ -1049,22 +1069,72 @@ void walk(int speed)
             calfDegree[1] -= legSpeed;
         }
 
-
         // hand movement
+        if (!insultControl)
+        {
+            if (armDegree[1] > -armMoveDegree)
+            {
+                armDegree[1] -= armSpeed;
+            }
+        }
         if (armDegree[0] < armMoveDegree)
         {
             armDegree[0] += armSpeed;
         }
-        if (armDegree[1] > -armMoveDegree)
-        {
-            armDegree[1] -= armSpeed;
-        }
-        
+
         if (thighDegree[1] > 45)
         {
             walkingFlag[0] = 0;
             walkingFlag[1] = 1;
         }
+    }
+
+    //  walk with move X
+    if (!walkStationary)
+    {
+        if (walkDirection == 1)
+        {
+            if (walkControl)
+                animationX -= 0.1;
+            else if (runControl)
+                animationX -= 0.2;
+        }
+        else if (walkDirection == -1)
+        {
+            if (walkControl)
+                animationX += 0.1;
+            else if (runControl)
+                animationX += 0.2;
+        }
+    }
+}
+
+void insult()
+{
+    float armSpeed = 1;
+    if (armDegree[1] < 80)
+    {
+        armDegree[1] += armSpeed;
+    }
+    if (handDegree[1] < 80)
+    {
+        handDegree[1] += armSpeed;
+    }
+    if (fingerDegree[5] < 100)
+    {
+        fingerDegree[5] += armSpeed;
+    }
+    if (fingerDegree[6] < 100)
+    {
+        fingerDegree[6] += armSpeed;
+    }
+    if (fingerDegree[8] < 100)
+    {
+        fingerDegree[8] += armSpeed;
+    }
+    if (fingerDegree[9] < 100)
+    {
+        fingerDegree[9] += armSpeed;
     }
 }
 
@@ -1862,11 +1932,18 @@ int main(int argc, char **argv)
             }
             else if (runControl)
             {
-                if (walkDirection == 2)
+                if (walkDirection == 1)
                     walk(3);
-                else if (walkDirection == -2)
+                else if (walkDirection == -1)
                     walk(3);
             }
+
+            if (insultControl)
+            {
+                insult();
+            }
+
+            glTranslatef(animationX, animationY, animationZ);
 
             display();
 
