@@ -37,14 +37,14 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0;
-float v1 = 0;
-float v2 = 0;
-float v3 = 0;
+float v = 0.25;
+float v1 = 0.25;
+float v2 = 1.8;
+float v3 = -0.83;
 float v4 = 0;
 float v5 = 0;
 float v6 = 0;
-float v7 = 0;
+float v7 = 2.64;
 
 int fingerNo = 0; // individual finger control on, 1 - 10
 bool fingerControl = false;
@@ -533,7 +533,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
 
         case GLFW_KEY_T:
-            v += 1;
+            v += 0.01;
             break;
         case GLFW_KEY_G:
             v -= 0.01;
@@ -912,7 +912,7 @@ void drawRightPyramid(float length)
     glPopMatrix();
 }
 
-void drawTrianglePyramid(float length)
+void drawTrianglePyramid(float length, float rightTopHeight)
 {
     glDisable(GL_SMOOTH);
     glPushMatrix();
@@ -932,7 +932,7 @@ void drawTrianglePyramid(float length)
     glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, length);
+        glVertex3f(0, rightTopHeight, length);
         glTexCoord2f(-0.5f, 0);
         glVertex3f(0.5, 0, length);
         glTexCoord2f(0.5f, 0);
@@ -944,7 +944,7 @@ void drawTrianglePyramid(float length)
     glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, length);
+        glVertex3f(0, rightTopHeight, length);
         glTexCoord2f(1, 1);
         glVertex3f(0, 1, 0);
         glTexCoord2f(1, 0.0f);
@@ -957,7 +957,7 @@ void drawTrianglePyramid(float length)
     glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, length);
+        glVertex3f(0, rightTopHeight, length);
         glTexCoord2f(1, 1);
         glVertex3f(0, 1, 0);
         glTexCoord2f(1, 0.0f);
@@ -1662,7 +1662,7 @@ void drawBody()
         glRotatef(180, 0, 0, 1);
         glTranslatef(-0.17, -1.93, 0.42);
         glScalef(1.28, 1.32, 1);
-        drawTrianglePyramid(-1);
+        drawTrianglePyramid(-1, 1);
     }
     glPopMatrix();
 
@@ -1779,7 +1779,7 @@ void drawArms()
             glTranslatef(0, 5.67, 0);
             glRotatef(0 + armDegreeX[0], 1, 0, 0);
             glTranslatef(0, -5.68, 0);
- 
+
             float handDistance = 1.64;
             glTranslatef(0.23, 3.97, 0);
             glScalef(1.15, 1.39, 1.16);
@@ -1870,6 +1870,162 @@ void drawHead()
     glPopMatrix();
 }
 
+void drawWingLeaf()
+{
+    // leaf
+    glPushMatrix();
+    {
+        glPushMatrix();
+        {
+            glRotatef(90, 0, 1, 0);
+            glTranslatef(-0.65, 5.39, -0.52);
+            glScalef(0.12, 0.88, 1.97);
+            drawTrianglePyramid(-1.0, 0.65);
+            glTranslatef(0, -0.19, -1.05);
+            glScalef(1, 0.63, 1.13);
+            drawTrianglePyramid(-1.0, 0.5);
+
+            // leaf connector
+            glPushMatrix();
+            {
+                glTranslatef(0, -0.03, -0.07);
+                glScalef(0.06, 2.54, 0.98);
+                drawCuboid(0.18, 2.64);
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+    }
+    glPopMatrix();
+}
+
+void drawWing()
+{
+    glPushMatrix();
+    { // joint between the two side of leaf
+        glPushMatrix();
+        {
+            glRotatef(90, 1, 0, 0);
+            glTranslatef(0.15, 0.66, -5.7);
+            drawCapsule(0.98, 0.16);
+        }
+        glPopMatrix();
+
+        // rocket booster
+        glPushMatrix();
+        {
+            glRotatef(90, 1, 0, 0);
+            glTranslatef(0.56, 0.73, -5.88);
+            drawCylinder(0.25, 0.25, 1.8, 20, 10);
+            glTranslatef(-0.83, 0, 0);
+            drawCylinder(0.25, 0.25, 1.8, 20, 10);
+
+            glPushMatrix();
+            {
+                glTranslatef(0, 0, 0.14);
+                int jointSliceStack = 10;
+                float jointRadius = 0.25;
+                // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
+                drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+                glTranslatef(0.83, 0, 0);
+                drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+            }
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+                glTranslatef(0.83, 0, 1.64);
+                drawCylinder(0.18, 0.35, 0.45, 20, 10);
+                glTranslatef(-0.83, 0, 0);
+                drawCylinder(0.18, 0.35, 0.45, 20, 10);
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+
+        // leaf level 1
+        glPushMatrix();
+        {
+            glTranslatef(0, -0.76, 0);
+            glPushMatrix();
+            {
+                drawWingLeaf();
+            }
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+                glRotatef(180, 0, 1, 0);
+                glTranslatef(-0.29, 0, -1.23);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+
+        // leaf level 2
+        glPushMatrix();
+        {
+            // glTranslatef(v, v1, -0.07);
+            glPushMatrix();
+            {
+                glRotatef(10, 0, 1, 0);
+                glScalef(0.76, 1, 1);
+                glTranslatef(-0.15, -0.39, 0.06);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+
+                glRotatef(170, 0, 1, 0);
+                glScalef(0.76, 1, 1);
+                glTranslatef(-0.53, -0.39, -1.23);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+
+        // leaf level 3
+        glPushMatrix();
+        {
+            glPushMatrix();
+            {
+                glRotatef(20, 0, 1, 0);
+                glScalef(0.59, 0.63, 1.14);
+                glTranslatef(-0.94, 3.03, 0.02);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+
+            // leaf 3 connector
+            glPushMatrix();
+            {
+                glRotatef(90, 1, 0, 0);
+                glTranslatef(0.85, 0.96, -5.58);
+                drawCapsule(0.520, 0.14);
+
+                glTranslatef(-1.33, 0.02, 0);
+                drawCapsule(0.520, 0.14);
+            }
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+                glRotatef(160, 0, 1, 0);
+                glScalef(0.59, 0.63, 1.14);
+                glTranslatef(-1.46, 3.02, -1.22);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+    }
+    glPopMatrix();
+}
+
 void display()
 {
     glClearColor(0, 0, 0, 0);
@@ -1906,11 +2062,13 @@ void display()
 
     glScalef(0.7, 0.7, 0.7);
 
-    drawLegs();
+    // drawLegs();
     drawArms();
     drawBody();
-    drawHead();
+    // drawHead();
     drawShoulderJoint();
+
+    drawWing();
 }
 
 int main(int argc, char **argv)
