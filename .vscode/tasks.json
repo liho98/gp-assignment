@@ -38,9 +38,12 @@
                     "-o",
                     "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe",
                     "-lopengl32",
-                    "-lGLEW",
+                    "-lglew32",
                     "-lglfw3",
                     "-lassimp",
+                    "-lmingw32",
+                    "-lglu32",
+                    "-lgdi32",
                 ],
                 "options": {
                     "cwd": "C:\\MinGW\\bin"
@@ -94,7 +97,6 @@
                     "-o",
                     "${fileDirname}/${fileBasenameNoExtension}",
                     "-lGL",
-                    "-lGLU",
                     // "-lglut",
                     "-lglad",
                     "-lGLEW",
@@ -123,6 +125,8 @@
                     "-lglew32",
                     "-lglfw3",
                     "-lassimp",
+                    "-lglu32",
+                    "-lgdi32",
                     "&&",
                     "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
                 ],

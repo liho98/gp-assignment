@@ -9,4 +9,5 @@
         "utility": "cpp"
     },
     "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\cmd.exe",
+    "C_Cpp.errorSquiggles": "Disabled",
 }

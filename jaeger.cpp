@@ -81,7 +81,7 @@ BITMAP BMP;
 HBITMAP hBMP = NULL;
 string textures[3] = {"Brick.bmp", "Wood.bmp", "Metal.bmp"};
 int textureNo = 0;
-string projectRoot = "D:\\TARUC\\Sem 5\\BACS2173 Graphics Programming\\gp-assignment\\texture\\";
+string projectRoot = "C:\\Users\\hanzo\\OneDrive\\Desktop\\GP-assignment\\gp-assignment\\texture\\";
 char temp[100];
 
 // use dedicated GPU to run
@@ -119,6 +119,12 @@ void initTexture(string textureName)
                  BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
 
     DeleteObject(hBMP);
+}
+
+void removeTexture()
+{
+    glDisable(GL_TEXTURE_2D);
+    glDeleteTextures(1, &texture);
 }
 
 void incrementArray(float *arr, float value, int size)
@@ -1160,28 +1166,36 @@ void drawBracers()
     // hand
     glPushMatrix();
     {
+        initTexture("blue_texture.bmp");
         glRotatef(180, 0, 1, 1);
         glTranslatef(0, 0, -0.45);
         drawCylinder(0.1, 0.2, 0.45, 20, 10);
     }
+    removeTexture();
     glPopMatrix();
 
+    //wrist
     glPushMatrix();
     {
+        initTexture("white_texture.bmp");
         glTranslatef(0.1, -0.43, 0);
         glRotatef(180, 0, 1, 1);
         glRotatef(90, 0, 1, 0);
         drawCylinder(0.05, 0.05, 0.21, 20, 10);
     }
+    removeTexture();
     glPopMatrix();
 
+    //shoulderGuanjie
     glPushMatrix();
     {
         int jointSliceStack = 10;
         float jointRadius = 0.22;
+        initTexture("yellow_texture.bmp");
         glTranslatef(0, 1.04, 0);
         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
     }
+    removeTexture();
     glPopMatrix();
 }
 
@@ -1196,24 +1210,35 @@ void drawFinger(float fingerSize, float fingerWidthScale, int fingerNo)
     float fingerGap = fingerSize * fingerWidthScale + jointRadius;
     float jointGap = fingerGap - (jointRadius * 0.5);
 
+    //lowerFinger
     glScalef(0.7, 0.5, 0.5);
     glPushMatrix();
     {
+        initTexture("red2_texture.bmp");
         drawCuboid(fingerSize, fingerWidthScale);
     }
+    removeTexture();
     glPopMatrix();
+
+    //fingerMiddle
     glPushMatrix();
     {
+        initTexture("white_texture.bmp");
         glTranslatef(jointGap, fingerSize / 2, fingerSize / 2);
         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
     }
+    removeTexture();
     glPopMatrix();
+
+    //upperfinger
     glPushMatrix();
     {
+        initTexture("red2_texture.bmp");
         glTranslatef(fingerGap, 0, 0);
         glRotatef(0 + fingerDegree[fingerNo], 0, 0, 1);
         drawCuboid(fingerSize, fingerWidthScale);
     }
+    removeTexture();
     glPopMatrix();
 }
 
@@ -1232,9 +1257,11 @@ void drawFingers()
 
     glPushMatrix();
     {
+        //initTexture("blue_metal_texture.bmp");
         glTranslatef(0, 0, -0.2);
         drawFinger(0.3, 2, fingerCounter++);
     }
+    removeTexture();
     glPopMatrix();
 
     glPushMatrix();
@@ -1270,9 +1297,11 @@ void drawArm()
     // draw arm
     glPushMatrix();
     {
+        initTexture("grey_texture.bmp");
         glRotatef(180, 0, 1, 1);
         drawCylinder(0.15, 0.22, 1, 20, 10);
     }
+    removeTexture();
     glPopMatrix();
 
     glPushMatrix();
@@ -1288,10 +1317,12 @@ void drawArm()
         glTranslatef(0, 0.49, 0);
         glPushMatrix();
         {
+            initTexture("red2_texture.bmp");
             glRotatef(90, 0, 1, 0);
             glTranslatef(-0.04, -0.78, -0.18);
             drawCuboid(0.35, 0.21);
         }
+        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
@@ -1317,17 +1348,22 @@ void drawCalf(int thighNo)
         glTranslatef(-0.31, -2.62, 0); //-1.84
         // TODO: limit calfHeight to reasonable value
         float calfHeight = robotHeight;
+        //xiaotui
         glPushMatrix();
         {
+            initTexture("blue_texture.bmp");
             glTranslatef(0.1, 0.45, 0);
             glScalef(0.5, 2.42 + calfHeight * 3, 0.8);
             drawCuboid(0.5, 1.51);
         }
+        removeTexture();
         glPopMatrix();
 
+        //houxiaotui
         glPushMatrix();
         {
             float cylinderHeight = 1.5;
+            initTexture("yellow_texture.bmp");
             glRotatef(180, 0, 1, 1);
             glTranslatef(-0.06, 0, 0.16);
             glScalef(1, 1, 1 + calfHeight);
@@ -1337,6 +1373,7 @@ void drawCalf(int thighNo)
             glTranslatef(0, 0.19, 0);
             drawCylinder(0.05, 0.05, cylinderHeight, 20, 10);
         }
+        removeTexture();
         glPopMatrix();
 
         ///////////////////////
@@ -1345,27 +1382,32 @@ void drawCalf(int thighNo)
         glPushMatrix();
         {
             float cylinderHeight = 0.31;
+            initTexture("yellow_texture.bmp");
             glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.04);
             glScalef(1, 1, 1);
             drawCylinder(0.16, 0.16, cylinderHeight, 20, 10);
         }
+        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
         {
             int jointSliceStack = 10;
             float jointRadius = 0.16;
+            initTexture("blue_texture.bmp");
             glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
             glTranslatef(0, 0, -0.27);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
         }
+        removeTexture();
         glPopMatrix();
-
+        //knee
         glPushMatrix();
         {
             // triangle cover the cylinder joint
             float pyramidSize = 0.1;
+            initTexture("red2_texture.bmp");
             glRotatef(270, 0, 1, 0);
             glScalef(0.39, 0.58, 0.48);
             glTranslatef(0.50, 3.4 + calfHeight * 2.5, -0.04);
@@ -1375,6 +1417,7 @@ void drawCalf(int thighNo)
             glTranslatef(-0.07, 0, 0.92);
             drawRightPyramid(-0.82);
         }
+        removeTexture();
         glPopMatrix();
         ///////////////////////
 
@@ -1382,17 +1425,21 @@ void drawCalf(int thighNo)
         glPushMatrix(); // front shoe pyramid
         {
             float pyramidSize = 0.1;
+            initTexture("red2_texture.bmp");
             glRotatef(270, 0, 1, 0);
             glScalef(0.39, 0.58, 0.48);
             glTranslatef(0.48, 1.27, -1.0);
             drawRightPyramid(-0.67);
         }
+        removeTexture();
         glPopMatrix();
 
+        //jiaohougen
         glPushMatrix();
         {
             int jointSliceStack = 10;
             float jointRadius = 0.1;
+            initTexture("blue_texture.bmp");
             glTranslatef(0.09, 0.210000, 0.39);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
             glTranslatef(0, 0, -0.2);
@@ -1400,26 +1447,33 @@ void drawCalf(int thighNo)
             glTranslatef(0, 0, -0.2);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
         }
+        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
         {
+            initTexture("yellow_texture.bmp");
             glScalef(1, 0.3, 1);
             glTranslatef(0, 0, -0.05);
             drawCuboid(0.5, 2);
         }
+        removeTexture();
+
         glPopMatrix();
         glPushMatrix();
         {
+            initTexture("red2_texture.bmp");
             glTranslatef(0.1, 0.3 * 0.5, 0);
             glScalef(0.7, 0.6, 0.8);
             drawCuboid(0.5, 2);
         }
+        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
         {
             float pyramidSize = 0.1;
+            initTexture("red2_texture.bmp");
             glRotatef(90, 0, 0, 1);
             glScalef(0.2, 0.2, 0.15);
             glTranslatef(0.52, 0.46, 0.85);
@@ -1429,10 +1483,13 @@ void drawCalf(int thighNo)
             glTranslatef(0, 0, 1.0);
             drawPyramid();
         }
+        removeTexture();
         glPopMatrix();
+        //legside
         glPushMatrix();
         {
             float pyramidSize = 0.1;
+            initTexture("red2_texture.bmp");
             glRotatef(90, 1, 0, 0);
             glScalef(0.2, 0.2, 0.15);
             glTranslatef(0.5, 2.74, 0.02);
@@ -1446,10 +1503,13 @@ void drawCalf(int thighNo)
             glTranslatef(1, 0, 0);
             drawPyramid();
         }
+        removeTexture();
         glPopMatrix();
+        //legside
         glPushMatrix();
         {
             float pyramidSize = 0.1;
+            initTexture("red2_texture.bmp");
             glRotatef(-90, 1, 0, 0);
             glScalef(0.2, 0.2, 0.15);
             glTranslatef(0.57, 0.65, 0.98);
@@ -1463,15 +1523,18 @@ void drawCalf(int thighNo)
             glTranslatef(1, 0, 0);
             drawPyramid();
         }
+        removeTexture();
         glPopMatrix();
         glPushMatrix(); // front shoe pyramid
         {
             float pyramidSize = 0.1;
+            initTexture("red2_texture.bmp");
             glRotatef(-90, 0, 0, 1);
             glScalef(0.15, 0.13, 0.48);
             glTranslatef(-0.49, 8.21, 0.95);
             drawPyramid();
         }
+        removeTexture();
         glPopMatrix();
     }
     glPopMatrix();
@@ -1483,11 +1546,13 @@ void drawBackground()
     glPushMatrix();
     {
         float cylinderHeight = 0.6;
+        //initTexture("blue_metal_texture.bmp");
         glRotatef(-90, 1, 0, 0);
         glScalef(0.2, 0.2, 0.15);
         glTranslatef(0.57, 0.65, 0.98);
         drawPyramid();
     }
+    removeTexture();
     glPopMatrix();
 }
 
@@ -1504,15 +1569,19 @@ void drawThigh(int thighNo)
 
         glPushMatrix();
         {
+            initTexture("grey_texture.bmp");
             glTranslatef(-0.1, -0.43 + robotHeight * 1.5, -0.02);
             glScalef(0.5, 3.18, 0.8);
             drawCuboid(0.5, 1.51);
         }
+        removeTexture();
         glPopMatrix();
 
+        //thigh capsule
         glPushMatrix();
         {
             // glRotatef(90, 0, 1, 0);
+            initTexture("yellow_texture.bmp");
             glTranslatef(0.09, 1.26, 0.05);
             drawCapsule(0.27, 0.12);
             glTranslatef(0., -0.28, 0);
@@ -1520,6 +1589,7 @@ void drawThigh(int thighNo)
             glTranslatef(0., -0.28, 0);
             drawCapsule(0.27, 0.12);
         }
+        removeTexture();
         glPopMatrix();
     }
     glPopMatrix();
@@ -1533,22 +1603,26 @@ void drawHipJoint()
         glPushMatrix();
         {
             float cylinderHeight = 1.46;
+            initTexture("red2_texture.bmp");
             glRotatef(90, 0, 1, 0);
             glTranslatef(0.12, 1.48 + robotHeight * 1.45, -0.47);
             glScalef(1, 1, 1);
             drawCylinder(0.22, 0.22, cylinderHeight, 20, 10);
         }
+        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
         {
             int jointSliceStack = 10;
             float jointRadius = 0.22;
+            initTexture("yellow_texture.bmp");
             glTranslatef(0.95, 1.48 + robotHeight * 1.45, -0.12);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
             glTranslatef(-1.37, 0, 0);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
         }
+        removeTexture();
         glPopMatrix();
     }
     glPopMatrix();
@@ -1556,34 +1630,44 @@ void drawHipJoint()
 
 void drawBody()
 {
-    // hip
+    // hip (penis)
     glPushMatrix();
     {
+        initTexture("blue_metal_texture.bmp");
         glRotatef(180, 0, 0, 1);
         glTranslatef(-0.17, -1.93, 0.42);
         glScalef(1.28, 1.32, 1);
         drawTrianglePyramid(-1);
     }
+    removeTexture();
     glPopMatrix();
 
+    //lowerbody
     glPushMatrix();
     {
+        initTexture("red2_texture.bmp");
         glTranslatef(-0.59, 2.49, -0.62);
         glScalef(0.65, 2.21, 1.23);
         drawCuboid(0.88, 2.64);
     }
+    removeTexture();
     glPopMatrix();
 
+    //upperbody
     glPushMatrix();
     {
+        initTexture("grey_texture.bmp");
         glTranslatef(-1.23, 4.44, -0.62);
         glScalef(0.65, 1.82, 1.26);
         drawCuboid(0.89, 4.83);
     }
+    removeTexture();
     glPopMatrix();
 
+    //armpit
     glPushMatrix();
     {
+        initTexture("blue_metal_texture.bmp");
         glRotatef(90, 1, 0, 0);
         glRotatef(90, 0, 0, 1);
         glTranslatef(-0.08, 0.91, -4.44);
@@ -1594,10 +1678,13 @@ void drawBody()
         glTranslatef(0, 3.36, 0);
         drawRightPyramid(0.5);
     }
+    removeTexture();
     glPopMatrix();
 
+    //bodyCylinder
     glPushMatrix();
     {
+        initTexture("yellow_texture.bmp");
         glRotatef(90, 0, 1, 0);
         glTranslatef(0.09, 3.52, -0.61);
         drawCapsule(1.55, 0.12);
@@ -1606,6 +1693,7 @@ void drawBody()
         glTranslatef(0, -0.31, 0);
         drawCapsule(1.55, 0.12);
     }
+    removeTexture();
     glPopMatrix();
 }
 
@@ -1613,12 +1701,14 @@ void drawShoulderJoint()
 {
     glPushMatrix();
     {
+        initTexture("yellow_texture.bmp");
         glRotatef(90, 0, 1, 0);
         glTranslatef(0.02, 5.67, 1.32);
         drawCapsule(0.48, 0.16);
         glTranslatef(0, 0, -2.79);
         drawCapsule(0.48, 0.16);
     }
+    removeTexture();
     glPopMatrix();
 }
 
@@ -1629,6 +1719,7 @@ void drawLegs()
     {
         glPushMatrix();
         {
+            //initTexture("blue_metal_texture.bmp");
             glRotatef(90, 0, 1, 0);
             glTranslatef(0, 0, 0.7);
             drawThigh(0);
@@ -1639,10 +1730,12 @@ void drawLegs()
             }
             glPopMatrix();
         }
+        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
         {
+            //initTexture("blue_metal_texture.bmp");
             glRotatef(90, 0, 1, 0);
             glTranslatef(0, 0, -0.7);
             drawThigh(1);
@@ -1653,6 +1746,7 @@ void drawLegs()
             }
             glPopMatrix();
         }
+        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
@@ -1693,12 +1787,14 @@ void drawArms()
                 glPushMatrix();
                 {
                     float pyramidSize = 0.1;
+                    initTexture("red2_texture.bmp");
                     glRotatef(90, 0, 1, 0);
                     glRotatef(180, 0, 0, 1);
                     glScalef(0.80, 0.58, 0.48);
                     glTranslatef(-0.02, -1.95, 0.02);
                     drawRightPyramid(-1.29);
                 }
+                removeTexture();
                 glPopMatrix();
             }
             glPopMatrix();
@@ -1724,12 +1820,14 @@ void drawArms()
                 glPushMatrix();
                 {
                     float pyramidSize = 0.1;
+                    initTexture("red2_texture.bmp");
                     glRotatef(270, 0, 1, 0);
                     glRotatef(180, 0, 0, 1);
                     glScalef(0.80, 0.58, 0.48);
                     glTranslatef(0.02, -1.95, 0.07);
                     drawRightPyramid(-1.29);
                 }
+                removeTexture();
                 glPopMatrix();
             }
             glPopMatrix();
@@ -1750,21 +1848,26 @@ void drawHead()
         float width = 0.5;
         glPushMatrix();
         {
+            initTexture("yellow_texture.bmp");
             // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.04);
             glScalef(1, 1, 1);
             drawCylinder(height, height * 1.5, width, 20, 10);
         }
+        removeTexture();
         glPopMatrix();
 
+        //topHead
         glPushMatrix();
         {
             int jointSliceStack = 10;
             // float jointRadius = 0.12;
             // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
+            initTexture("green_texture.bmp");
             drawSphere(height, jointSliceStack, jointSliceStack);
             glTranslatef(0, 0, width);
             drawSphere(height, jointSliceStack, jointSliceStack);
         }
+        removeTexture();
         glPopMatrix();
     }
     glPopMatrix();
@@ -1772,17 +1875,16 @@ void drawHead()
 
 void display()
 {
-    glClearColor(0, 0, 0, 0);
+    glClearColor(0,0,0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
     if (isTexture)
     {
-        glColor3f(1, 1, 1);
+        //glColor3f(1, 1, 1);
         selectedGluDrawStyles = gluDrawStyles[0];
         selectedGlDrawStyles = glDrawStyles[0];
         selectedGlewDrawStyles = glewDrawStyles[0];
-        initTexture(textures[2]);
 
         // glEnable(GL_TEXTURE_2D);
         // glGenTextures(1, &texture);
@@ -1798,7 +1900,7 @@ void display()
     else
     {
         glDisable(GL_TEXTURE_2D);
-        glColor3ub(30, 136, 229);
+        glColor3ub(255, 255, 255);
     }
 
     glRotatef(speed, 0, 1, 0);
