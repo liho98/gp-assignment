@@ -69,6 +69,15 @@ int walkDirection = 0;
 bool insultControl = false;
 bool walkStationary = true;
 
+bool itemControl = false;
+bool jetpack = false;
+
+bool flyMode = false;
+float ascendSpeed = 0.1;
+void flying(int direction);
+float swingDistance = 0;
+bool swingFlag = false;
+
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
 int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
@@ -223,6 +232,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 armControl = true;
                 legControl = false;
                 animationControl = false;
+                itemControl = false;
             }
             break;
         case GLFW_KEY_F9: // leg control
@@ -237,6 +247,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 armControl = false;
                 legControl = true;
                 animationControl = false;
+                itemControl = false;
             }
             break;
         case GLFW_KEY_F10: // animation
@@ -251,10 +262,23 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 armControl = false;
                 legControl = false;
                 animationControl = true;
+                itemControl = false;
             }
             break;
         case GLFW_KEY_F11: // weapon, change shape
-
+            if (itemControl)
+            {
+                itemControl = false;
+                mode = 0;
+            }
+            else // user need to press F5 or F6
+            {
+                fingerControl = false;
+                armControl = false;
+                legControl = false;
+                animationControl = false;
+                itemControl = true;
+            }
             break;
         case GLFW_KEY_F12: // enable texture
             if (isTexture)
@@ -348,6 +372,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 else
                     incrementArray(thighDegree, 1, 2);
                 break;
+            case 6:
+                if (flyMode)
+                    flying(1);
+                break;
             default:
                 break;
             }
@@ -391,6 +419,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     thighDegree[legNo - 1] -= 1;
                 else
                     incrementArray(thighDegree, -1, 2);
+                break;
+            case 6:
+                if (flyMode)
+                    flying(-1);
                 break;
             default:
                 break;
@@ -441,6 +473,13 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkControl = false;
                 }
             }
+            else if (itemControl)
+            {
+                if (jetpack)
+                    jetpack = false;
+                else
+                    jetpack = true;
+            }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
                    fingerNo, armNo, legNo);
             break;
@@ -453,6 +492,18 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkStationary = false;
                 else
                     walkStationary = true;
+            }
+            else if (itemControl)
+            {
+                if (flyMode)
+                    flyMode = false;
+                else if (!flyMode && jetpack)
+                {
+                    flyMode = true;
+                    mode = 6;
+                }
+                else
+                    flyMode = false;
             }
             break;
         case GLFW_KEY_4:
@@ -1161,8 +1212,31 @@ void insult()
     }
 }
 
-// model item
+void flying(int direction)
+{
+    // ascend speed increase exponentially
+    if (direction == 1)
+    {
+        animationY += ascendSpeed;
+    }
+    else if (direction == -1)
+    {
+        animationY -= ascendSpeed;
+    }
 
+    // move up and down by 0.5
+    if (swingDistance < 0.5 && !swingFlag)
+        animationY += 0.05;
+    else if (swingDistance > 0 && swingFlag)
+        animationY -= 0.05;
+
+    if (swingDistance == 0.5)
+        swingFlag = true;
+    else if (swingDistance == 0)
+        swingFlag = false;
+}
+
+// model item
 void drawMoon()
 {
     float x = 0, y = 0, z = -15, GL_PI = 3.142, radius = 0.4;
@@ -1899,7 +1973,7 @@ void drawWingLeaf()
     glPopMatrix();
 }
 
-void drawWing()
+void drawJetpack()
 {
     glPushMatrix();
     { // joint between the two side of leaf
@@ -2026,6 +2100,10 @@ void drawWing()
     glPopMatrix();
 }
 
+void drawWeapon()
+{
+}
+
 void display()
 {
     glClearColor(0, 0, 0, 0);
@@ -2057,7 +2135,6 @@ void display()
         glColor3ub(30, 136, 229);
     }
 
-    glRotatef(speed, 0, 1, 0);
     glRotatef(90, 0, 1, 0);
 
     glScalef(0.7, 0.7, 0.7);
@@ -2068,7 +2145,8 @@ void display()
     // drawHead();
     drawShoulderJoint();
 
-    drawWing();
+    if (jetpack)
+        drawJetpack();
 }
 
 int main(int argc, char **argv)
@@ -2093,10 +2171,11 @@ int main(int argc, char **argv)
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 glOrtho(-2 * ar, 2 * ar, -2, 2, -2, 2000);
+                glTranslatef(orthoX, orthoY, orthoZ);
+                glRotatef(speed, 0, 1, 0);
 
                 glMatrixMode(GL_MODELVIEW);
                 glLoadIdentity();
-                glTranslatef(orthoX, orthoY, orthoZ);
             }
             else
             {
@@ -2104,10 +2183,11 @@ int main(int argc, char **argv)
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 gluPerspective(45, ar, 1, 2000);
+                glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
+                glRotatef(speed, 0, 1, 0);
 
                 glMatrixMode(GL_MODELVIEW);
                 glLoadIdentity();
-                glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
             }
 
             // walk animation
