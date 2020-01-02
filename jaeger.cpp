@@ -99,7 +99,7 @@ BITMAP BMP;
 HBITMAP hBMP = NULL;
 string textures[3] = {"Brick.bmp", "Wood.bmp", "Metal.bmp"};
 int textureNo = 0;
-string projectRoot = "C:\\Users\\hanzo\\OneDrive\\Desktop\\GP-assignment\\gp-assignment\\texture\\";
+string projectRoot = "C:\\Users\\hanzo\\OneDrive\\Desktop\\GP-assignment2\\gp-assignment\\texture\\";
 char temp[100];
 
 // use dedicated GPU to run

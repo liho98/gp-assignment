@@ -21,6 +21,8 @@
                     "-lglfw",
                     "-lassimp",
                     "-ldl",
+                    "-lglu32",
+                    "-lgdi32",
                 ],
                 "options": {
                     "cwd": "/usr/bin"
@@ -41,6 +43,8 @@
                     "-lGLEW",
                     "-lglfw3",
                     "-lassimp",
+                    "-lglu32",
+                    "-lgdi32",
                 ],
                 "options": {
                     "cwd": "C:\\MinGW\\bin"
@@ -101,6 +105,8 @@
                     "-lglfw",
                     "-lassimp",
                     "-ldl",
+                    "-lglu32",
+                    "-lgdi32",
                     "&&",
                     "${fileDirname}/${fileBasenameNoExtension}"
                 ],
@@ -123,6 +129,8 @@
                     "-lglew32",
                     "-lglfw3",
                     "-lassimp",
+                    "-lglu32",
+                    "-lgdi32",
                     "&&",
                     "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
                 ],
