@@ -151,7 +151,7 @@ void initTexture(string textureName)
         HBITMAP hBMP = (HBITMAP)LoadImage(GetModuleHandle(NULL), temp, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
         GetObject(hBMP, sizeof(BMP), &BMP);
 
-        // glActiveTexture(GL_TEXTURE0 + textureCount); // Texture unit 0
+        //glActiveTexture(GL_TEXTURE0 + textureCount); // Texture unit 0
         glBindTexture(GL_TEXTURE_2D, textures[textureCount]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
                         GL_LINEAR);
