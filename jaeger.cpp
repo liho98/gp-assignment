@@ -100,8 +100,11 @@ HBITMAP hBMP = NULL;
 // string textures[3] = {"Brick.bmp", "Wood.bmp", "Metal.bmp"};
 int textureNo = 0;
 
-string projectRoot = "C:\\Users\\hanzo\\OneDrive\\Desktop\\GP-assignment2\\gp-assignment\\texture\\";
+// get dir path of project root
+string file_path = __FILE__;
+string dir_path = file_path.substr(0, file_path.rfind("\\"));
 
+string projectRoot;
 char temp[100];
 
 // use dedicated GPU to run
@@ -140,12 +143,9 @@ void initTexture(string textureName)
     }
     else
     {
-        // glDisable(GL_TEXTURE_2D);
-        // glDeleteTextures(1, &texture);
-
-        strcpy(temp, projectRoot.c_str());
+        strcpy(temp, dir_path.c_str());
+        strcat(temp, "\\texture\\");
         strcat(temp, textureName.c_str());
-        // strcat(temp, ".bmp");
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         HBITMAP hBMP = (HBITMAP)LoadImage(GetModuleHandle(NULL), temp, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);

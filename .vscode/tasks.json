@@ -29,7 +29,7 @@
                 },
             },
             "windows": {
-                "command": "C:\\MinGW\\bin\\g++.exe",
+                "command": "D:\\MinGW\\bin\\g++.exe",
                 "args": [
                     "-I${workspaceFolder}\\include", // include path for header
                     "-L${workspaceFolder}\\lib\\wins", // for static (.a or .lib) 
@@ -47,7 +47,7 @@
                     "-lgdi32",
                 ],
                 "options": {
-                    "cwd": "C:\\MinGW\\bin"
+                    "cwd": "D:\\MinGW\\bin"
                 }
             },
             "problemMatcher": [
@@ -103,7 +103,7 @@
                     "-lglad",
                     "-lGLEW",
                     "-lglfw",
-                    "-lassimp",
+                    // "-lassimp",
                     "-ldl",
                     "-lglu32",
                     "-lgdi32",
@@ -115,7 +115,7 @@
                 },
             },
             "windows": {
-                "command": "C:\\MinGW\\bin\\g++.exe",
+                "command": "D:\\MinGW\\bin\\g++.exe",
                 "args": [
                     "-I${workspaceFolder}\\include", // include path for header
                     "-L${workspaceFolder}\\lib\\wins", // for static (.a or .lib) 
@@ -131,11 +131,14 @@
                     "-lassimp",
                     "-lglu32",
                     "-lgdi32",
+                    // "-lassimp",
+                    "-lmingw32",
+                    // "-lfreeglut", 
                     "&&",
                     "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
                 ],
                 "options": {
-                    "cwd": "C:\\MinGW\\bin"
+                    "cwd": "D:\\MinGW\\bin"
                 }
             },
             "problemMatcher": [
@@ -144,7 +147,7 @@
             "group": "build",
             "presentation": {
                 "echo": true,
-                "reveal": "always",
+                "reveal": "never",
                 "focus": false,
                 "panel": "shared",
                 "showReuseMessage": true,
