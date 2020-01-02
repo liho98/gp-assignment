@@ -29,7 +29,7 @@
                 },
             },
             "windows": {
-                "command": "D:\\MinGW\\bin\\g++.exe",
+                "command": "C:\\MinGW\\bin\\g++.exe",
                 "args": [
                     "-I${workspaceFolder}\\include", // include path for header
                     "-L${workspaceFolder}\\lib\\wins", // for static (.a or .lib) 
@@ -47,7 +47,7 @@
                     "-lgdi32",
                 ],
                 "options": {
-                    "cwd": "D:\\MinGW\\bin"
+                    "cwd": "C:\\MinGW\\bin"
                 }
             },
             "problemMatcher": [
@@ -115,7 +115,7 @@
                 },
             },
             "windows": {
-                "command": "D:\\MinGW\\bin\\g++.exe",
+                "command": "C:\\MinGW\\bin\\g++.exe",
                 "args": [
                     "-I${workspaceFolder}\\include", // include path for header
                     "-L${workspaceFolder}\\lib\\wins", // for static (.a or .lib) 
@@ -138,7 +138,7 @@
                     "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
                 ],
                 "options": {
-                    "cwd": "D:\\MinGW\\bin"
+                    "cwd": "C:\\MinGW\\bin"
                 }
             },
             "problemMatcher": [
