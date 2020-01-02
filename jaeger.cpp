@@ -17,6 +17,8 @@ float perspectiveX = 0, perspectiveY = 0, perspectiveZ = -5;
 float orthoX = 0, orthoY = 0.5, orthoZ = 0;
 float bridgeDegree = 0, bridgeLineUp = 0;
 
+float animationX = 0, animationY = 0, animationZ = 0;
+
 bool rotate = false;
 bool rotateLeft = false;
 bool rotateRight = false;
@@ -26,7 +28,8 @@ bool isTexture = false;
 
 int mode = 0, moveFinger = 0;
 
-float fingerDegree[10] = {}, handDegree[2] = {}, armDegree[2] = {};
+float fingerDegree[10] = {}, handDegree[2] = {};
+float armDegreeX[2] = {}, armDegreeY[2] = {};
 float robotHeight = 0.5;
 float calfDegree[2] = {}, thighDegree[2] = {};
 
@@ -34,14 +37,14 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0.12;
-float v1 = -0.05;
-float v2 = -5.28;
-float v3 = 1.53;
-float v4 = 1.64;
-float v5 = 1.21;
-float v6 = 0.12;
-float v7 = 0.27;
+float v = 0.25;
+float v1 = 0.25;
+float v2 = 1.8;
+float v3 = -0.83;
+float v4 = 0;
+float v5 = 0;
+float v6 = 0;
+float v7 = 2.64;
 
 int fingerNo = 0; // individual finger control on, 1 - 10
 bool fingerControl = false;
@@ -63,6 +66,17 @@ bool walkControl = false;
 bool runControl = false;
 int walkingFlag[2] = {0, 1};
 int walkDirection = 0;
+bool insultControl = false;
+bool walkStationary = true;
+
+bool itemControl = false;
+bool jetpack = false;
+
+bool flyMode = false;
+float ascendSpeed = 0.1;
+void flying(int direction);
+float swingDistance = 0;
+bool swingFlag = false;
 
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
@@ -224,6 +238,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 armControl = true;
                 legControl = false;
                 animationControl = false;
+                itemControl = false;
             }
             break;
         case GLFW_KEY_F9: // leg control
@@ -238,6 +253,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 armControl = false;
                 legControl = true;
                 animationControl = false;
+                itemControl = false;
             }
             break;
         case GLFW_KEY_F10: // animation
@@ -252,10 +268,23 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 armControl = false;
                 legControl = false;
                 animationControl = true;
+                itemControl = false;
             }
             break;
         case GLFW_KEY_F11: // weapon, change shape
-
+            if (itemControl)
+            {
+                itemControl = false;
+                mode = 0;
+            }
+            else // user need to press F5 or F6
+            {
+                fingerControl = false;
+                armControl = false;
+                legControl = false;
+                animationControl = false;
+                itemControl = true;
+            }
             break;
         case GLFW_KEY_F12: // enable texture
             if (isTexture)
@@ -276,12 +305,34 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             speed += 1;
             break;
         case GLFW_KEY_RIGHT:
-            perspectiveX += 0.1;
-            orthoX += 0.1;
+            switch (mode)
+            {
+            case 0:
+                perspectiveX += 0.1;
+                orthoX += 0.1;
+                break;
+            case 3:
+                if (armControl)
+                    armDegreeY[armNo - 1] -= 2;
+                break;
+            default:
+                break;
+            }
             break;
         case GLFW_KEY_LEFT:
-            perspectiveX -= 0.1;
-            orthoX -= 0.1;
+            switch (mode)
+            {
+            case 0:
+                perspectiveX -= 0.1;
+                orthoX -= 0.1;
+                break;
+            case 3:
+                if (armControl)
+                    armDegreeY[armNo - 1] += 2;
+                break;
+            default:
+                break;
+            }
             break;
         case GLFW_KEY_UP:
             switch (mode)
@@ -308,12 +359,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             case 3:
                 if (armControl)
                 {
-                    armDegree[armNo - 1] += 1;
+                    armDegreeX[armNo - 1] += 1;
                     // printf("armDegree1 = %f\tarmDegree2 = %f\tCurrent = %d\n",
                     //        armDegree[0], armDegree[1], armNo - 1);
                 }
                 else
-                    incrementArray(armDegree, 1, 2);
+                    incrementArray(armDegreeX, 1, 2);
                 break;
             case 4:
                 if (legControl)
@@ -326,6 +377,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     thighDegree[legNo - 1] += 1;
                 else
                     incrementArray(thighDegree, 1, 2);
+                break;
+            case 6:
+                if (flyMode)
+                    flying(1);
                 break;
             default:
                 break;
@@ -355,9 +410,9 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             //     break;
             case 3:
                 if (armControl)
-                    armDegree[armNo - 1] -= 1;
+                    armDegreeX[armNo - 1] -= 1;
                 else
-                    incrementArray(armDegree, -1, 2);
+                    incrementArray(armDegreeX, -1, 2);
                 break;
             case 4:
                 if (legControl)
@@ -370,6 +425,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     thighDegree[legNo - 1] -= 1;
                 else
                     incrementArray(thighDegree, -1, 2);
+                break;
+            case 6:
+                if (flyMode)
+                    flying(-1);
                 break;
             default:
                 break;
@@ -411,7 +470,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             else if (legControl)
                 legNo = 2;
             else if (animationControl)
-            { // walk
+            {
                 if (runControl)
                     runControl = false;
                 else
@@ -420,12 +479,38 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkControl = false;
                 }
             }
+            else if (itemControl)
+            {
+                if (jetpack)
+                    jetpack = false;
+                else
+                    jetpack = true;
+            }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
                    fingerNo, armNo, legNo);
             break;
-        case GLFW_KEY_3:
+        case GLFW_KEY_3: // real walk / run
             if (fingerControl)
                 fingerNo = 3;
+            else if (animationControl)
+            {
+                if (walkStationary)
+                    walkStationary = false;
+                else
+                    walkStationary = true;
+            }
+            else if (itemControl)
+            {
+                if (flyMode)
+                    flyMode = false;
+                else if (!flyMode && jetpack)
+                {
+                    flyMode = true;
+                    mode = 6;
+                }
+                else
+                    flyMode = false;
+            }
             break;
         case GLFW_KEY_4:
             if (fingerControl)
@@ -451,13 +536,20 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             if (fingerControl)
                 fingerNo = 9;
             break;
-        case GLFW_KEY_0:
+        case GLFW_KEY_0: // insult animation
             if (fingerControl)
                 fingerNo = 10;
+            else if (animationControl)
+            {
+                if (insultControl)
+                    insultControl = false;
+                else
+                    insultControl = true;
+            }
             break;
 
         case GLFW_KEY_W:
-            if (walkControl)
+            if (walkControl || runControl)
             {
                 if (walkDirection != 1)
                 {
@@ -466,18 +558,18 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 }
                 walkDirection = 1;
             }
-            else if (runControl)
-            {
-                if (walkDirection != 2)
-                {
-                    walkingFlag[0] = 0;
-                    walkingFlag[1] = 1;
-                }
-                walkDirection = 2;
-            }
+            // else if (runControl)
+            // {
+            //     if (walkDirection != 2)
+            //     {
+            //         walkingFlag[0] = 0;
+            //         walkingFlag[1] = 1;
+            //     }
+            //     walkDirection = 2;
+            // }
             break;
         case GLFW_KEY_S:
-            if (walkControl)
+            if (walkControl || runControl)
             {
                 if (walkDirection != -1)
                 {
@@ -486,15 +578,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 }
                 walkDirection = -1;
             }
-            else if (runControl)
-            {
-                if (walkDirection != -2)
-                {
-                    walkingFlag[0] = 0;
-                    walkingFlag[1] = 1;
-                }
-                walkDirection = -2;
-            }
+            // else if (runControl)
+            // {
+            //     if (walkDirection != -2)
+            //     {
+            //         walkingFlag[0] = 0;
+            //         walkingFlag[1] = 1;
+            //     }
+            //     walkDirection = -2;
+            // }
             break;
 
         case GLFW_KEY_T:
@@ -877,7 +969,7 @@ void drawRightPyramid(float length)
     glPopMatrix();
 }
 
-void drawTrianglePyramid(float length)
+void drawTrianglePyramid(float length, float rightTopHeight)
 {
     glDisable(GL_SMOOTH);
     glPushMatrix();
@@ -897,7 +989,7 @@ void drawTrianglePyramid(float length)
     glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, length);
+        glVertex3f(0, rightTopHeight, length);
         glTexCoord2f(-0.5f, 0);
         glVertex3f(0.5, 0, length);
         glTexCoord2f(0.5f, 0);
@@ -909,7 +1001,7 @@ void drawTrianglePyramid(float length)
     glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, length);
+        glVertex3f(0, rightTopHeight, length);
         glTexCoord2f(1, 1);
         glVertex3f(0, 1, 0);
         glTexCoord2f(1, 0.0f);
@@ -922,7 +1014,7 @@ void drawTrianglePyramid(float length)
     glBegin(selectedGlewDrawStyles);
     {
         glTexCoord2f(0.0f, 1);
-        glVertex3f(0, 1, length);
+        glVertex3f(0, rightTopHeight, length);
         glTexCoord2f(1, 1);
         glVertex3f(0, 1, 0);
         glTexCoord2f(1, 0.0f);
@@ -1019,21 +1111,23 @@ void walk(int speed)
         }
 
         // hand movement
-        if (armDegree[1] < armMoveDegree)
+        if (!insultControl)
         {
-            armDegree[1] += armSpeed;
+            if (armDegreeX[1] < armMoveDegree)
+            {
+                armDegreeX[1] += armSpeed;
+            }
         }
-        if (armDegree[0] > -armMoveDegree)
+
+        if (armDegreeX[0] > -armMoveDegree)
         {
-            armDegree[0] -= armSpeed;
+            armDegreeX[0] -= armSpeed;
         }
-        
         if (thighDegree[0] > 45)
         {
             walkingFlag[0] = 1;
             walkingFlag[1] = 0;
         }
-
     }
     if (walkingFlag[0])
     {
@@ -1055,27 +1149,100 @@ void walk(int speed)
             calfDegree[1] -= legSpeed;
         }
 
-
         // hand movement
-        if (armDegree[0] < armMoveDegree)
+        if (!insultControl)
         {
-            armDegree[0] += armSpeed;
+            if (armDegreeX[1] > -armMoveDegree)
+            {
+                armDegreeX[1] -= armSpeed;
+            }
         }
-        if (armDegree[1] > -armMoveDegree)
+        if (armDegreeX[0] < armMoveDegree)
         {
-            armDegree[1] -= armSpeed;
+            armDegreeX[0] += armSpeed;
         }
-        
+
         if (thighDegree[1] > 45)
         {
             walkingFlag[0] = 0;
             walkingFlag[1] = 1;
         }
     }
+
+    //  walk with move X
+    if (!walkStationary)
+    {
+        if (walkDirection == 1)
+        {
+            if (walkControl)
+                animationX -= 0.1;
+            else if (runControl)
+                animationX -= 0.2;
+        }
+        else if (walkDirection == -1)
+        {
+            if (walkControl)
+                animationX += 0.1;
+            else if (runControl)
+                animationX += 0.2;
+        }
+    }
+}
+
+void insult()
+{
+    float armSpeed = 1;
+    if (armDegreeX[1] < 80)
+    {
+        armDegreeX[1] += armSpeed;
+    }
+    if (handDegree[1] < 80)
+    {
+        handDegree[1] += armSpeed;
+    }
+    if (fingerDegree[5] < 100)
+    {
+        fingerDegree[5] += armSpeed;
+    }
+    if (fingerDegree[6] < 100)
+    {
+        fingerDegree[6] += armSpeed;
+    }
+    if (fingerDegree[8] < 100)
+    {
+        fingerDegree[8] += armSpeed;
+    }
+    if (fingerDegree[9] < 100)
+    {
+        fingerDegree[9] += armSpeed;
+    }
+}
+
+void flying(int direction)
+{
+    // ascend speed increase exponentially
+    if (direction == 1)
+    {
+        animationY += ascendSpeed;
+    }
+    else if (direction == -1)
+    {
+        animationY -= ascendSpeed;
+    }
+
+    // move up and down by 0.5
+    if (swingDistance < 0.5 && !swingFlag)
+        animationY += 0.05;
+    else if (swingDistance > 0 && swingFlag)
+        animationY -= 0.05;
+
+    if (swingDistance == 0.5)
+        swingFlag = true;
+    else if (swingDistance == 0)
+        swingFlag = false;
 }
 
 // model item
-
 void drawMoon()
 {
     float x = 0, y = 0, z = -15, GL_PI = 3.142, radius = 0.4;
@@ -1174,7 +1341,6 @@ void drawBracers()
     removeTexture();
     glPopMatrix();
 
-    //wrist
     glPushMatrix();
     {
         initTexture("white_texture.bmp");
@@ -1186,7 +1352,6 @@ void drawBracers()
     removeTexture();
     glPopMatrix();
 
-    //shoulderGuanjie
     glPushMatrix();
     {
         int jointSliceStack = 10;
@@ -1210,7 +1375,6 @@ void drawFinger(float fingerSize, float fingerWidthScale, int fingerNo)
     float fingerGap = fingerSize * fingerWidthScale + jointRadius;
     float jointGap = fingerGap - (jointRadius * 0.5);
 
-    //lowerFinger
     glScalef(0.7, 0.5, 0.5);
     glPushMatrix();
     {
@@ -1219,8 +1383,6 @@ void drawFinger(float fingerSize, float fingerWidthScale, int fingerNo)
     }
     removeTexture();
     glPopMatrix();
-
-    //fingerMiddle
     glPushMatrix();
     {
         initTexture("white_texture.bmp");
@@ -1229,8 +1391,6 @@ void drawFinger(float fingerSize, float fingerWidthScale, int fingerNo)
     }
     removeTexture();
     glPopMatrix();
-
-    //upperfinger
     glPushMatrix();
     {
         initTexture("red2_texture.bmp");
@@ -1257,11 +1417,9 @@ void drawFingers()
 
     glPushMatrix();
     {
-        //initTexture("blue_metal_texture.bmp");
         glTranslatef(0, 0, -0.2);
         drawFinger(0.3, 2, fingerCounter++);
     }
-    removeTexture();
     glPopMatrix();
 
     glPushMatrix();
@@ -1292,44 +1450,51 @@ void drawFingers()
     glPopMatrix();
 }
 
-void drawArm()
+void drawArm(int armNo)
 {
-    // draw arm
     glPushMatrix();
     {
-        initTexture("grey_texture.bmp");
-        glRotatef(180, 0, 1, 1);
-        drawCylinder(0.15, 0.22, 1, 20, 10);
-    }
-    removeTexture();
-    glPopMatrix();
+        // rotate horizontally
+        glRotatef(0 + armDegreeY[armNo], 0, 1, 0);
 
-    glPushMatrix();
-    {
-        drawBracers();
-    }
-    glPopMatrix();
-
-    glPushMatrix();
-    {
-        glTranslatef(0, -0.44, 0);
-        glRotatef(0 + handDegree[handCounter++], 1, 0, 0);
-        glTranslatef(0, 0.49, 0);
+        // draw arm
         glPushMatrix();
         {
-            initTexture("red2_texture.bmp");
-            glRotatef(90, 0, 1, 0);
-            glTranslatef(-0.04, -0.78, -0.18);
-            drawCuboid(0.35, 0.21);
+            initTexture("grey_texture.bmp");
+            glRotatef(180, 0, 1, 1);
+            drawCylinder(0.15, 0.22, 1, 20, 10);
         }
         removeTexture();
         glPopMatrix();
 
         glPushMatrix();
         {
-            glTranslatef(-0.1, -0.71, 0.03);
-            glScalef(0.37, 0.37, 0.37);
-            drawFingers();
+            drawBracers();
+        }
+        glPopMatrix();
+
+        glPushMatrix();
+        {
+            glTranslatef(0, -0.44, 0);
+            glRotatef(0 + handDegree[handCounter++], 1, 0, 0);
+            glTranslatef(0, 0.49, 0);
+            glPushMatrix();
+            {
+                initTexture("red2_texture.bmp");
+                glRotatef(90, 0, 1, 0);
+                glTranslatef(-0.04, -0.78, -0.18);
+                drawCuboid(0.35, 0.21);
+            }
+            removeTexture();
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+                glTranslatef(-0.1, -0.71, 0.03);
+                glScalef(0.37, 0.37, 0.37);
+                drawFingers();
+            }
+            glPopMatrix();
         }
         glPopMatrix();
     }
@@ -1348,7 +1513,6 @@ void drawCalf(int thighNo)
         glTranslatef(-0.31, -2.62, 0); //-1.84
         // TODO: limit calfHeight to reasonable value
         float calfHeight = robotHeight;
-        //xiaotui
         glPushMatrix();
         {
             initTexture("blue_texture.bmp");
@@ -1359,7 +1523,6 @@ void drawCalf(int thighNo)
         removeTexture();
         glPopMatrix();
 
-        //houxiaotui
         glPushMatrix();
         {
             float cylinderHeight = 1.5;
@@ -1402,7 +1565,7 @@ void drawCalf(int thighNo)
         }
         removeTexture();
         glPopMatrix();
-        //knee
+
         glPushMatrix();
         {
             // triangle cover the cylinder joint
@@ -1434,7 +1597,6 @@ void drawCalf(int thighNo)
         removeTexture();
         glPopMatrix();
 
-        //jiaohougen
         glPushMatrix();
         {
             int jointSliceStack = 10;
@@ -1458,7 +1620,6 @@ void drawCalf(int thighNo)
             drawCuboid(0.5, 2);
         }
         removeTexture();
-
         glPopMatrix();
         glPushMatrix();
         {
@@ -1485,7 +1646,6 @@ void drawCalf(int thighNo)
         }
         removeTexture();
         glPopMatrix();
-        //legside
         glPushMatrix();
         {
             float pyramidSize = 0.1;
@@ -1505,7 +1665,6 @@ void drawCalf(int thighNo)
         }
         removeTexture();
         glPopMatrix();
-        //legside
         glPushMatrix();
         {
             float pyramidSize = 0.1;
@@ -1546,13 +1705,11 @@ void drawBackground()
     glPushMatrix();
     {
         float cylinderHeight = 0.6;
-        //initTexture("blue_metal_texture.bmp");
         glRotatef(-90, 1, 0, 0);
         glScalef(0.2, 0.2, 0.15);
         glTranslatef(0.57, 0.65, 0.98);
         drawPyramid();
     }
-    removeTexture();
     glPopMatrix();
 }
 
@@ -1577,7 +1734,6 @@ void drawThigh(int thighNo)
         removeTexture();
         glPopMatrix();
 
-        //thigh capsule
         glPushMatrix();
         {
             // glRotatef(90, 0, 1, 0);
@@ -1630,19 +1786,18 @@ void drawHipJoint()
 
 void drawBody()
 {
-    // hip (penis)
+    // hip
     glPushMatrix();
     {
         initTexture("blue_metal_texture.bmp");
         glRotatef(180, 0, 0, 1);
         glTranslatef(-0.17, -1.93, 0.42);
         glScalef(1.28, 1.32, 1);
-        drawTrianglePyramid(-1);
+        drawTrianglePyramid(-1, 1);
     }
     removeTexture();
     glPopMatrix();
 
-    //lowerbody
     glPushMatrix();
     {
         initTexture("red2_texture.bmp");
@@ -1653,7 +1808,6 @@ void drawBody()
     removeTexture();
     glPopMatrix();
 
-    //upperbody
     glPushMatrix();
     {
         initTexture("grey_texture.bmp");
@@ -1664,7 +1818,6 @@ void drawBody()
     removeTexture();
     glPopMatrix();
 
-    //armpit
     glPushMatrix();
     {
         initTexture("blue_metal_texture.bmp");
@@ -1681,7 +1834,6 @@ void drawBody()
     removeTexture();
     glPopMatrix();
 
-    //bodyCylinder
     glPushMatrix();
     {
         initTexture("yellow_texture.bmp");
@@ -1719,7 +1871,6 @@ void drawLegs()
     {
         glPushMatrix();
         {
-            //initTexture("blue_metal_texture.bmp");
             glRotatef(90, 0, 1, 0);
             glTranslatef(0, 0, 0.7);
             drawThigh(0);
@@ -1730,12 +1881,10 @@ void drawLegs()
             }
             glPopMatrix();
         }
-        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
         {
-            //initTexture("blue_metal_texture.bmp");
             glRotatef(90, 0, 1, 0);
             glTranslatef(0, 0, -0.7);
             drawThigh(1);
@@ -1746,7 +1895,6 @@ void drawLegs()
             }
             glPopMatrix();
         }
-        removeTexture();
         glPopMatrix();
 
         glPushMatrix();
@@ -1771,7 +1919,7 @@ void drawArms()
         glPushMatrix();
         {
             glTranslatef(0, 5.67, 0);
-            glRotatef(0 + armDegree[0], 1, 0, 0);
+            glRotatef(0 + armDegreeX[0], 1, 0, 0);
             glTranslatef(0, -5.68, 0);
 
             float handDistance = 1.64;
@@ -1782,7 +1930,7 @@ void drawArms()
             {
                 // glRotatef(90, 0, 1, 0);
                 glTranslatef(handDistance, 0, 0);
-                drawArm();
+                drawArm(0);
 
                 glPushMatrix();
                 {
@@ -1804,7 +1952,7 @@ void drawArms()
         glPushMatrix();
         {
             glTranslatef(0, 5.67, 0);
-            glRotatef(0 + armDegree[1], 1, 0, 0);
+            glRotatef(0 + armDegreeX[1], 1, 0, 0);
             glTranslatef(0, -5.68, 0);
 
             float handDistance = 1.64;
@@ -1815,7 +1963,7 @@ void drawArms()
             {
                 // glRotatef(90, 0, 1, 0);
                 glTranslatef(-handDistance, 0, 0);
-                drawArm();
+                drawArm(1);
 
                 glPushMatrix();
                 {
@@ -1856,7 +2004,6 @@ void drawHead()
         removeTexture();
         glPopMatrix();
 
-        //topHead
         glPushMatrix();
         {
             int jointSliceStack = 10;
@@ -1873,9 +2020,169 @@ void drawHead()
     glPopMatrix();
 }
 
+void drawWingLeaf()
+{
+    // leaf
+    glPushMatrix();
+    {
+        glPushMatrix();
+        {
+            glRotatef(90, 0, 1, 0);
+            glTranslatef(-0.65, 5.39, -0.52);
+            glScalef(0.12, 0.88, 1.97);
+            drawTrianglePyramid(-1.0, 0.65);
+            glTranslatef(0, -0.19, -1.05);
+            glScalef(1, 0.63, 1.13);
+            drawTrianglePyramid(-1.0, 0.5);
+
+            // leaf connector
+            glPushMatrix();
+            {
+                glTranslatef(0, -0.03, -0.07);
+                glScalef(0.06, 2.54, 0.98);
+                drawCuboid(0.18, 2.64);
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+    }
+    glPopMatrix();
+}
+
+void drawJetpack()
+{
+    glPushMatrix();
+    { // joint between the two side of leaf
+        glPushMatrix();
+        {
+            glRotatef(90, 1, 0, 0);
+            glTranslatef(0.15, 0.66, -5.7);
+            drawCapsule(0.98, 0.16);
+        }
+        glPopMatrix();
+
+        // rocket booster
+        glPushMatrix();
+        {
+            glRotatef(90, 1, 0, 0);
+            glTranslatef(0.56, 0.73, -5.88);
+            drawCylinder(0.25, 0.25, 1.8, 20, 10);
+            glTranslatef(-0.83, 0, 0);
+            drawCylinder(0.25, 0.25, 1.8, 20, 10);
+
+            glPushMatrix();
+            {
+                glTranslatef(0, 0, 0.14);
+                int jointSliceStack = 10;
+                float jointRadius = 0.25;
+                // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
+                drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+                glTranslatef(0.83, 0, 0);
+                drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+            }
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+                glTranslatef(0.83, 0, 1.64);
+                drawCylinder(0.18, 0.35, 0.45, 20, 10);
+                glTranslatef(-0.83, 0, 0);
+                drawCylinder(0.18, 0.35, 0.45, 20, 10);
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+
+        // leaf level 1
+        glPushMatrix();
+        {
+            glTranslatef(0, -0.76, 0);
+            glPushMatrix();
+            {
+                drawWingLeaf();
+            }
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+                glRotatef(180, 0, 1, 0);
+                glTranslatef(-0.29, 0, -1.23);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+
+        // leaf level 2
+        glPushMatrix();
+        {
+            // glTranslatef(v, v1, -0.07);
+            glPushMatrix();
+            {
+                glRotatef(10, 0, 1, 0);
+                glScalef(0.76, 1, 1);
+                glTranslatef(-0.15, -0.39, 0.06);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+
+                glRotatef(170, 0, 1, 0);
+                glScalef(0.76, 1, 1);
+                glTranslatef(-0.53, -0.39, -1.23);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+
+        // leaf level 3
+        glPushMatrix();
+        {
+            glPushMatrix();
+            {
+                glRotatef(20, 0, 1, 0);
+                glScalef(0.59, 0.63, 1.14);
+                glTranslatef(-0.94, 3.03, 0.02);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+
+            // leaf 3 connector
+            glPushMatrix();
+            {
+                glRotatef(90, 1, 0, 0);
+                glTranslatef(0.85, 0.96, -5.58);
+                drawCapsule(0.520, 0.14);
+
+                glTranslatef(-1.33, 0.02, 0);
+                drawCapsule(0.520, 0.14);
+            }
+            glPopMatrix();
+
+            glPushMatrix();
+            {
+                glRotatef(160, 0, 1, 0);
+                glScalef(0.59, 0.63, 1.14);
+                glTranslatef(-1.46, 3.02, -1.22);
+                drawWingLeaf();
+            }
+            glPopMatrix();
+        }
+        glPopMatrix();
+    }
+    glPopMatrix();
+}
+
+void drawWeapon()
+{
+}
+
 void display()
 {
-    glClearColor(0,0,0, 0);
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -1885,7 +2192,6 @@ void display()
         selectedGluDrawStyles = gluDrawStyles[0];
         selectedGlDrawStyles = glDrawStyles[0];
         selectedGlewDrawStyles = glewDrawStyles[0];
-
         // glEnable(GL_TEXTURE_2D);
         // glGenTextures(1, &texture);
         // glBindTexture(GL_TEXTURE_2D, texture);
@@ -1903,7 +2209,6 @@ void display()
         glColor3ub(255, 255, 255);
     }
 
-    glRotatef(speed, 0, 1, 0);
     glRotatef(90, 0, 1, 0);
 
     glScalef(0.7, 0.7, 0.7);
@@ -1913,6 +2218,9 @@ void display()
     drawBody();
     drawHead();
     drawShoulderJoint();
+
+    if (jetpack)
+        drawJetpack();
 }
 
 int main(int argc, char **argv)
@@ -1937,10 +2245,11 @@ int main(int argc, char **argv)
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 glOrtho(-2 * ar, 2 * ar, -2, 2, -2, 2000);
+                glTranslatef(orthoX, orthoY, orthoZ);
+                glRotatef(speed, 0, 1, 0);
 
                 glMatrixMode(GL_MODELVIEW);
                 glLoadIdentity();
-                glTranslatef(orthoX, orthoY, orthoZ);
             }
             else
             {
@@ -1948,10 +2257,11 @@ int main(int argc, char **argv)
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 gluPerspective(45, ar, 1, 2000);
+                glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
+                glRotatef(speed, 0, 1, 0);
 
                 glMatrixMode(GL_MODELVIEW);
                 glLoadIdentity();
-                glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
             }
 
             // walk animation
@@ -1964,11 +2274,18 @@ int main(int argc, char **argv)
             }
             else if (runControl)
             {
-                if (walkDirection == 2)
+                if (walkDirection == 1)
                     walk(3);
-                else if (walkDirection == -2)
+                else if (walkDirection == -1)
                     walk(3);
             }
+
+            if (insultControl)
+            {
+                insult();
+            }
+
+            glTranslatef(animationX, animationY, animationZ);
 
             display();
 
