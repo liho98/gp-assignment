@@ -24,3 +24,5 @@ lib/libGLEW.so
 lib/libGLEW.a
 lib/libglad.a
 lib/libassimp.so
+.vscode/tasks.json
+.vscode/settings.json
