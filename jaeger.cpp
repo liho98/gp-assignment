@@ -2115,23 +2115,27 @@ void drawJetpack()
     { // joint between the two side of leaf
         glPushMatrix();
         {
+            initTexture("red2_texture.bmp");
             glRotatef(90, 1, 0, 0);
             glTranslatef(0.15, 0.66, -5.7);
             drawCapsule(0.98, 0.16);
         }
+        removeTexture();
         glPopMatrix();
 
         // rocket booster
         glPushMatrix();
         {
+            initTexture("white_blue_texture.bmp");
             glRotatef(90, 1, 0, 0);
             glTranslatef(0.56, 0.73, -5.88);
             drawCylinder(0.25, 0.25, 1.8, 20, 10);
             glTranslatef(-0.83, 0, 0);
             drawCylinder(0.25, 0.25, 1.8, 20, 10);
-
+            removeTexture();
             glPushMatrix();
             {
+                initTexture("orange_texture.bmp");
                 glTranslatef(0, 0, 0.14);
                 int jointSliceStack = 10;
                 float jointRadius = 0.25;
@@ -2140,15 +2144,18 @@ void drawJetpack()
                 glTranslatef(0.83, 0, 0);
                 drawSphere(jointRadius, jointSliceStack, jointSliceStack);
             }
+            removeTexture();
             glPopMatrix();
 
             glPushMatrix();
             {
+                initTexture("orange_texture.bmp");
                 glTranslatef(0.83, 0, 1.64);
                 drawCylinder(0.18, 0.35, 0.45, 20, 10);
                 glTranslatef(-0.83, 0, 0);
                 drawCylinder(0.18, 0.35, 0.45, 20, 10);
             }
+            removeTexture();
             glPopMatrix();
         }
         glPopMatrix();
@@ -2156,6 +2163,7 @@ void drawJetpack()
         // leaf level 1
         glPushMatrix();
         {
+            initTexture("rainbow_texture.bmp");
             glTranslatef(0, -0.76, 0);
             glPushMatrix();
             {
@@ -2169,6 +2177,7 @@ void drawJetpack()
                 glTranslatef(-0.29, 0, -1.23);
                 drawWingLeaf();
             }
+            removeTexture();
             glPopMatrix();
         }
         glPopMatrix();
@@ -2177,6 +2186,7 @@ void drawJetpack()
         glPushMatrix();
         {
             // glTranslatef(v, v1, -0.07);
+            initTexture("green2_texture.bmp");
             glPushMatrix();
             {
                 glRotatef(10, 0, 1, 0);
@@ -2194,6 +2204,7 @@ void drawJetpack()
                 glTranslatef(-0.53, -0.39, -1.23);
                 drawWingLeaf();
             }
+            removeTexture();
             glPopMatrix();
         }
         glPopMatrix();
@@ -2203,16 +2214,19 @@ void drawJetpack()
         {
             glPushMatrix();
             {
+                initTexture("purple_texture.bmp");
                 glRotatef(20, 0, 1, 0);
                 glScalef(0.59, 0.63, 1.14);
                 glTranslatef(-0.94, 3.03, 0.02);
                 drawWingLeaf();
             }
+            removeTexture();
             glPopMatrix();
 
             // leaf 3 connector
             glPushMatrix();
             {
+                initTexture("orange_texture.bmp");
                 glRotatef(90, 1, 0, 0);
                 glTranslatef(0.85, 0.96, -5.58);
                 drawCapsule(0.520, 0.14);
@@ -2224,11 +2238,13 @@ void drawJetpack()
 
             glPushMatrix();
             {
+                initTexture("purple_texture.bmp");
                 glRotatef(160, 0, 1, 0);
                 glScalef(0.59, 0.63, 1.14);
                 glTranslatef(-1.46, 3.02, -1.22);
                 drawWingLeaf();
             }
+            removeTexture();
             glPopMatrix();
         }
         glPopMatrix();
