@@ -9,11 +9,12 @@
 #include <string>
 
 #include <cstdio>
+#include <cmath>
 
 using namespace std;
 
-float speed = 0;
-float perspectiveX = 0, perspectiveY = 0, perspectiveZ = -5;
+float speed = -90;
+float perspectiveX = 0, perspectiveY = -3.3, perspectiveZ = -16;
 float orthoX = 0, orthoY = 0.5, orthoZ = 0;
 float bridgeDegree = 0, bridgeLineUp = 0;
 
@@ -37,11 +38,11 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0.25;
-float v1 = 0.25;
-float v2 = 1.8;
-float v3 = -0.83;
-float v4 = 0;
+float v = -400;
+float v1 = -200;
+float v2 = 0;
+float v3 = 3.17;
+float v4 = 0.21;
 float v5 = 0;
 float v6 = 0;
 float v7 = 2.64;
@@ -73,10 +74,13 @@ bool itemControl = false;
 bool jetpack = false;
 
 bool flyMode = false;
-float ascendSpeed = 0.1;
-void flying(int direction);
+float ascendSpeed = 0.01;
+void flyVertical(int direction);
+void flyHorizontal(int direction);
 float swingDistance = 0;
 bool swingFlag = false;
+int exponent = 1;
+float flyForwardDegree = 0;
 
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
@@ -135,6 +139,12 @@ void initTexture(string textureName)
     DeleteObject(hBMP);
 }
 
+void removeTexture()
+{
+    glDisable(GL_TEXTURE_2D);
+    glDeleteTextures(1, &texture);
+}
+
 void incrementArray(float *arr, float value, int size)
 {
     for (int i = 0; i < size; i++)
@@ -165,7 +175,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         case GLFW_KEY_ESCAPE:
             printf("v: %f\tv1: %f\tv2: %f\tv3: %f\n", v, v1, v2, v3);
             printf("v4: %f\tv5: %f\tv6: %f\tv7: %f\n", v4, v5, v6, v7);
-            printf("orthoZ: %f\n", orthoZ);
+            // printf("orthoZ: %f\texponent: %d\n", orthoZ, exponent);
+            printf("perspectiveX: %f\tperspectiveY: %f\tspeed: %f\t\n", perspectiveX, perspectiveY, speed);
 
             glfwSetWindowShouldClose(window, GL_TRUE);
             break;
@@ -374,7 +385,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 break;
             case 6:
                 if (flyMode)
-                    flying(1);
+                {
+                    exponent++;
+                    flyVertical(1);
+                }
                 break;
             default:
                 break;
@@ -422,7 +436,17 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 break;
             case 6:
                 if (flyMode)
-                    flying(-1);
+                {
+                    if (exponent > 35)
+                    {
+                        exponent = 25;
+                    }
+                    else if (exponent > 25)
+                    {
+                        exponent--;
+                    }
+                    flyVertical(-1);
+                }
                 break;
             default:
                 break;
@@ -499,6 +523,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     flyMode = false;
                 else if (!flyMode && jetpack)
                 {
+                    walkStationary = false;
                     flyMode = true;
                     mode = 6;
                 }
@@ -552,15 +577,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 }
                 walkDirection = 1;
             }
-            // else if (runControl)
-            // {
-            //     if (walkDirection != 2)
-            //     {
-            //         walkingFlag[0] = 0;
-            //         walkingFlag[1] = 1;
-            //     }
-            //     walkDirection = 2;
-            // }
+            else if (flyMode)
+            {
+                flyHorizontal(1);
+            }
             break;
         case GLFW_KEY_S:
             if (walkControl || runControl)
@@ -571,6 +591,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[0] = 1;
                 }
                 walkDirection = -1;
+            }
+            else if (flyMode)
+            {
+                flyHorizontal(-1);
             }
             // else if (runControl)
             // {
@@ -584,16 +608,16 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
 
         case GLFW_KEY_T:
-            v += 0.01;
+            v += 100;
             break;
         case GLFW_KEY_G:
-            v -= 0.01;
+            v -= 100;
             break;
         case GLFW_KEY_Y:
-            v1 += 0.01;
+            v1 += 100;
             break;
         case GLFW_KEY_H:
-            v1 -= 0.01;
+            v1 -= 100;
             break;
         case GLFW_KEY_U:
             v2 += 0.01;
@@ -602,10 +626,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             v2 -= 0.01;
             break;
         case GLFW_KEY_I:
-            v3 += 0.01;
+            v3 += 1;
             break;
         case GLFW_KEY_K:
-            v3 -= 0.01;
+            v3 -= 1;
             break;
         case GLFW_KEY_O:
             v4 += 0.01;
@@ -1169,16 +1193,16 @@ void walk(int speed)
         if (walkDirection == 1)
         {
             if (walkControl)
-                animationX -= 0.1;
+                animationZ -= 0.1;
             else if (runControl)
-                animationX -= 0.2;
+                animationZ -= 0.2;
         }
         else if (walkDirection == -1)
         {
             if (walkControl)
-                animationX += 0.1;
+                animationZ += 0.1;
             else if (runControl)
-                animationX += 0.2;
+                animationZ += 0.2;
         }
     }
 }
@@ -1212,9 +1236,16 @@ void insult()
     }
 }
 
-void flying(int direction)
+void flyVertical(int direction)
 {
     // ascend speed increase exponentially
+    ascendSpeed = pow(1.1, exponent) / 100;
+
+    if (ascendSpeed > 0.5)
+    {
+        ascendSpeed = 0.5;
+    }
+
     if (direction == 1)
     {
         animationY += ascendSpeed;
@@ -1226,14 +1257,50 @@ void flying(int direction)
 
     // move up and down by 0.5
     if (swingDistance < 0.5 && !swingFlag)
-        animationY += 0.05;
+        animationY += 0.001;
     else if (swingDistance > 0 && swingFlag)
-        animationY -= 0.05;
+        animationY -= 0.001;
 
     if (swingDistance == 0.5)
         swingFlag = true;
     else if (swingDistance == 0)
         swingFlag = false;
+}
+
+void flyHorizontal(int direction)
+{
+    if (direction == 1)
+    {
+        if (flyForwardDegree < -35)
+        {
+            flyForwardDegree += 1;
+        }
+
+        if (armDegreeX[1] < v)
+        {
+            armDegreeX[1] += 1;
+        }
+        if (armDegreeX[0] < v)
+        {
+            armDegreeX[0] += 1;
+        }
+    }
+    else
+    {
+        if (flyForwardDegree > 0)
+        {
+            flyForwardDegree -= 1;
+        }
+
+        if (armDegreeX[1] > 0)
+        {
+            armDegreeX[1] -= 1;
+        }
+        if (armDegreeX[0] > 0)
+        {
+            armDegreeX[0] -= 1;
+        }
+    }
 }
 
 // model item
@@ -2104,6 +2171,64 @@ void drawWeapon()
 {
 }
 
+void drawSky()
+{
+    glPushMatrix();
+    {
+        initTexture("sky.bmp");
+        glRotatef(-90, 1, 0, 0);
+        glTranslatef(0.14, 1.4, 0);
+        drawSphere(155, 50, 50);
+        removeTexture();
+    }
+    glPopMatrix();
+}
+
+void drawGround()
+{
+    glPushMatrix();
+    {
+        float size = 11;
+        int noOfGrass = 50;
+        float resetValue = size * noOfGrass;
+
+        initTexture("grass.bmp");
+        //  nested loop draw ground
+        glTranslatef(-400, -2.44, -200);
+        for (int j = 0; j < noOfGrass; j++)
+        {
+            glTranslatef(size, 0, 0);
+            // draw column
+            for (int i = 0; i < noOfGrass; i++)
+            {
+                glTranslatef(0, 0, size);
+                glPushMatrix();
+                {
+                    glBegin(GL_QUADS);
+                    {
+                        glTexCoord2f(0.0f, 1);
+                        glVertex3f(-0.5 * size, 0, -1 * size);
+
+                        glTexCoord2f(1, 1);
+                        glVertex3f(-0.5 * size, 0, 0);
+
+                        glTexCoord2f(1, 0.0f);
+                        glVertex3f(0.5 * size, 0, 0);
+
+                        glTexCoord2f(0.0f, 0.0f);
+                        glVertex3f(0.5 * size, 0, -1 * size);
+                    }
+                    glEnd();
+                }
+                glPopMatrix();
+            }
+            glTranslatef(0, 0, -resetValue);
+        }
+        removeTexture();
+    }
+    glPopMatrix();
+}
+
 void display()
 {
     glClearColor(0, 0, 0, 0);
@@ -2112,11 +2237,10 @@ void display()
 
     if (isTexture)
     {
-        glColor3f(1, 1, 1);
+        // glColor3f(1, 1, 1);
         selectedGluDrawStyles = gluDrawStyles[0];
         selectedGlDrawStyles = glDrawStyles[0];
         selectedGlewDrawStyles = glewDrawStyles[0];
-        initTexture(textures[2]);
 
         // glEnable(GL_TEXTURE_2D);
         // glGenTextures(1, &texture);
@@ -2132,21 +2256,28 @@ void display()
     else
     {
         glDisable(GL_TEXTURE_2D);
-        glColor3ub(30, 136, 229);
+
+        glColor3ub(255, 255, 255);
     }
 
-    glRotatef(90, 0, 1, 0);
+    glPushMatrix();
+    {
+        glRotatef(-90, 0, 1, 0);
+        glRotatef(flyForwardDegree, 1, 0, 0);
+        glScalef(0.7, 0.7, 0.7);
+        glTranslatef(animationX, animationY, animationZ);
+        drawLegs();
+        drawArms();
+        drawBody();
+        drawHead();
+        drawShoulderJoint();
+        if (jetpack)
+            drawJetpack();
+    }
+    glPopMatrix();
 
-    glScalef(0.7, 0.7, 0.7);
-
-    // drawLegs();
-    drawArms();
-    drawBody();
-    // drawHead();
-    drawShoulderJoint();
-
-    if (jetpack)
-        drawJetpack();
+    drawSky();
+    drawGround();
 }
 
 int main(int argc, char **argv)
@@ -2155,7 +2286,6 @@ int main(int argc, char **argv)
 
     if (NULL != window)
     {
-        initTexture(textures[textureNo]);
         while (!glfwWindowShouldClose(window))
         {
             // Scale to window size
@@ -2210,8 +2340,6 @@ int main(int argc, char **argv)
             {
                 insult();
             }
-
-            glTranslatef(animationX, animationY, animationZ);
 
             display();
 
