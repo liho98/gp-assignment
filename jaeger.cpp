@@ -66,7 +66,7 @@ bool animationControl = false;
 bool walkControl = false;
 bool runControl = false;
 int walkingFlag[2] = {0, 1};
-int walkDirection = 0;
+int direction = 0;
 bool insultControl = false;
 bool walkStationary = true;
 
@@ -475,6 +475,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 {
                     walkControl = true;
                     runControl = false;
+                    flyMode = false;
                 }
             }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
@@ -495,6 +496,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 {
                     runControl = true;
                     walkControl = false;
+                    flyMode = false;
                 }
             }
             else if (itemControl)
@@ -524,11 +526,16 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 else if (!flyMode && jetpack)
                 {
                     walkStationary = false;
+                    walkControl = false;
+                    runControl = false;
                     flyMode = true;
                     mode = 6;
                 }
                 else
+                {
+                    walkStationary = false;
                     flyMode = false;
+                }
             }
             break;
         case GLFW_KEY_4:
@@ -568,42 +575,34 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
 
         case GLFW_KEY_W:
-            if (walkControl || runControl)
+            if (walkControl || runControl || flyMode)
             {
-                if (walkDirection != 1)
+                if (direction != 1)
                 {
                     walkingFlag[0] = 0;
                     walkingFlag[1] = 1;
                 }
-                walkDirection = 1;
-            }
-            else if (flyMode)
-            {
-                flyHorizontal(1);
+                direction = 1;
             }
             break;
         case GLFW_KEY_S:
-            if (walkControl || runControl)
+            if (walkControl || runControl ||flyMode)
             {
-                if (walkDirection != -1)
+                if (direction != -1)
                 {
                     walkingFlag[1] = 0;
                     walkingFlag[0] = 1;
                 }
-                walkDirection = -1;
-            }
-            else if (flyMode)
-            {
-                flyHorizontal(-1);
+                direction = -1;
             }
             // else if (runControl)
             // {
-            //     if (walkDirection != -2)
+            //     if (direction != -2)
             //     {
             //         walkingFlag[0] = 0;
             //         walkingFlag[1] = 1;
             //     }
-            //     walkDirection = -2;
+            //     direction = -2;
             // }
             break;
 
@@ -664,12 +663,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         switch (key)
         {
         case GLFW_KEY_W:
-            if (walkControl || runControl)
-                walkDirection = 0;
+            if (walkControl || runControl || flyMode)
+                direction = 0;
             break;
         case GLFW_KEY_S:
-            if (walkControl || runControl)
-                walkDirection = 0;
+            if (walkControl || runControl || flyMode)
+                direction = 0;
             break;
         default:
             break;
@@ -1190,14 +1189,14 @@ void walk(int speed)
     //  walk with move X
     if (!walkStationary)
     {
-        if (walkDirection == 1)
+        if (direction == 1)
         {
             if (walkControl)
                 animationZ -= 0.1;
             else if (runControl)
                 animationZ -= 0.2;
         }
-        else if (walkDirection == -1)
+        else if (direction == -1)
         {
             if (walkControl)
                 animationZ += 0.1;
@@ -1267,7 +1266,7 @@ void flyVertical(int direction)
         swingFlag = false;
 }
 
-void flyHorizontal(int direction)
+void flyHorizontal()
 {
     if (direction == 1)
     {
@@ -2323,17 +2322,24 @@ int main(int argc, char **argv)
             // walk animation
             if (walkControl)
             {
-                if (walkDirection == 1)
+                if (direction == 1)
                     walk(1);
-                else if (walkDirection == -1)
+                else if (direction == -1)
                     walk(1);
             }
             else if (runControl)
             {
-                if (walkDirection == 1)
+                if (direction == 1)
                     walk(3);
-                else if (walkDirection == -1)
+                else if (direction == -1)
                     walk(3);
+            } // fly animation
+            else if (flyMode)
+            {
+                if (direction == 1)
+                    flyHorizontal();
+                else if (direction == -1)
+                    flyHorizontal();
             }
 
             if (insultControl)
