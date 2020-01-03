@@ -39,7 +39,7 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = -400;
+float v = 0;
 float v1 = -200;
 float v2 = 0;
 float v3 = 3.17;
@@ -640,7 +640,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
 
         case GLFW_KEY_T:
-            v += 100;
+            v += 1;
             break;
         case GLFW_KEY_C:
             if(textureMode == 0){
@@ -650,13 +650,13 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             }
             break;
         case GLFW_KEY_G:
-            v -= 100;
+            v -= 1;
             break;
         case GLFW_KEY_Y:
-            v1 += 100;
+            v1 += 1;
             break;
         case GLFW_KEY_H:
-            v1 -= 100;
+            v1 -= 1;
             break;
         case GLFW_KEY_U:
             v2 += 0.01;
@@ -703,9 +703,6 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         switch (key)
         {
         case GLFW_KEY_W:
-            if (walkControl || runControl || flyMode)
-                direction = 0;
-            break;
         case GLFW_KEY_S:
             if (walkControl || runControl || flyMode)
                 direction = 0;
@@ -1232,16 +1229,16 @@ void walk(int speed)
         if (direction == 1)
         {
             if (walkControl)
-                animationZ -= 0.1;
+                animationX += 0.1;
             else if (runControl)
-                animationZ -= 0.2;
+                animationX += 0.2;
         }
         else if (direction == -1)
         {
             if (walkControl)
-                animationZ += 0.1;
+                animationX -= 0.1;
             else if (runControl)
-                animationZ += 0.2;
+                animationX -= 0.2;
         }
     }
 }
@@ -1310,34 +1307,41 @@ void flyHorizontal()
 {
     if (direction == 1)
     {
-        if (flyForwardDegree < -35)
-        {
-            flyForwardDegree += 1;
-        }
+        animationX += 0.1;
+        animationY += 0.1;
 
-        if (armDegreeX[1] < v)
-        {
-            armDegreeX[1] += 1;
-        }
-        if (armDegreeX[0] < v)
-        {
-            armDegreeX[0] += 1;
-        }
-    }
-    else
-    {
-        if (flyForwardDegree > 0)
+        if (flyForwardDegree > -45)
         {
             flyForwardDegree -= 1;
         }
 
+        if (armDegreeX[1] < 160)
+        {
+            armDegreeX[1] += 5;
+        }
+        if (armDegreeX[0] < 160)
+        {
+            armDegreeX[0] += 5;
+        }
+    }
+    else
+    {
+        if (direction == -1)
+        {
+            animationX -= 0.1;
+            animationY -= 0.1;
+        }
+        if (flyForwardDegree < 0)
+        {
+            flyForwardDegree += 1;
+        }
         if (armDegreeX[1] > 0)
         {
-            armDegreeX[1] -= 1;
+            armDegreeX[1] -= 5;
         }
         if (armDegreeX[0] > 0)
         {
-            armDegreeX[0] -= 1;
+            armDegreeX[0] -= 5;
         }
     }
 }
@@ -2582,10 +2586,10 @@ void display()
 
     glPushMatrix();
     {
+        glTranslatef(animationX, animationY, animationZ);
         glRotatef(-90, 0, 1, 0);
         glRotatef(flyForwardDegree, 1, 0, 0);
         glScalef(0.7, 0.7, 0.7);
-        glTranslatef(animationX, animationY, animationZ);
         drawLegs();
         drawArms();
         drawBody();
@@ -2643,24 +2647,17 @@ int main(int argc, char **argv)
             // walk animation
             if (walkControl)
             {
-                if (direction == 1)
-                    walk(1);
-                else if (direction == -1)
+                if (direction != 0)
                     walk(1);
             }
             else if (runControl)
             {
-                if (direction == 1)
-                    walk(3);
-                else if (direction == -1)
+                if (direction != 0)
                     walk(3);
             } // fly animation
             else if (flyMode)
             {
-                if (direction == 1)
-                    flyHorizontal();
-                else if (direction == -1)
-                    flyHorizontal();
+                flyHorizontal();
             }
 
             if (insultControl)
