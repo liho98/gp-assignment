@@ -28,6 +28,7 @@ bool isOrtho = false;
 bool isTexture = false;
 
 int mode = 0, moveFinger = 0;
+int textureMode = 0;
 
 float fingerDegree[10] = {}, handDegree[2] = {};
 float armDegreeX[2] = {}, armDegreeY[2] = {};
@@ -170,8 +171,8 @@ void initTexture(string textureName)
 
 void removeTexture()
 {
-    // glDisable(GL_TEXTURE_2D);
-    // glDeleteTextures(1, &texture);
+    glDisable(GL_TEXTURE_2D);
+    glDeleteTextures(1, &texture);
 }
 
 void incrementArray(float *arr, float value, int size)
@@ -322,9 +323,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_F12: // enable texture
             if (isTexture)
+            {
                 isTexture = false;
-            else
+            } 
+            else{
                 isTexture = true;
+            }
             break;
         case GLFW_KEY_SPACE: // rotate world
             if (rotate)
@@ -637,6 +641,13 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
 
         case GLFW_KEY_T:
             v += 100;
+            break;
+        case GLFW_KEY_C:
+            if(textureMode == 0){
+                textureMode = textureMode + 1;
+            }else{
+                textureMode = 0;
+            }
             break;
         case GLFW_KEY_G:
             v -= 100;
@@ -1422,7 +1433,11 @@ void drawBracers()
     // hand
     glPushMatrix();
     {
-        initTexture("blue_texture.bmp");
+        if(textureMode == 0){
+            initTexture("blue_texture.bmp");
+        }else{
+            initTexture("galvanized_blue.bmp");
+        }
         glRotatef(180, 0, 1, 1);
         glTranslatef(0, 0, -0.45);
         drawCylinder(0.1, 0.2, 0.45, 20, 10);
@@ -1432,7 +1447,11 @@ void drawBracers()
 
     glPushMatrix();
     {
-        initTexture("white_texture.bmp");
+        if(textureMode == 0){
+            initTexture("white_texture.bmp");
+        }else{
+            initTexture("galvanized.bmp");
+        }
         glTranslatef(0.1, -0.43, 0);
         glRotatef(180, 0, 1, 1);
         glRotatef(90, 0, 1, 0);
@@ -1445,7 +1464,12 @@ void drawBracers()
     {
         int jointSliceStack = 10;
         float jointRadius = 0.22;
-        initTexture("yellow_texture.bmp");
+        if(textureMode == 0){
+            initTexture("yellow_texture.bmp");
+        }else{
+            initTexture("galvanized_blue.bmp");
+        }
+        
         glTranslatef(0, 1.04, 0);
         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
     }
@@ -1467,7 +1491,11 @@ void drawFinger(float fingerSize, float fingerWidthScale, int fingerNo)
     glScalef(0.7, 0.5, 0.5);
     glPushMatrix();
     {
-        initTexture("red2_texture.bmp");
+        if(textureMode == 0){
+            initTexture("red2_texture.bmp");
+        }else{
+            initTexture("grey2_texture.bmp");
+        }
         drawCuboid(fingerSize, fingerWidthScale);
     }
     removeTexture();
@@ -1482,7 +1510,11 @@ void drawFinger(float fingerSize, float fingerWidthScale, int fingerNo)
     glPopMatrix();
     glPushMatrix();
     {
-        initTexture("red2_texture.bmp");
+        if(textureMode == 0){
+            initTexture("red2_texture.bmp");
+        }else{
+            initTexture("grey2_texture.bmp");
+        }
         glTranslatef(fingerGap, 0, 0);
         glRotatef(0 + fingerDegree[fingerNo], 0, 0, 1);
         drawCuboid(fingerSize, fingerWidthScale);
@@ -1549,7 +1581,12 @@ void drawArm(int armNo)
         // draw arm
         glPushMatrix();
         {
-            initTexture("grey_texture.bmp");
+            if(textureMode == 0){
+                initTexture("grey_texture.bmp");
+            }else{
+                initTexture("galvanized.bmp");
+            }
+            
             glRotatef(180, 0, 1, 1);
             drawCylinder(0.15, 0.22, 1, 20, 10);
         }
@@ -1569,7 +1606,12 @@ void drawArm(int armNo)
             glTranslatef(0, 0.49, 0);
             glPushMatrix();
             {
-                initTexture("red2_texture.bmp");
+                if(textureMode == 0){
+                    initTexture("red2_texture.bmp");
+                }else{
+                    initTexture("dark_texture.bmp");
+                }
+                
                 glRotatef(90, 0, 1, 0);
                 glTranslatef(-0.04, -0.78, -0.18);
                 drawCuboid(0.35, 0.21);
@@ -1604,7 +1646,11 @@ void drawCalf(int thighNo)
         float calfHeight = robotHeight;
         glPushMatrix();
         {
-            initTexture("blue_texture.bmp");
+            if(textureMode == 0){
+                initTexture("blue_texture.bmp");
+            }else{
+                initTexture("galvanized_blue.bmp");
+            }
             glTranslatef(0.1, 0.45, 0);
             glScalef(0.5, 2.42 + calfHeight * 3, 0.8);
             drawCuboid(0.5, 1.51);
@@ -1615,7 +1661,12 @@ void drawCalf(int thighNo)
         glPushMatrix();
         {
             float cylinderHeight = 1.5;
-            initTexture("yellow_texture.bmp");
+            if(textureMode == 0){
+                initTexture("yellow_texture.bmp");
+            }else{
+                initTexture("galvanized.bmp");
+            }
+            
             glRotatef(180, 0, 1, 1);
             glTranslatef(-0.06, 0, 0.16);
             glScalef(1, 1, 1 + calfHeight);
@@ -1634,7 +1685,12 @@ void drawCalf(int thighNo)
         glPushMatrix();
         {
             float cylinderHeight = 0.31;
-            initTexture("yellow_texture.bmp");
+            if(textureMode == 0){
+                initTexture("yellow_texture.bmp");
+            }else{
+                initTexture("galvanized.bmp");
+            }
+            
             glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.04);
             glScalef(1, 1, 1);
             drawCylinder(0.16, 0.16, cylinderHeight, 20, 10);
@@ -1646,7 +1702,11 @@ void drawCalf(int thighNo)
         {
             int jointSliceStack = 10;
             float jointRadius = 0.16;
-            initTexture("blue_texture.bmp");
+            if(textureMode == 0){
+                initTexture("blue_texture.bmp");
+            }else{
+                initTexture("galvanized_blue.bmp");
+            }
             glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
             glTranslatef(0, 0, -0.27);
@@ -1659,7 +1719,11 @@ void drawCalf(int thighNo)
         {
             // triangle cover the cylinder joint
             float pyramidSize = 0.1;
-            initTexture("red2_texture.bmp");
+            if(textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("grey_texture.bmp");
+            }
             glRotatef(270, 0, 1, 0);
             glScalef(0.39, 0.58, 0.48);
             glTranslatef(0.50, 3.4 + calfHeight * 2.5, -0.04);
@@ -1677,7 +1741,11 @@ void drawCalf(int thighNo)
         glPushMatrix(); // front shoe pyramid
         {
             float pyramidSize = 0.1;
-            initTexture("red2_texture.bmp");
+            if(textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("grey_texture.bmp");
+            }
             glRotatef(270, 0, 1, 0);
             glScalef(0.39, 0.58, 0.48);
             glTranslatef(0.48, 1.27, -1.0);
@@ -1690,7 +1758,12 @@ void drawCalf(int thighNo)
         {
             int jointSliceStack = 10;
             float jointRadius = 0.1;
-            initTexture("blue_texture.bmp");
+            if(textureMode == 0){
+                initTexture("blue_texture.bmp");
+            }else{
+                initTexture("galvanized_blue.bmp");
+            }
+            
             glTranslatef(0.09, 0.210000, 0.39);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
             glTranslatef(0, 0, -0.2);
@@ -1703,7 +1776,11 @@ void drawCalf(int thighNo)
 
         glPushMatrix();
         {
-            initTexture("yellow_texture.bmp");
+            if(textureMode == 0){
+                initTexture("yellow_texture.bmp");
+            }else{
+                initTexture("galvanized.bmp");
+            }
             glScalef(1, 0.3, 1);
             glTranslatef(0, 0, -0.05);
             drawCuboid(0.5, 2);
@@ -1712,7 +1789,12 @@ void drawCalf(int thighNo)
         glPopMatrix();
         glPushMatrix();
         {
-            initTexture("red2_texture.bmp");
+            if(textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("grey2_texture.bmp");
+            }
+            
             glTranslatef(0.1, 0.3 * 0.5, 0);
             glScalef(0.7, 0.6, 0.8);
             drawCuboid(0.5, 2);
@@ -1723,7 +1805,11 @@ void drawCalf(int thighNo)
         glPushMatrix();
         {
             float pyramidSize = 0.1;
-            initTexture("red2_texture.bmp");
+            if(textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("galvanized_dark.bmp");
+            }
             glRotatef(90, 0, 0, 1);
             glScalef(0.2, 0.2, 0.15);
             glTranslatef(0.52, 0.46, 0.85);
@@ -1738,7 +1824,11 @@ void drawCalf(int thighNo)
         glPushMatrix();
         {
             float pyramidSize = 0.1;
-            initTexture("red2_texture.bmp");
+            if(textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("galvanized_dark.bmp");
+            }
             glRotatef(90, 1, 0, 0);
             glScalef(0.2, 0.2, 0.15);
             glTranslatef(0.5, 2.74, 0.02);
@@ -1757,7 +1847,11 @@ void drawCalf(int thighNo)
         glPushMatrix();
         {
             float pyramidSize = 0.1;
-            initTexture("red2_texture.bmp");
+            if(textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("galvanized_dark.bmp");
+            }
             glRotatef(-90, 1, 0, 0);
             glScalef(0.2, 0.2, 0.15);
             glTranslatef(0.57, 0.65, 0.98);
@@ -1776,7 +1870,11 @@ void drawCalf(int thighNo)
         glPushMatrix(); // front shoe pyramid
         {
             float pyramidSize = 0.1;
-            initTexture("red2_texture.bmp");
+            if(textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("galvanized_dark.bmp");
+            }
             glRotatef(-90, 0, 0, 1);
             glScalef(0.15, 0.13, 0.48);
             glTranslatef(-0.49, 8.21, 0.95);
@@ -1815,7 +1913,11 @@ void drawThigh(int thighNo)
 
         glPushMatrix();
         {
-            initTexture("grey_texture.bmp");
+            if(textureMode == 0){
+                initTexture("grey_texture.bmp");
+            }else{
+                initTexture("dark_texture.bmp");
+            }
             glTranslatef(-0.1, -0.43 + robotHeight * 1.5, -0.02);
             glScalef(0.5, 3.18, 0.8);
             drawCuboid(0.5, 1.51);
@@ -1826,7 +1928,12 @@ void drawThigh(int thighNo)
         glPushMatrix();
         {
             // glRotatef(90, 0, 1, 0);
-            initTexture("yellow_texture.bmp");
+            if(textureMode == 0){
+                initTexture("yellow_texture.bmp");
+            }else{
+                initTexture("red2_texture.bmp");
+            }
+            
             glTranslatef(0.09, 1.26, 0.05);
             drawCapsule(0.27, 0.12);
             glTranslatef(0., -0.28, 0);
@@ -1848,7 +1955,12 @@ void drawHipJoint()
         glPushMatrix();
         {
             float cylinderHeight = 1.46;
-            initTexture("red2_texture.bmp");
+            if(textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("grey2_texture.bmp");
+            }
+            
             glRotatef(90, 0, 1, 0);
             glTranslatef(0.12, 1.48 + robotHeight * 1.45, -0.47);
             glScalef(1, 1, 1);
@@ -1861,7 +1973,12 @@ void drawHipJoint()
         {
             int jointSliceStack = 10;
             float jointRadius = 0.22;
-            initTexture("yellow_texture.bmp");
+            if(textureMode == 0){
+                initTexture("yellow_texture.bmp");
+            }else{
+                initTexture("red2_texture.bmp");
+            }
+            
             glTranslatef(0.95, 1.48 + robotHeight * 1.45, -0.12);
             drawSphere(jointRadius, jointSliceStack, jointSliceStack);
             glTranslatef(-1.37, 0, 0);
@@ -1878,7 +1995,12 @@ void drawBody()
     // hip
     glPushMatrix();
     {
-        initTexture("blue_metal_texture.bmp");
+        if(textureMode == 0){
+            initTexture("blue_metal_texture.bmp");
+        }else{
+            initTexture("red2_texture.bmp");
+        }
+        
         glRotatef(180, 0, 0, 1);
         glTranslatef(-0.17, -1.93, 0.42);
         glScalef(1.28, 1.32, 1);
@@ -1889,7 +2011,11 @@ void drawBody()
 
     glPushMatrix();
     {
-        initTexture("red2_texture.bmp");
+        if(textureMode == 0){
+            initTexture("red2_texture.bmp");
+        }else{
+            initTexture("dark_texture.bmp");
+        }
         glTranslatef(-0.59, 2.49, -0.62);
         glScalef(0.65, 2.21, 1.23);
         drawCuboid(0.88, 2.64);
@@ -1899,7 +2025,11 @@ void drawBody()
 
     glPushMatrix();
     {
-        initTexture("grey_texture.bmp");
+        if(textureMode == 0){
+            initTexture("grey_texture.bmp");
+        }else{
+            initTexture("2020_texture.bmp");
+        }
         glTranslatef(-1.23, 4.44, -0.62);
         glScalef(0.65, 1.82, 1.26);
         drawCuboid(0.89, 4.83);
@@ -1909,7 +2039,12 @@ void drawBody()
 
     glPushMatrix();
     {
-        initTexture("blue_metal_texture.bmp");
+        if(textureMode == 0){
+            initTexture("blue_metal_texture.bmp");
+        }else{
+            initTexture("grey2_texture.bmp");
+        }
+        
         glRotatef(90, 1, 0, 0);
         glRotatef(90, 0, 0, 1);
         glTranslatef(-0.08, 0.91, -4.44);
@@ -1925,7 +2060,11 @@ void drawBody()
 
     glPushMatrix();
     {
-        initTexture("yellow_texture.bmp");
+        if(textureMode == 0){
+            initTexture("yellow_texture.bmp");
+        }else{
+            initTexture("red2_texture.bmp");
+        }
         glRotatef(90, 0, 1, 0);
         glTranslatef(0.09, 3.52, -0.61);
         drawCapsule(1.55, 0.12);
@@ -1942,7 +2081,11 @@ void drawShoulderJoint()
 {
     glPushMatrix();
     {
-        initTexture("yellow_texture.bmp");
+        if(textureMode == 0){
+            initTexture("yellow_texture.bmp");
+        }else{
+            initTexture("red2_texture.bmp");
+        }
         glRotatef(90, 0, 1, 0);
         glTranslatef(0.02, 5.67, 1.32);
         drawCapsule(0.48, 0.16);
@@ -2024,7 +2167,12 @@ void drawArms()
                 glPushMatrix();
                 {
                     float pyramidSize = 0.1;
-                    initTexture("red2_texture.bmp");
+                    if(textureMode == 0){
+                        initTexture("red2_texture.bmp");
+                    }else{
+                        initTexture("black_texture.bmp");
+                    }
+                    
                     glRotatef(90, 0, 1, 0);
                     glRotatef(180, 0, 0, 1);
                     glScalef(0.80, 0.58, 0.48);
@@ -2057,7 +2205,11 @@ void drawArms()
                 glPushMatrix();
                 {
                     float pyramidSize = 0.1;
-                    initTexture("red2_texture.bmp");
+                    if(textureMode == 0){
+                        initTexture("red2_texture.bmp");
+                    }else{
+                        initTexture("black_texture.bmp");
+                    }
                     glRotatef(270, 0, 1, 0);
                     glRotatef(180, 0, 0, 1);
                     glScalef(0.80, 0.58, 0.48);
@@ -2085,7 +2237,12 @@ void drawHead()
         float width = 0.5;
         glPushMatrix();
         {
-            initTexture("yellow_texture.bmp");
+            if(textureMode == 0){
+                initTexture("yellow_texture.bmp");
+            }else{
+                initTexture("darth_vader_texture.bmp");
+            }
+            
             // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.04);
             glScalef(1, 1, 1);
             drawCylinder(height, height * 1.5, width, 20, 10);
@@ -2098,7 +2255,12 @@ void drawHead()
             int jointSliceStack = 10;
             // float jointRadius = 0.12;
             // glTranslatef(0.25, 1.88 + calfHeight * 1.45, 0.33);
-            initTexture("green_texture.bmp");
+            if(textureMode == 0){
+                initTexture("green_texture.bmp");
+            }else{
+                initTexture("grey2_texture.bmp");
+            }
+            
             drawSphere(height, jointSliceStack, jointSliceStack);
             glTranslatef(0, 0, width);
             drawSphere(height, jointSliceStack, jointSliceStack);
@@ -2144,7 +2306,11 @@ void drawJetpack()
     { // joint between the two side of leaf
         glPushMatrix();
         {
-            initTexture("red2_texture.bmp");
+            if (textureMode == 0){
+                initTexture("red2_texture.bmp");
+            }else{
+                initTexture("orange_texture.bmp");
+            }
             glRotatef(90, 1, 0, 0);
             glTranslatef(0.15, 0.66, -5.7);
             drawCapsule(0.98, 0.16);
@@ -2155,7 +2321,11 @@ void drawJetpack()
         // rocket booster
         glPushMatrix();
         {
-            initTexture("white_blue_texture.bmp");
+            if (textureMode == 0){
+                initTexture("white_blue_texture.bmp");
+            }else{
+                initTexture("Metal.bmp");
+            }
             glRotatef(90, 1, 0, 0);
             glTranslatef(0.56, 0.73, -5.88);
             drawCylinder(0.25, 0.25, 1.8, 20, 10);
@@ -2164,7 +2334,11 @@ void drawJetpack()
             removeTexture();
             glPushMatrix();
             {
-                initTexture("orange_texture.bmp");
+                if (textureMode == 0){
+                    initTexture("orange_texture.bmp");
+                }else{
+                    initTexture("grey_texture.bmp");
+                }
                 glTranslatef(0, 0, 0.14);
                 int jointSliceStack = 10;
                 float jointRadius = 0.25;
@@ -2178,7 +2352,11 @@ void drawJetpack()
 
             glPushMatrix();
             {
-                initTexture("orange_texture.bmp");
+                if (textureMode == 0){
+                    initTexture("orange_texture.bmp");
+                }else{
+                    initTexture("grey_texture.bmp");
+                }
                 glTranslatef(0.83, 0, 1.64);
                 drawCylinder(0.18, 0.35, 0.45, 20, 10);
                 glTranslatef(-0.83, 0, 0);
@@ -2192,7 +2370,12 @@ void drawJetpack()
         // leaf level 1
         glPushMatrix();
         {
-            initTexture("rainbow_texture.bmp");
+            if (textureMode == 0){
+                initTexture("rainbow_texture.bmp");
+            }else{
+                initTexture("grey2_texture.bmp");
+            }
+            
             glTranslatef(0, -0.76, 0);
             glPushMatrix();
             {
@@ -2215,7 +2398,12 @@ void drawJetpack()
         glPushMatrix();
         {
             // glTranslatef(v, v1, -0.07);
-            initTexture("green2_texture.bmp");
+            if (textureMode == 0){
+                initTexture("green2_texture.bmp");
+            }else{
+                initTexture("bunker_galvanized.bmp");
+            }
+            
             glPushMatrix();
             {
                 glRotatef(10, 0, 1, 0);
@@ -2243,7 +2431,12 @@ void drawJetpack()
         {
             glPushMatrix();
             {
-                initTexture("purple_texture.bmp");
+                if (textureMode == 0){
+                    initTexture("purple_texture.bmp");
+                }else{
+                    initTexture("galvanized_blue.bmp");
+                }
+                
                 glRotatef(20, 0, 1, 0);
                 glScalef(0.59, 0.63, 1.14);
                 glTranslatef(-0.94, 3.03, 0.02);
@@ -2267,7 +2460,11 @@ void drawJetpack()
 
             glPushMatrix();
             {
-                initTexture("purple_texture.bmp");
+                if (textureMode == 0){
+                    initTexture("purple_texture.bmp");
+                }else{
+                    initTexture("galvanized_blue.bmp");
+                }
                 glRotatef(160, 0, 1, 0);
                 glScalef(0.59, 0.63, 1.14);
                 glTranslatef(-1.46, 3.02, -1.22);
@@ -2289,7 +2486,12 @@ void drawSky()
 {
     glPushMatrix();
     {
-        initTexture("sky.bmp");
+        if (textureMode == 0){
+            initTexture("sky.bmp");
+        }else{
+            initTexture("galaxy_texture2.bmp");
+        }
+        
         glRotatef(-90, 1, 0, 0);
         glTranslatef(0.14, 1.4, 0);
         drawSphere(155, 50, 50);
@@ -2305,8 +2507,12 @@ void drawGround()
         float size = 11;
         int noOfGrass = 50;
         float resetValue = size * noOfGrass;
-
-        initTexture("grass.bmp");
+        if (textureMode == 0){
+            initTexture("grass.bmp");
+        }else{
+            initTexture("moon_texture.bmp");
+        }
+        
         //  nested loop draw ground
         glTranslatef(-400, -2.44, -200);
         for (int j = 0; j < noOfGrass; j++)
