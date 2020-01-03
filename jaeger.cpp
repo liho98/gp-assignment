@@ -2943,7 +2943,7 @@ void drawSky()
         }
         else
         {
-            initTexture("galaxy_texture2.bmp");
+            initTexture("night_sky.bmp");
         }
 
         glRotatef(-90, 1, 0, 0);
