@@ -2650,7 +2650,7 @@ void drawIonBlaster()
         glPushMatrix();
         {
         
-            initTexture("blue_texture.bmp");
+            initTexture("tiger_texture.bmp");
             // 1st and 2nd cylinder: muzzle
             glTranslatef(0, 0, -0.59);
             drawCylinder(0.25, 0.25, 1.8, 20, 10);
@@ -2697,7 +2697,7 @@ void drawIonBlaster()
         glPushMatrix();
         {
             // second part
-            initTexture("blue_texture2.bmp");
+            initTexture("zebra_texture.bmp");
             glTranslatef(0, 0, -2.17);
             drawCylinder(0.25, 0.25, 1.25, 20, 10);
             glTranslatef(0, 0, -0.31);
@@ -2705,7 +2705,7 @@ void drawIonBlaster()
             // middle part cylinder cover cap
             glPushMatrix();
             {
-                initTexture("red2_texture.bmp");
+                initTexture("galvanized_blue.bmp");
                 glScalef(1, 1, 0.57);
                 glTranslatef(0, 0, 2.74);
                 drawSphere(0.25, 10, 10);
@@ -2722,7 +2722,7 @@ void drawIonBlaster()
                 glTranslatef(-0.07, -0.12, 0);
                 glPushMatrix();
                 {
-                    initTexture("red2_texture.bmp");
+                    initTexture("galvanized_blue.bmp");
                     glRotatef(-90, 0, 1, 0);
                     glTranslatef(0.690, 0.25, -0.18);
                     drawCuboid(0.28, 1.66);
@@ -2746,7 +2746,7 @@ void drawIonBlaster()
                 glScalef(0.92, 0.78, 0.75);
                 glPushMatrix();
                 {
-                    initTexture("red2_texture.bmp");
+                    initTexture("galvanized_blue.bmp");
                     glRotatef(-90, 0, 1, 0);
                     glTranslatef(0.690, 0.25, -0.18);
                     drawCuboid(0.28, 1.66);
@@ -2767,7 +2767,7 @@ void drawIonBlaster()
                 // pointer light 1 cuboid, 1 cylinder
                 glPushMatrix();
                 {
-                    initTexture("blue_metal_texture.bmp");
+                    initTexture("galvanized_blue.bmp");
                     glTranslatef(-0.2, -0.55, 0.92);
                     glScalef(0.94, 0.71, 1.07);
                     drawCuboid(0.26, 1.61);
@@ -2776,7 +2776,7 @@ void drawIonBlaster()
 
                 glPushMatrix();
                 {
-                    initTexture("blue_metal_texture.bmp");
+                    initTexture("galvanized_blue.bmp");
                     glTranslatef(0.02, -0.46, 1.16);
                     drawCylinder(0.04, 0.04, 0.35, 20, 10);
                 }
@@ -2856,7 +2856,7 @@ void drawIonBlaster()
                 glTranslatef(-0.07, 0, -0.7);
                 glPushMatrix();
                 {
-                    initTexture("yellow_texture.bmp");
+                    initTexture("blue_texture2.bmp");
                     glRotatef(-90, 0, 1, 0);
                     glTranslatef(0.690, 0.25, -0.18);
                     drawCuboid(0.28, 1.66);
@@ -2890,6 +2890,7 @@ void drawIonBlaster()
                 glTranslatef(0.03, 0.51, 0.29);
                 drawTrianglePyramid(-0.28, 1);
             }
+            removeTexture();
             glPopMatrix();
         }
         glPopMatrix();
@@ -2897,19 +2898,21 @@ void drawIonBlaster()
         glPushMatrix();
         {
             // forth part
-            
+            initTexture("tiger_texture.bmp");
             glTranslatef(0, 0, -4.21);
             drawCylinder(0.39, 0.39, 0.67, 20, 10);
 
             // cap
             glPushMatrix();
             {
+                initTexture("yellow_texture.bmp");
                 glScalef(1, 1, 0.34);
                 glTranslatef(0, 0, 2.07);
                 drawSphere(0.41, 10, 10);
                 glTranslatef(0, 0, -2.07);
                 drawSphere(0.41, 10, 10);
             }
+            removeTexture();
             glPopMatrix();
 
             // grip
@@ -2917,6 +2920,7 @@ void drawIonBlaster()
             {
                 glPushMatrix();
                 {
+                    initTexture("black_texture.bmp");
                     glRotatef(12, 1, 0, 0);
                     glScalef(1.35, 1.36, 0.53);
                     glTranslatef(-0.15, -0.78, 0.65);
@@ -2926,6 +2930,7 @@ void drawIonBlaster()
 
                 glPushMatrix();
                 {
+                    initTexture("black_texture.bmp");
                     glRotatef(90, 0, 1, 0);
                     glRotatef(122, 0, 0, 1);
                     glScalef(0.14, 0.19, 1.25);
@@ -2944,6 +2949,7 @@ void drawIonBlaster()
                 // up and down
                 glPushMatrix();
                 {
+                    initTexture("yellow_texture.bmp");
                     glRotatef(-90, 0, 1, 0);
                     glTranslatef(2.05, 0.1, -0.07);
                     drawCuboid(0.15, 1.66);
@@ -2951,6 +2957,7 @@ void drawIonBlaster()
                     glTranslatef(0, 0, 0.2);
                     drawCuboid(0.15, 1.66);
                 }
+                removeTexture();
                 glPopMatrix();
 
                 // left and right
