@@ -19,6 +19,8 @@ float orthoX = 0, orthoY = 0.5, orthoZ = 0;
 float bridgeDegree = 0, bridgeLineUp = 0;
 
 float animationX = 0, animationY = 0, animationZ = 0;
+float ionBlasterX = 0, ionBlasterY = 0, ionBlasterZ = 0;
+float ionBlasterXDegree = 0, ionBlasterYDegree = 0, ionBlasterZDegree = 0;
 
 bool rotate = false;
 bool rotateLeft = false;
@@ -40,8 +42,8 @@ double h = 1080;
 double ar = w / h; // aspect ratio
 
 float v = 0;
-float v1 = -3.16;
-float v2 = 1;
+float v1 = 0;
+float v2 = 0;
 float v3 = 0;
 float v4 = 0;
 float v5 = 0;
@@ -75,7 +77,11 @@ bool itemControl = false;
 bool jetpack = false;
 bool ionBlaster = false;
 
+bool fightMode = false;
+int fightModeFlag[2] = {0, 0};
+
 bool flyMode = false;
+
 float ascendSpeed = 0.01;
 void flyVertical(int direction);
 void flyHorizontal(int direction);
@@ -110,6 +116,11 @@ string dir_path = file_path.substr(0, file_path.rfind("\\"));
 
 string projectRoot;
 char temp[100];
+
+float adjustSpeed1 = 0.1;
+float adjustSpeed2 = 1;
+
+void resetRobot();
 
 // use dedicated GPU to run
 extern "C"
@@ -200,21 +211,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
     {
         switch (key)
         {
-        case GLFW_KEY_Z:
-            textureNo += 1;
-            if (textureNo % 3 == 0)
-            {
-                textureNo = 0;
-            }
-            // strcpy(temp, p rojectRoot.c_str());
-            // strcat(temp, textures[textureNo].c_str());
-            // printf("%d\n", textureNo);
-            // printf("%s\n", temp);
-            // initTexture(textures[textureNo]);
-            break;
         case GLFW_KEY_ESCAPE:
             printf("v: %f\tv1: %f\tv2: %f\tv3: %f\n", v, v1, v2, v3);
             printf("v4: %f\tv5: %f\tv6: %f\tv7: %f\n", v4, v5, v6, v7);
+            printf("ionBlasterX: %f\tionBlasterY: %f\tionBlasterZ: %f\n", ionBlasterX + v, ionBlasterY + v1, ionBlasterZ + v2, v7);
+
             // printf("orthoZ: %f\texponent: %d\n", orthoZ, exponent);
             printf("perspectiveX: %f\tperspectiveY: %f\tspeed: %f\t\n", perspectiveX, perspectiveY, speed);
 
@@ -552,6 +553,34 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkControl = false;
                     flyMode = false;
                 }
+
+                if (!runControl)
+                {
+                    resetRobot();
+                }
+            }
+            else if (itemControl)
+            {
+                if (fightMode)
+                    fightMode = false;
+                else if (!fightMode && ionBlaster)
+                {
+                    walkStationary = false;
+                    walkControl = false;
+                    runControl = false;
+                    flyMode = false;
+                    fightMode = true;
+                    printf("fightMode: %d\n", fightMode);
+                }
+                else
+                {
+                    fightMode = false;
+                }
+
+                if (!fightMode)
+                {
+                    resetRobot();
+                }
             }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
                    fingerNo, armNo, legNo);
@@ -592,6 +621,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkStationary = false;
                     walkControl = false;
                     runControl = false;
+                    fightMode = false;
                     flyMode = true;
                     mode = 6;
                 }
@@ -599,6 +629,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 {
                     walkStationary = false;
                     flyMode = false;
+                }
+
+                if (!flyMode)
+                {
+                    resetRobot();
                 }
             }
             break;
@@ -668,7 +703,9 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         case GLFW_KEY_V: // RPG or first person mode
                          // reserved
             break;
-
+        case GLFW_KEY_Z: // reset robot
+            resetRobot();
+            break;
         case GLFW_KEY_C:
             if (textureMode == 0)
             {
@@ -680,40 +717,40 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             }
             break;
         case GLFW_KEY_T:
-            v += 0.01;
+            v += adjustSpeed1;
             break;
         case GLFW_KEY_G:
-            v -= 0.01;
+            v -= adjustSpeed1;
             break;
         case GLFW_KEY_Y:
-            v1 += 0.01;
+            v1 += adjustSpeed1;
             break;
         case GLFW_KEY_H:
-            v1 -= 0.01;
+            v1 -= adjustSpeed1;
             break;
         case GLFW_KEY_U:
-            v2 += 0.01;
+            v2 += adjustSpeed1;
             break;
         case GLFW_KEY_J:
-            v2 -= 0.01;
+            v2 -= adjustSpeed1;
             break;
         case GLFW_KEY_I:
-            v3 += 0.01;
+            v3 += adjustSpeed2;
             break;
         case GLFW_KEY_K:
-            v3 -= 0.01;
+            v3 -= adjustSpeed2;
             break;
         case GLFW_KEY_O:
-            v4 += 0.01;
+            v4 += adjustSpeed2;
             break;
         case GLFW_KEY_L:
-            v4 -= 0.01;
+            v4 -= adjustSpeed2;
             break;
         case GLFW_KEY_P:
-            v5 += 0.01;
+            v5 += adjustSpeed2;
             break;
         case GLFW_KEY_SEMICOLON:
-            v5 -= 0.01;
+            v5 -= adjustSpeed2;
             break;
         case GLFW_KEY_LEFT_BRACKET:
             v6 += 0.01;
@@ -1158,10 +1195,24 @@ void drawCapsule(float width, float height)
 // animation
 void resetRobot()
 {
-    // if (calfDegree[1] < 0)
-    // {
-    //     calfDegree[1] += legSpeed;
-    // }
+    fill(fingerDegree, fingerDegree + 10, 0);
+    fill(handDegree, handDegree + 2, 0);
+    fill(armDegreeX, armDegreeX + 2, 0);
+    fill(armDegreeY, armDegreeY + 2, 0);
+    fill(calfDegree, calfDegree + 2, 0);
+    fill(thighDegree, thighDegree + 2, 0);
+    animationX = 0;
+    animationY = 0;
+    animationZ = 0;
+    ionBlasterX = 0;
+    ionBlasterY = 0;
+    ionBlasterZ = 0;
+    ionBlasterXDegree = 0;
+    ionBlasterYDegree = 0;
+    ionBlasterZDegree = 0;
+
+    fill(fightModeFlag, fightModeFlag + 2, 0);
+    fill(walkingFlag, walkingFlag + 2, 0);
 }
 
 void walk(int speed)
@@ -1372,6 +1423,101 @@ void flyHorizontal()
         if (armDegreeX[0] > 0)
         {
             armDegreeX[0] -= 5;
+        }
+    }
+}
+
+void activateFightMode()
+{
+    // makes gun go to hand
+    // first the gun fly up and rotate
+    // resetRobot();
+    // printf("ionBlasterXDegree: %f, ionBlasterYDegree: %f\n", ionBlasterXDegree, ionBlasterYDegree);
+
+    // step 1
+
+    if (!fightModeFlag[0])
+    {
+        if (ionBlasterX < 7)
+        {
+            ionBlasterX += 0.2;
+        }
+        if (ionBlasterY < 4.7)
+        {
+            ionBlasterY += 0.2;
+        }
+        if (ionBlasterYDegree < 90)
+        {
+            ionBlasterYDegree += 2;
+        }
+        if (ionBlasterXDegree > -45)
+        {
+            ionBlasterXDegree -= 2;
+        }
+
+        if (ionBlasterX >= 7 && ionBlasterYDegree >= 90)
+        {
+            fightModeFlag[0] = 1;
+        }
+    }
+
+    // if(fightModeFlag[0]){
+    // ionBlasterX = ionBlasterX + v;
+    // ionBlasterY = ionBlasterY + v1;
+    // ionBlasterZ = ionBlasterZ + v2;
+    // }
+
+    else if (!fightModeFlag[1])
+    {
+        // -0.200000    v1: -1.800000   v2: -2.7
+
+        // if (ionBlasterX > 7)
+        // {
+        //     ionBlasterX -= 0.1;
+        // }
+        if (ionBlasterY > 3)
+        {
+            ionBlasterY -= 0.1;
+        }
+        if (ionBlasterZ > -2.7)
+        {
+            ionBlasterZ -= 0.1;
+        }
+
+        float armSpeed = 2;
+        if (armDegreeX[1] < 90)
+        {
+            armDegreeX[1] += armSpeed;
+        }
+        if (armDegreeY[1] < 90)
+        {
+            armDegreeY[1] += armSpeed;
+        }
+
+        if (fingerDegree[5] < 100)
+        {
+            fingerDegree[5] += armSpeed;
+        }
+        if (fingerDegree[6] < 100)
+        {
+            fingerDegree[6] += armSpeed;
+        }
+        if (fingerDegree[7] < 100)
+        {
+            fingerDegree[7] += armSpeed;
+        }
+        if (fingerDegree[8] < 100)
+        {
+            fingerDegree[8] += armSpeed;
+        }
+        if (fingerDegree[9] < 100)
+        {
+            fingerDegree[9] += armSpeed;
+        }
+
+        if (ionBlasterY <= 3 && ionBlasterZ <= -2.7 && fingerDegree[5] >= 100)
+        {
+            fightModeFlag[1] = 1;
         }
     }
 }
@@ -2645,8 +2791,26 @@ void drawIonBlaster()
     {
         glRotatef(90, 0, 1, 0);
         glTranslatef(-0.85, 3.47, 1.24);
+
+        // ionBlasterX = v;
+        // ionBlasterY = v1;
+        // ionBlasterZ = v2;
+
+        // ionBlasterXDegree = v3;
+        // ionBlasterYDegree = v4;
+        // ionBlasterZDegree = v5;
+        // if (fightMode)
+        // {
+        glTranslatef(ionBlasterX + v, ionBlasterY + v1, ionBlasterZ + v2);
+        // }
+
         glRotatef(45, 1, 0, 0);
         glScalef(0.93, 0.93, 0.93);
+
+        glRotatef(ionBlasterXDegree, 1, 0, 0);
+        glRotatef(ionBlasterYDegree, 0, 1, 0);
+        glRotatef(ionBlasterZDegree, 0, 0, 1);
+
         glPushMatrix();
         {
         
@@ -3092,7 +3256,7 @@ void display()
         // item
         if (jetpack)
             drawJetpack();
-        if (ionBlaster)
+        else if (ionBlaster)
             drawIonBlaster();
     }
     glPopMatrix();
@@ -3160,6 +3324,10 @@ int main(int argc, char **argv)
             else if (flyMode)
             {
                 flyHorizontal();
+            }
+            else if (fightMode)
+            {
+                activateFightMode();
             }
 
             if (insultControl)
