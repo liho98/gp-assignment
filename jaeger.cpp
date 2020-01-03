@@ -481,11 +481,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             case 6:
                 if (flyMode)
                 {
-                    if (exponent > 35)
+                    if (exponent > 30)
                     {
-                        exponent = 25;
+                        exponent = 30;
                     }
-                    else if (exponent > 25)
+                    else if (exponent > 30)
                     {
                         exponent--;
                     }
@@ -527,7 +527,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 if (ionBlaster)
                     ionBlaster = false;
                 else
+                {
                     ionBlaster = true;
+                    jetpack = false;
+                }
             }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
                    fingerNo, armNo, legNo);
@@ -550,13 +553,6 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     flyMode = false;
                 }
             }
-            else if (itemControl)
-            {
-                if (jetpack)
-                    jetpack = false;
-                else
-                    jetpack = true;
-            }
             printf("fingerNo: %d\tarmNo: %d\tlegNo: %d\t\n",
                    fingerNo, armNo, legNo);
             break;
@@ -570,6 +566,23 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 else
                     walkStationary = true;
             }
+            else if (itemControl)
+            {
+                if (jetpack)
+                {
+                    jetpack = false;
+                    flyMode = false;
+                }
+                else
+                {
+                    ionBlaster = false;
+                    jetpack = true;
+                }
+            }
+            break;
+        case GLFW_KEY_4:
+            if (fingerControl)
+                fingerNo = 4;
             else if (itemControl)
             {
                 if (flyMode)
@@ -588,10 +601,6 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     flyMode = false;
                 }
             }
-            break;
-        case GLFW_KEY_4:
-            if (fingerControl)
-                fingerNo = 4;
             break;
         case GLFW_KEY_5:
             if (fingerControl)
@@ -1147,15 +1156,12 @@ void drawCapsule(float width, float height)
 }
 
 // animation
-void controlLeg(int legNo, float degree)
+void resetRobot()
 {
-    if (legNo == 1)
-    {
-        for (int i = 0; i < degree; i++)
-        {
-            thighDegree[legNo] += 1;
-        }
-    }
+    // if (calfDegree[1] < 0)
+    // {
+    //     calfDegree[1] += legSpeed;
+    // }
 }
 
 void walk(int speed)
@@ -2637,6 +2643,10 @@ void drawIonBlaster()
     // 7 cylinder main barrel: http://bit.ly/2ZMGhZl
     glPushMatrix();
     {
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(-0.85, 3.47, 1.24);
+        glRotatef(45, 1, 0, 0);
+        glScalef(0.93, 0.93, 0.93);
         glPushMatrix();
         {
         
@@ -3071,7 +3081,6 @@ void display()
         drawBody();
         drawHead();
         drawShoulderJoint();
-        drawIonBlaster();
 
         // item
         if (jetpack)
@@ -3094,6 +3103,8 @@ int main(int argc, char **argv)
 
     if (NULL != window)
     {
+        glGenTextures(50, textures);
+
         while (!glfwWindowShouldClose(window))
         {
             // Scale to window size
