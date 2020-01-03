@@ -171,8 +171,8 @@ void initTexture(string textureName)
 
 void removeTexture()
 {
-    glDisable(GL_TEXTURE_2D);
-    glDeleteTextures(1, &texture);
+    // glDisable(GL_TEXTURE_2D);
+    // glDeleteTextures(1, &texture);
 }
 
 void incrementArray(float *arr, float value, int size)
