@@ -84,6 +84,7 @@ float walkDirectionDegree = 0;
 bool itemControl = false;
 bool jetpack = false;
 bool ionBlaster = false;
+bool sword = false;
 
 bool fightMode = false;
 int fightModeFlag[2] = {0, 0};
@@ -665,6 +666,17 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         case GLFW_KEY_5:
             if (fingerControl)
                 fingerNo = 5;
+            else if (itemControl)
+            {
+                if (sword)
+                    sword = false;
+                else
+                {
+                    sword = true;
+                    jetpack = false;
+                    ionBlaster = false;
+                }
+            }
             break;
         case GLFW_KEY_6:
             if (fingerControl)
@@ -3200,6 +3212,70 @@ void drawJetpack()
     glPopMatrix();
 }
 
+void drawSword()
+{
+    glPushMatrix();
+    {
+        if (textureMode == 0){
+            initTexture("brown_texture.bmp");
+        }
+        else {
+            initTexture("black_texture.bmp");
+        }
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(-0.65, 2.5, 2.0);
+        glScalef(1, 1, 0.34);
+        drawCuboid(0.5, 2.5);
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        if (textureMode == 0){
+            initTexture("black_texture.bmp");
+        }
+        else {
+            initTexture("black_texture.bmp");
+        }
+        glTranslatef(1.3, 2.5, -0.75);
+        glScalef(1, 1, 0.34);
+        drawCuboid(0.6, 2.5);
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        if (textureMode == 0){
+            initTexture("Wood.bmp");
+        }
+        else {
+            initTexture("dragon_texture.bmp");
+        }
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(0.75, 2.5, 2.0);
+        glScalef(1, 1, 0.34);
+        drawCuboid(0.5, 8.0);
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    {
+        if (textureMode == 0){
+            initTexture("Wood.bmp");
+        }
+        else {
+            initTexture("dragon_texture.bmp");
+        }
+        glRotatef(270, 1, 0, 0);
+        glRotatef(90, 0, 1, 0);
+        glTranslatef(-2.75, 5.0, 2.2); //z=zuoyou y=qianhou
+        glScalef(0.5, 0.5, 0.2);
+        drawTrianglePyramid(-1, 1);
+    }
+    removeTexture();
+    glPopMatrix();
+}
+
 void drawIonBlaster()
 {
     // 7 cylinder main barrel: http://bit.ly/2ZMGhZl
@@ -3229,7 +3305,6 @@ void drawIonBlaster()
 
         glPushMatrix();
         {
-
             initTexture("tiger_texture.bmp");
             // 1st and 2nd cylinder: muzzle
             glTranslatef(0, 0, -0.59);
@@ -3701,6 +3776,8 @@ void display()
             drawJetpack();
         else if (ionBlaster)
             drawIonBlaster();
+        else if (sword)
+            drawSword();
     }
     glPopMatrix();
 
