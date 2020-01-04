@@ -130,6 +130,11 @@ void resetRobot();
 bool spawn = true;
 int frameDisplayCount = 0;
 
+bool light = false;
+float diffuseColor[] = {0.64f, 0.48f, 0.76f};
+float diffusePosition[] = {-60.0f, -0.65f, 20.0f};
+float objectColor[] = {0.64f, 0.48f, 0.76f};
+
 // use dedicated GPU to run
 extern "C"
 {
@@ -767,6 +772,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             else
             {
                 textureMode = 0;
+            }
+            break;
+        case GLFW_KEY_Q:
+            if (light)
+            {
+                light = false;
+            }else 
+            {
+                light = true;
             }
             break;
         case GLFW_KEY_T:
@@ -3472,7 +3486,6 @@ void drawSky()
         {
             initTexture("night_sky.bmp");
         }
-
         glRotatef(-90, 1, 0, 0);
         glTranslatef(0.14, 1.4, 0);
         drawSphere(155, 50, 50);
@@ -3510,6 +3523,7 @@ void drawGround()
                 {
                     glBegin(GL_QUADS);
                     {
+                        glMaterialfv(GL_FRONT, GL_AMBIENT, diffuseColor);
                         glTexCoord2f(0.0f, 1);
                         glVertex3f(-0.5 * size, 0, -1 * size);
 
@@ -3575,6 +3589,7 @@ void display()
         //  BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
     }
 
+
     glPushMatrix();
     {
         if (animationY <= -0.71)
@@ -3604,6 +3619,20 @@ void display()
     {
         drawSky();
         drawGround();
+    }
+
+    if(light){
+        glPushMatrix();
+        {
+            glEnable(GL_LIGHTING);
+            glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
+            glLightfv(GL_LIGHT0, GL_POSITION, diffusePosition);
+            glEnable(GL_LIGHT0);
+        }
+        glPopMatrix();
+    }else{
+        glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHT0);
     }
 }
 
