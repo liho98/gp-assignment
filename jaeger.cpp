@@ -525,11 +525,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_KP_8:
             perspectiveZ += 0.1;
-            orthoZ += 20;
+            orthoZ += 0.05;
             break;
         case GLFW_KEY_KP_2:
             perspectiveZ -= 0.1;
-            orthoZ -= 20;
+            orthoZ -= 0.05;
             break;
         case GLFW_KEY_1:
             if (fingerControl)
@@ -714,7 +714,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[0] = 0;
                     walkingFlag[1] = 1;
                 }
-                jetPackParticleSize = 1.5;
+                if (flyMode)
+                    jetPackParticleSize = 1.5;
                 walkDirectionDegree = 0;
                 direction = 1;
             }
@@ -743,7 +744,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[1] = 2;
                 }
                 walkDirectionDegree = -90;
-                jetPackParticleSize = 1.5;
+                if (flyMode)
+                    jetPackParticleSize = 1.5;
                 direction = 2;
             }
             break;
@@ -756,6 +758,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[0] = 1;
                 }
                 walkDirectionDegree = 90;
+                if (flyMode)
                     jetPackParticleSize = 1.5;
                 direction = -2;
             }
@@ -3216,10 +3219,12 @@ void drawSword()
 {
     glPushMatrix();
     {
-        if (textureMode == 0){
+        if (textureMode == 0)
+        {
             initTexture("brown_texture.bmp");
         }
-        else {
+        else
+        {
             initTexture("black_texture.bmp");
         }
         glRotatef(90, 0, 1, 0);
@@ -3231,10 +3236,12 @@ void drawSword()
 
     glPushMatrix();
     {
-        if (textureMode == 0){
+        if (textureMode == 0)
+        {
             initTexture("black_texture.bmp");
         }
-        else {
+        else
+        {
             initTexture("black_texture.bmp");
         }
         glTranslatef(1.3, 2.5, -0.75);
@@ -3245,10 +3252,12 @@ void drawSword()
 
     glPushMatrix();
     {
-        if (textureMode == 0){
+        if (textureMode == 0)
+        {
             initTexture("Wood.bmp");
         }
-        else {
+        else
+        {
             initTexture("dragon_texture.bmp");
         }
         glRotatef(90, 0, 1, 0);
@@ -3260,10 +3269,12 @@ void drawSword()
 
     glPushMatrix();
     {
-        if (textureMode == 0){
+        if (textureMode == 0)
+        {
             initTexture("Wood.bmp");
         }
-        else {
+        else
+        {
             initTexture("dragon_texture.bmp");
         }
         glRotatef(270, 1, 0, 0);
@@ -3720,9 +3731,10 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    // spawn effect
-    // if (spawn)
-    // {
+    if (isOrtho)
+    {
+        glScalef(1 + orthoZ, 1 + orthoZ, 1 + orthoZ);
+    }
 
     glPushMatrix();
     {
@@ -3731,29 +3743,17 @@ void display()
         glDrawParticles();
     }
     glPopMatrix();
+
     if (frameDisplayCount == 100)
     {
         spawn = false;
     }
-    // }
 
     if (isTexture)
     {
-        // glColor3f(1, 1, 1);
         selectedGluDrawStyles = gluDrawStyles[0];
         selectedGlDrawStyles = glDrawStyles[0];
         selectedGlewDrawStyles = glewDrawStyles[0];
-
-        // glEnable(GL_TEXTURE_2D);
-        // glGenTextures(1, &texture);
-        // glBindTexture(GL_TEXTURE_2D, texture);
-
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-        //                 GL_LINEAR);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-        //                 GL_LINEAR);
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, BMP.bmWidth,
-        //  BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
     }
 
     glPushMatrix();
@@ -3814,7 +3814,7 @@ int main(int argc, char **argv)
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 glOrtho(-2 * ar, 2 * ar, -2, 2, -2, 2000);
-                glTranslatef(orthoX, orthoY, orthoZ);
+                glTranslatef(orthoX, orthoY, 0);
                 glRotatef(speed, 0, 1, 0);
 
                 glMatrixMode(GL_MODELVIEW);
