@@ -13,6 +13,11 @@
 
 using namespace std;
 
+// Particle engine
+const int ParticleCount = 500;
+const int JetPackParticleCount = 100;
+float jetPackParticleSize = 1;
+
 float speed = -90;
 float perspectiveX = 0, perspectiveY = -3.3, perspectiveZ = -16;
 float orthoX = 0, orthoY = 0.5, orthoZ = 0;
@@ -41,9 +46,11 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0;
-float v1 = 0;
-float v2 = 0;
+float adjustSpeed1 = 0.05;
+float adjustSpeed2 = 0.05;
+float v = 0.5;
+float v1 = 2.41;
+float v2 = 4.92;
 float v3 = 0;
 float v4 = 0;
 float v5 = 0;
@@ -121,9 +128,6 @@ string dir_path = file_path.substr(0, file_path.rfind("\\"));
 
 string projectRoot;
 char temp[100];
-
-float adjustSpeed1 = 0.01;
-float adjustSpeed2 = 0.1;
 
 void resetRobot();
 
@@ -454,6 +458,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     exponent++;
                     direction = 3;
                     flyVertical(1);
+                    jetPackParticleSize = 1.5;
                 }
                 break;
             default:
@@ -525,11 +530,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_KP_8:
             perspectiveZ += 0.1;
-            orthoZ += 20;
+            orthoZ += 0.05;
             break;
         case GLFW_KEY_KP_2:
             perspectiveZ -= 0.1;
-            orthoZ -= 20;
+            orthoZ -= 0.05;
             break;
         case GLFW_KEY_1:
             if (fingerControl)
@@ -714,6 +719,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[0] = 0;
                     walkingFlag[1] = 1;
                 }
+                if (flyMode)
+                    jetPackParticleSize = 1.5;
                 walkDirectionDegree = 0;
                 direction = 1;
             }
@@ -742,6 +749,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[1] = 2;
                 }
                 walkDirectionDegree = -90;
+                if (flyMode)
+                    jetPackParticleSize = 1.5;
                 direction = 2;
             }
             break;
@@ -754,6 +763,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[0] = 1;
                 }
                 walkDirectionDegree = 90;
+                if (flyMode)
+                    jetPackParticleSize = 1.5;
                 direction = -2;
             }
             break;
@@ -840,11 +851,25 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         switch (key)
         {
         case GLFW_KEY_W:
-        case GLFW_KEY_S:
         case GLFW_KEY_A:
         case GLFW_KEY_D:
+        case GLFW_KEY_S:
             if (walkControl || runControl || flyMode)
+            {
                 direction = 0;
+                jetPackParticleSize = 1;
+            }
+            break;
+        case GLFW_KEY_UP:
+            if (flyMode)
+            {
+                if (direction == -3)
+                    exponent = 1;
+                exponent++;
+                direction = 3;
+                flyVertical(1);
+                jetPackParticleSize = 1;
+            }
             break;
 
         default:
@@ -1264,8 +1289,6 @@ void drawCapsule(float width, float height)
 
 // animation
 
-// Particle engine
-const int ParticleCount = 500;
 typedef struct
 {
     double Xpos;
@@ -1285,9 +1308,8 @@ typedef struct
 
 PARTICLES Particle[ParticleCount];
 
-GLuint LoadTextureRAW(const char *filename, int width,
-                      int height);
-void FreeTexture(GLuint texturez);
+PARTICLES JetPackParticle1[JetPackParticleCount];
+PARTICLES JetPackParticle2[JetPackParticleCount];
 
 void glCreateParticles(void)
 {
@@ -1364,6 +1386,156 @@ void glDrawParticles(void)
         else
             initTexture("galaxy_texture.bmp");
 
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        glPopMatrix();
+    }
+}
+
+// jetpack effect
+
+void glCreateJetPackParticles1(void)
+{
+    int i;
+    for (i = 1; i < JetPackParticleCount; i++)
+    {
+        JetPackParticle1[i].Xpos = 0;
+        JetPackParticle1[i].Ypos = -5;
+        JetPackParticle1[i].Zpos = -5;
+        JetPackParticle1[i].Xmov = (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) *
+                                      rand() % 11) +
+                                     1) *
+                                    0.005) -
+                                   (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1) * 0.005);
+        JetPackParticle1[i].Zmov = (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) *
+                                      rand() % 11) +
+                                     1) *
+                                    0.005) -
+                                   (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1) * 0.005);
+        JetPackParticle1[i].Red = 1;
+        JetPackParticle1[i].Green = 1;
+        JetPackParticle1[i].Blue = 1;
+        JetPackParticle1[i].Scalez = 0.1;
+        JetPackParticle1[i].Direction = 0;
+        JetPackParticle1[i].Acceleration = ((((((8 - 5 + 2) * rand() % 11) + 5) - 1 + 1) * rand() % 11) + 1) * 0.02;
+        JetPackParticle1[i].Deceleration = 0.0025;
+    }
+}
+
+void glUpdateJetPackParticles1(void)
+{
+    int i;
+    for (i = 1; i < JetPackParticleCount; i++)
+    {
+        JetPackParticle1[i].Ypos = JetPackParticle1[i].Ypos + JetPackParticle1[i].Acceleration - JetPackParticle1[i].Deceleration - 0.30;
+        JetPackParticle1[i].Deceleration = JetPackParticle1[i].Deceleration + 0.0025;
+        JetPackParticle1[i].Xpos = JetPackParticle1[i].Xpos + JetPackParticle1[i].Xmov;
+        JetPackParticle1[i].Zpos = JetPackParticle1[i].Zpos + JetPackParticle1[i].Zmov;
+        JetPackParticle1[i].Direction = JetPackParticle1[i].Direction + ((((((int)(0.5 - 0.1 + 0.1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1);
+
+        if (JetPackParticle1[i].Ypos < -5)
+        {
+            JetPackParticle1[i].Xpos = 0;
+            JetPackParticle1[i].Ypos = 4.0;
+            JetPackParticle1[i].Zpos = -5;
+            JetPackParticle1[i].Red = 1;
+            JetPackParticle1[i].Green = 0;
+            JetPackParticle1[i].Blue = 0;
+            JetPackParticle1[i].Direction = 0;
+            JetPackParticle1[i].Acceleration = ((((((8 - 5 + 2) * rand() % 11) + 5) - 1 + 1) * rand() % 11) + 1) * 0.02;
+            JetPackParticle1[i].Deceleration = 0.0025;
+        }
+    }
+}
+
+void glDrawJetPackParticles1(void)
+{
+    int i;
+    for (i = 1; i < JetPackParticleCount; i++)
+    {
+        glPushMatrix();
+        glTranslatef(JetPackParticle1[i].Xpos, JetPackParticle1[i].Ypos, JetPackParticle1[i].Zpos);
+        glRotatef(JetPackParticle1[i].Direction - 90, 0, 0, 1);
+        glScalef(JetPackParticle1[i].Scalez, JetPackParticle1[i].Scalez, JetPackParticle1[i].Scalez);
+
+        int jointSliceStack = 3;
+        float jointRadius = 0.8;
+        initTexture("fire.bmp");
+        glScalef(jetPackParticleSize, jetPackParticleSize, jetPackParticleSize);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        glPopMatrix();
+    }
+}
+
+void glCreateJetPackParticles2(void)
+{
+    int i;
+    for (i = 1; i < JetPackParticleCount; i++)
+    {
+        JetPackParticle2[i].Xpos = 0;
+        JetPackParticle2[i].Ypos = -5;
+        JetPackParticle2[i].Zpos = -5;
+        JetPackParticle2[i].Xmov = (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) *
+                                      rand() % 11) +
+                                     1) *
+                                    0.005) -
+                                   (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1) * 0.005);
+        JetPackParticle2[i].Zmov = (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) *
+                                      rand() % 11) +
+                                     1) *
+                                    0.005) -
+                                   (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1) * 0.005);
+        JetPackParticle2[i].Red = 1;
+        JetPackParticle2[i].Green = 1;
+        JetPackParticle2[i].Blue = 1;
+        JetPackParticle2[i].Scalez = 0.1;
+        JetPackParticle2[i].Direction = 0;
+        JetPackParticle2[i].Acceleration = ((((((8 - 5 + 2) * rand() % 11) + 5) - 1 + 1) * rand() % 11) + 1) * 0.02;
+        JetPackParticle2[i].Deceleration = 0.0025;
+    }
+}
+
+void glUpdateJetPackParticles2(void)
+{
+    int i;
+    for (i = 1; i < JetPackParticleCount; i++)
+    {
+        JetPackParticle2[i].Ypos = JetPackParticle2[i].Ypos + JetPackParticle2[i].Acceleration - JetPackParticle2[i].Deceleration - 0.30;
+        JetPackParticle2[i].Deceleration = JetPackParticle2[i].Deceleration + 0.0025;
+        JetPackParticle2[i].Xpos = JetPackParticle2[i].Xpos + JetPackParticle2[i].Xmov;
+        JetPackParticle2[i].Zpos = JetPackParticle2[i].Zpos + JetPackParticle2[i].Zmov;
+        JetPackParticle2[i].Direction = JetPackParticle2[i].Direction + ((((((int)(0.5 - 0.1 + 0.1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1);
+
+        if (JetPackParticle2[i].Ypos < -5)
+        {
+            JetPackParticle2[i].Xpos = 0;
+            JetPackParticle2[i].Ypos = 4.0;
+            JetPackParticle2[i].Zpos = -5;
+            JetPackParticle2[i].Red = 1;
+            JetPackParticle2[i].Green = 0;
+            JetPackParticle2[i].Blue = 0;
+            JetPackParticle2[i].Direction = 0;
+            JetPackParticle2[i].Acceleration = ((((((8 - 5 + 2) * rand() % 11) + 5) - 1 + 1) * rand() % 11) + 1) * 0.02;
+            JetPackParticle2[i].Deceleration = 0.0025;
+        }
+    }
+}
+
+void glDrawJetPackParticles2(void)
+{
+    int i;
+    for (i = 1; i < JetPackParticleCount; i++)
+    {
+        glPushMatrix();
+        glTranslatef(JetPackParticle2[i].Xpos, JetPackParticle2[i].Ypos, JetPackParticle2[i].Zpos);
+        glRotatef(JetPackParticle2[i].Direction - 90, 0, 0, 1);
+        glScalef(JetPackParticle2[i].Scalez, JetPackParticle2[i].Scalez, JetPackParticle2[i].Scalez);
+
+        int jointSliceStack = 3;
+        float jointRadius = 0.8;
+        initTexture("fire.bmp");
+        glScalef(jetPackParticleSize, jetPackParticleSize, jetPackParticleSize);
         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
         drawSphere(jointRadius, jointSliceStack, jointSliceStack);
         glPopMatrix();
@@ -3041,6 +3213,18 @@ void drawJetpack()
             glPopMatrix();
         }
         glPopMatrix();
+
+        // effect
+        glPushMatrix();
+        {
+            glTranslatef(-0.25, 0.21, 5.72);
+            glUpdateJetPackParticles1();
+            glDrawJetPackParticles1();
+            glTranslatef(0.85, -0.05, 0);
+            glUpdateJetPackParticles2();
+            glDrawJetPackParticles2();
+        }
+        glPopMatrix();
     }
     glPopMatrix();
 }
@@ -3049,10 +3233,12 @@ void drawSword()
 {
     glPushMatrix();
     {
-        if (textureMode == 0){
+        if (textureMode == 0)
+        {
             initTexture("brown_texture.bmp");
         }
-        else {
+        else
+        {
             initTexture("black_texture.bmp");
         }
         glRotatef(90, 0, 1, 0);
@@ -3064,10 +3250,12 @@ void drawSword()
 
     glPushMatrix();
     {
-        if (textureMode == 0){
+        if (textureMode == 0)
+        {
             initTexture("black_texture.bmp");
         }
-        else {
+        else
+        {
             initTexture("black_texture.bmp");
         }
         glTranslatef(1.3, 2.5, -0.75);
@@ -3078,10 +3266,12 @@ void drawSword()
 
     glPushMatrix();
     {
-        if (textureMode == 0){
+        if (textureMode == 0)
+        {
             initTexture("Wood.bmp");
         }
-        else {
+        else
+        {
             initTexture("dragon_texture.bmp");
         }
         glRotatef(90, 0, 1, 0);
@@ -3093,10 +3283,12 @@ void drawSword()
 
     glPushMatrix();
     {
-        if (textureMode == 0){
+        if (textureMode == 0)
+        {
             initTexture("Wood.bmp");
         }
-        else {
+        else
+        {
             initTexture("dragon_texture.bmp");
         }
         glRotatef(270, 1, 0, 0);
@@ -3553,9 +3745,10 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    // spawn effect
-    // if (spawn)
-    // {
+    if (isOrtho)
+    {
+        glScalef(1 + orthoZ, 1 + orthoZ, 1 + orthoZ);
+    }
 
     glPushMatrix();
     {
@@ -3564,29 +3757,17 @@ void display()
         glDrawParticles();
     }
     glPopMatrix();
+
     if (frameDisplayCount == 100)
     {
         spawn = false;
     }
-    // }
 
     if (isTexture)
     {
-        // glColor3f(1, 1, 1);
         selectedGluDrawStyles = gluDrawStyles[0];
         selectedGlDrawStyles = glDrawStyles[0];
         selectedGlewDrawStyles = glewDrawStyles[0];
-
-        // glEnable(GL_TEXTURE_2D);
-        // glGenTextures(1, &texture);
-        // glBindTexture(GL_TEXTURE_2D, texture);
-
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-        //                 GL_LINEAR);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-        //                 GL_LINEAR);
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, BMP.bmWidth,
-        //  BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
     }
 
 
@@ -3640,6 +3821,8 @@ int main(int argc, char **argv)
 {
     GLFWwindow *window = initWindow(1920, 1080);
     glCreateParticles();
+    glCreateJetPackParticles1();
+    glCreateJetPackParticles2();
 
     if (NULL != window)
     {
@@ -3660,7 +3843,7 @@ int main(int argc, char **argv)
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 glOrtho(-2 * ar, 2 * ar, -2, 2, -2, 2000);
-                glTranslatef(orthoX, orthoY, orthoZ);
+                glTranslatef(orthoX, orthoY, 0);
                 glRotatef(speed, 0, 1, 0);
 
                 glMatrixMode(GL_MODELVIEW);
