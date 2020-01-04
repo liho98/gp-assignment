@@ -46,14 +46,14 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float adjustSpeed1 = 0.05;
-float adjustSpeed2 = 0.05;
-float v = 0.5;
-float v1 = 2.41;
-float v2 = 4.92;
-float v3 = 0;
+float adjustSpeed1 = 0.1;
+float adjustSpeed2 = 0.1;
+float v = 0;
+float v1 = -4.0;
+float v2 = 19.5;
+float v3 = -23.5;
 float v4 = 0;
-float v5 = 0;
+float v5 = -21;
 float v6 = 0.14;
 float v7 = 90;
 
@@ -136,8 +136,15 @@ int frameDisplayCount = 0;
 
 bool light = false;
 float diffuseColor[] = {0.64f, 0.48f, 0.76f};
+// float diffuseColor[] = {1, 1, 1};
+float ambientColor[] = {1, 1, 1};
+
 float diffusePosition[] = {-30.0f, -0.65f, 15.0f};
 float objectColor[] = {0.64f, 0.48f, 0.76f};
+
+bool rpgMode = false;
+float rpgX = 23.5, rpgY = -5.5, rpgZ = 0;
+float rpgRotateY = 0;
 
 // use dedicated GPU to run
 extern "C"
@@ -382,7 +389,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             switch (mode)
             {
             case 0:
-                perspectiveX += 0.1;
+                perspectiveX += 0.5;
                 orthoX += 0.1;
                 break;
             case 3:
@@ -397,7 +404,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             switch (mode)
             {
             case 0:
-                perspectiveX -= 0.1;
+                perspectiveX -= 0.5;
                 orthoX -= 0.1;
                 break;
             case 3:
@@ -412,7 +419,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             switch (mode)
             {
             case 0:
-                perspectiveY += 0.1;
+                perspectiveY += 0.5;
                 orthoY += 0.1;
                 break;
             case 1:
@@ -471,7 +478,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             switch (mode)
             {
             case 0:
-                perspectiveY -= 0.1;
+                perspectiveY -= 0.5;
                 orthoY -= 0.1;
                 break;
             case 1:
@@ -531,11 +538,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             }
             break;
         case GLFW_KEY_KP_8:
-            perspectiveZ += 0.1;
+            perspectiveZ += 1;
             orthoZ += 0.05;
             break;
         case GLFW_KEY_KP_2:
-            perspectiveZ -= 0.1;
+            perspectiveZ -= 1;
             orthoZ -= 0.05;
             break;
         case GLFW_KEY_1:
@@ -773,8 +780,14 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             }
             break;
         case GLFW_KEY_V: // RPG or first person mode
-                         // reserved
-
+            if (rpgMode)
+            {
+                rpgMode = false;
+            }
+            else
+            {
+                rpgMode = true;
+            }
             break;
         case GLFW_KEY_Z: // reset robot
             resetRobot();
@@ -793,7 +806,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             if (light)
             {
                 light = false;
-            }else 
+            }
+            else
             {
                 light = true;
             }
@@ -1695,30 +1709,30 @@ void walk(int speed)
         if (direction == 1)
         {
             if (walkControl)
-                animationX += 0.1;
-            else if (runControl)
                 animationX += 0.2;
+            else if (runControl)
+                animationX += 0.4;
         }
         else if (direction == -1)
         {
             if (walkControl)
-                animationX -= 0.1;
-            else if (runControl)
                 animationX -= 0.2;
+            else if (runControl)
+                animationX -= 0.4;
         }
         if (direction == 2)
         {
             if (walkControl)
-                animationZ += 0.1;
-            else if (runControl)
                 animationZ += 0.2;
+            else if (runControl)
+                animationZ += 0.4;
         }
         else if (direction == -2)
         {
             if (walkControl)
-                animationZ -= 0.1;
-            else if (runControl)
                 animationZ -= 0.2;
+            else if (runControl)
+                animationZ -= 0.4;
         }
     }
 }
@@ -1787,7 +1801,7 @@ void flyHorizontal()
 {
     if (direction == 1)
     {
-        animationX += 0.1;
+        animationX += 0.2;
         animationY += 0.1;
 
         if (flyForwardDegree > -45)
@@ -1807,7 +1821,7 @@ void flyHorizontal()
     else if (direction == -1)
     {
         {
-            animationX -= 0.1;
+            animationX -= 0.2;
             animationY -= 0.1;
         }
         if (flyForwardDegree < 0)
@@ -1825,7 +1839,7 @@ void flyHorizontal()
     }
     else if (direction == 2)
     {
-        animationZ += 0.1;
+        animationZ += 0.2;
         animationY += 0.1;
 
         if (flyForwardDegree > -45)
@@ -1844,7 +1858,7 @@ void flyHorizontal()
     }
     else if (direction == -2)
     {
-        animationZ -= 0.1;
+        animationZ -= 0.2;
         animationY += 0.1;
 
         if (flyForwardDegree > -45)
@@ -3775,7 +3789,6 @@ void display()
         selectedGlewDrawStyles = glewDrawStyles[0];
     }
 
-
     glPushMatrix();
     {
         if (animationY <= -0.71)
@@ -3807,17 +3820,30 @@ void display()
         drawGround();
     }
 
-    if(light){
+    if (light)
+    {
         glPushMatrix();
         {
             glEnable(GL_LIGHTING);
             glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
             glLightfv(GL_LIGHT0, GL_POSITION, diffusePosition);
             glEnable(GL_LIGHT0);
+
+            glLightfv(GL_LIGHT1, GL_AMBIENT, diffuseColor);
+            glLightfv(GL_LIGHT1, GL_POSITION, diffusePosition);
+            glEnable(GL_LIGHT1);
+
+            glLightfv(GL_LIGHT2, GL_SPECULAR, diffuseColor);
+            glLightfv(GL_LIGHT2, GL_POSITION, diffusePosition);
+            glEnable(GL_LIGHT2);
         }
         glPopMatrix();
-    }else{
+    }
+    else
+    {
         glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHT0);
+        glDisable(GL_LIGHT0);
         glDisable(GL_LIGHT0);
     }
 }
@@ -3860,8 +3886,32 @@ int main(int argc, char **argv)
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 gluPerspective(45, ar, 1, 2000);
-                glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
-                glRotatef(speed, 0, 1, 0);
+
+                if (rpgMode)
+                {
+                    glRotatef(90, 0, 1, 0);
+                    if (walkDirectionDegree == 90)
+                    {
+                        glRotatef(-90, 0, 1, 0);
+                        glTranslatef(-23.5, -0.20, -22.7);
+                    }
+                    else if (walkDirectionDegree == -90)
+                    {
+                        glRotatef(90, 0, 1, 0);
+                        glTranslatef(-23.5, 0.0, 23.50);
+                    }
+                    else if (walkDirectionDegree == 180)
+                    {
+                        glRotatef(180, 0, 1, 0);
+                        glTranslatef(-47.2, -0.50, 0);
+                    }
+                    glTranslatef(rpgX - animationX, rpgY - animationY, rpgZ - animationZ);
+                }
+                else
+                {
+                    glTranslatef(perspectiveX, perspectiveY, perspectiveZ);
+                    glRotatef(speed, 0, 1, 0);
+                }
 
                 glMatrixMode(GL_MODELVIEW);
                 glLoadIdentity();
