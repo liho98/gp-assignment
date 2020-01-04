@@ -18,7 +18,7 @@ float perspectiveX = 0, perspectiveY = -3.3, perspectiveZ = -16;
 float orthoX = 0, orthoY = 0.5, orthoZ = 0;
 float bridgeDegree = 0, bridgeLineUp = 0;
 
-float animationX = 0, animationY = 0, animationZ = 0;
+float animationX = 0, animationY = -0.71, animationZ = 0;
 float ionBlasterX = 0, ionBlasterY = 0, ionBlasterZ = 0;
 float ionBlasterXDegree = 0, ionBlasterYDegree = 0, ionBlasterZDegree = 0;
 
@@ -41,8 +41,8 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0.27;
-float v1 = 0.12;
+float v = 0;
+float v1 = 0;
 float v2 = 0;
 float v3 = 0;
 float v4 = 0;
@@ -72,6 +72,7 @@ int walkingFlag[2] = {0, 1};
 int direction = 0;
 bool insultControl = false;
 bool walkStationary = true;
+float walkDirectionDegree = 0;
 
 bool itemControl = false;
 bool jetpack = false;
@@ -125,6 +126,9 @@ float adjustSpeed1 = 0.01;
 float adjustSpeed2 = 0.1;
 
 void resetRobot();
+
+bool spawn = true;
+int frameDisplayCount = 0;
 
 // use dedicated GPU to run
 extern "C"
@@ -440,7 +444,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             case 6:
                 if (flyMode)
                 {
+                    if (direction == -3)
+                        exponent = 1;
                     exponent++;
+                    direction = 3;
                     flyVertical(1);
                 }
                 break;
@@ -491,14 +498,19 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             case 6:
                 if (flyMode)
                 {
-                    if (exponent > 30)
-                    {
-                        exponent = 30;
-                    }
-                    else if (exponent > 30)
-                    {
-                        exponent--;
-                    }
+                    if (direction == 3)
+                        exponent = 1;
+                    // if (exponent > 50)
+                    // {
+                    //     exponent = 50;
+                    // }
+                    // else if (exponent > 50)
+                    // {
+                    //     exponent--;
+                    // }
+                    exponent++;
+
+                    direction = -3;
                     flyVertical(-1);
                 }
                 break;
@@ -508,11 +520,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_KP_8:
             perspectiveZ += 0.1;
-            orthoZ += 10;
+            orthoZ += 20;
             break;
         case GLFW_KEY_KP_2:
             perspectiveZ -= 0.1;
-            orthoZ -= 10;
+            orthoZ -= 20;
             break;
         case GLFW_KEY_1:
             if (fingerControl)
@@ -697,6 +709,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[0] = 0;
                     walkingFlag[1] = 1;
                 }
+                walkDirectionDegree = 0;
                 direction = 1;
             }
             break;
@@ -708,20 +721,40 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[1] = 0;
                     walkingFlag[0] = 1;
                 }
+                if (flyMode)
+                    walkDirectionDegree = 0;
+                else
+                    walkDirectionDegree = 180;
                 direction = -1;
             }
-            // else if (runControl)
-            // {
-            //     if (direction != -2)
-            //     {
-            //         walkingFlag[0] = 0;
-            //         walkingFlag[1] = 1;
-            //     }
-            //     direction = -2;
-            // }
+            break;
+        case GLFW_KEY_A:
+            if (walkControl || runControl || flyMode)
+            {
+                if (direction != 2)
+                {
+                    walkingFlag[0] = 0;
+                    walkingFlag[1] = 2;
+                }
+                walkDirectionDegree = -90;
+                direction = 2;
+            }
+            break;
+        case GLFW_KEY_D:
+            if (walkControl || runControl || flyMode)
+            {
+                if (direction != -2)
+                {
+                    walkingFlag[1] = 0;
+                    walkingFlag[0] = 1;
+                }
+                walkDirectionDegree = 90;
+                direction = -2;
+            }
             break;
         case GLFW_KEY_V: // RPG or first person mode
                          // reserved
+
             break;
         case GLFW_KEY_Z: // reset robot
             resetRobot();
@@ -794,9 +827,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         {
         case GLFW_KEY_W:
         case GLFW_KEY_S:
+        case GLFW_KEY_A:
+        case GLFW_KEY_D:
             if (walkControl || runControl || flyMode)
                 direction = 0;
             break;
+
         default:
             break;
         }
@@ -1213,6 +1249,113 @@ void drawCapsule(float width, float height)
 }
 
 // animation
+
+// Particle engine
+const int ParticleCount = 500;
+typedef struct
+{
+    double Xpos;
+    double Ypos;
+    double Zpos;
+    double Xmov;
+    double Zmov;
+    double Red;
+    double Green;
+    double Blue;
+    double Direction;
+    double Acceleration;
+    double Deceleration;
+    double Scalez;
+    bool Visible;
+} PARTICLES;
+
+PARTICLES Particle[ParticleCount];
+
+GLuint LoadTextureRAW(const char *filename, int width,
+                      int height);
+void FreeTexture(GLuint texturez);
+
+void glCreateParticles(void)
+{
+    int i;
+    for (i = 1; i < ParticleCount; i++)
+    {
+        Particle[i].Xpos = 0;
+        Particle[i].Ypos = -5;
+        Particle[i].Zpos = -5;
+        Particle[i].Xmov = (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) *
+                              rand() % 11) +
+                             1) *
+                            0.005) -
+                           (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1) * 0.005);
+        Particle[i].Zmov = (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) *
+                              rand() % 11) +
+                             1) *
+                            0.005) -
+                           (((((((2 - 1 + 1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1) * 0.005);
+        Particle[i].Red = 1;
+        Particle[i].Green = 1;
+        Particle[i].Blue = 1;
+        Particle[i].Scalez = 0.1;
+        Particle[i].Direction = 0;
+        Particle[i].Acceleration = ((((((8 - 5 + 2) * rand() % 11) + 5) - 1 + 1) * rand() % 11) + 1) * 0.02;
+        Particle[i].Deceleration = 0.0025;
+    }
+}
+
+void glUpdateParticles(void)
+{
+    int i;
+    for (i = 1; i < ParticleCount; i++)
+    {
+        Particle[i].Ypos = Particle[i].Ypos + Particle[i].Acceleration - Particle[i].Deceleration;
+        Particle[i].Deceleration = Particle[i].Deceleration +
+                                   0.0025;
+        Particle[i].Xpos = Particle[i].Xpos + Particle[i].Xmov;
+        Particle[i].Zpos = Particle[i].Zpos + Particle[i].Zmov;
+        Particle[i].Direction = Particle[i].Direction + ((((((int)(0.5 - 0.1 + 0.1) * rand() % 11) + 1) - 1 + 1) * rand() % 11) + 1);
+
+        if (spawn)
+            if (Particle[i].Ypos < -5)
+            {
+                Particle[i].Xpos = 0;
+                Particle[i].Ypos = -5;
+                Particle[i].Zpos = -5;
+                Particle[i].Red = 1;
+                Particle[i].Green = 0;
+                Particle[i].Blue = 0;
+                Particle[i].Direction = 0;
+                Particle[i].Acceleration = ((((((8 - 5 + 2) * rand() % 11) + 5) - 1 + 1) * rand() % 11) + 1) * 0.02;
+                Particle[i].Deceleration = 0.0025;
+            }
+    }
+}
+
+void glDrawParticles(void)
+{
+    int i;
+    for (i = 1; i < ParticleCount; i++)
+    {
+        glPushMatrix();
+        glTranslatef(Particle[i].Xpos, Particle[i].Ypos, Particle[i].Zpos);
+        glRotatef(Particle[i].Direction - 90, 0, 0, 1);
+        glScalef(Particle[i].Scalez, Particle[i].Scalez, Particle[i].Scalez);
+
+        int jointSliceStack = 3;
+        float jointRadius = 0.8;
+        if (i % 2 == 0)
+            initTexture("gold_texture.bmp");
+        else if (i % 3 == 0)
+            initTexture("blue_metal_texture.bmp");
+        else
+            initTexture("galaxy_texture.bmp");
+
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        drawSphere(jointRadius, jointSliceStack, jointSliceStack);
+        glPopMatrix();
+    }
+}
+
 void resetRobot()
 {
     fill(fingerDegree, fingerDegree + 10, 0);
@@ -1231,8 +1374,15 @@ void resetRobot()
     ionBlasterYDegree = 0;
     ionBlasterZDegree = 0;
     flyForwardDegree = 0;
+    walkDirectionDegree = 0;
     fill(fightModeFlag, fightModeFlag + 2, 0);
     fill(walkingFlag, walkingFlag + 2, 0);
+    perspectiveX = 0;
+    perspectiveY = -3.3;
+    perspectiveZ = -16;
+    orthoX = 0;
+    orthoY = 0.5;
+    orthoZ = 0;
 }
 
 void shoot()
@@ -1366,6 +1516,20 @@ void walk(int speed)
             else if (runControl)
                 animationX -= 0.2;
         }
+        if (direction == 2)
+        {
+            if (walkControl)
+                animationZ += 0.1;
+            else if (runControl)
+                animationZ += 0.2;
+        }
+        else if (direction == -2)
+        {
+            if (walkControl)
+                animationZ -= 0.1;
+            else if (runControl)
+                animationZ -= 0.2;
+        }
     }
 }
 
@@ -1403,9 +1567,9 @@ void flyVertical(int direction)
     // ascend speed increase exponentially
     ascendSpeed = pow(1.1, exponent) / 100;
 
-    if (ascendSpeed > 0.5)
+    if (ascendSpeed > 1.0)
     {
-        ascendSpeed = 0.5;
+        ascendSpeed = 1.0;
     }
 
     if (direction == 1)
@@ -1450,9 +1614,8 @@ void flyHorizontal()
             armDegreeX[0] += 5;
         }
     }
-    else
+    else if (direction == -1)
     {
-        if (direction == -1)
         {
             animationX -= 0.1;
             animationY -= 0.1;
@@ -1468,6 +1631,44 @@ void flyHorizontal()
         if (armDegreeX[0] > 0)
         {
             armDegreeX[0] -= 5;
+        }
+    }
+    else if (direction == 2)
+    {
+        animationZ += 0.1;
+        animationY += 0.1;
+
+        if (flyForwardDegree > -45)
+        {
+            flyForwardDegree -= 1;
+        }
+
+        if (armDegreeX[1] < 160)
+        {
+            armDegreeX[1] += 5;
+        }
+        if (armDegreeX[0] < 160)
+        {
+            armDegreeX[0] += 5;
+        }
+    }
+    else if (direction == -2)
+    {
+        animationZ -= 0.1;
+        animationY += 0.1;
+
+        if (flyForwardDegree > -45)
+        {
+            flyForwardDegree -= 1;
+        }
+
+        if (armDegreeX[1] < 160)
+        {
+            armDegreeX[1] += 5;
+        }
+        if (armDegreeX[0] < 160)
+        {
+            armDegreeX[0] += 5;
         }
     }
 }
@@ -2631,6 +2832,7 @@ void drawJetpack()
 {
     glPushMatrix();
     { // joint between the two side of leaf
+
         glPushMatrix();
         {
             if (textureMode == 0)
@@ -3337,6 +3539,23 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
+    // spawn effect
+    // if (spawn)
+    // {
+
+    glPushMatrix();
+    {
+        glTranslatef(-0.1, 2.41, 4.92);
+        glUpdateParticles();
+        glDrawParticles();
+    }
+    glPopMatrix();
+    if (frameDisplayCount == 100)
+    {
+        spawn = false;
+    }
+    // }
+
     if (isTexture)
     {
         // glColor3f(1, 1, 1);
@@ -3358,8 +3577,12 @@ void display()
 
     glPushMatrix();
     {
+        if (animationY <= -0.71)
+        {
+            animationY = -0.71;
+        }
         glTranslatef(animationX, animationY, animationZ);
-        glRotatef(-90, 0, 1, 0);
+        glRotatef(-90 + walkDirectionDegree, 0, 1, 0);
         glRotatef(flyForwardDegree, 1, 0, 0);
         glScalef(0.7, 0.7, 0.7);
         drawLegs();
@@ -3387,6 +3610,7 @@ void display()
 int main(int argc, char **argv)
 {
     GLFWwindow *window = initWindow(1920, 1080);
+    glCreateParticles();
 
     if (NULL != window)
     {
@@ -3449,6 +3673,11 @@ int main(int argc, char **argv)
             if (insultControl)
             {
                 insult();
+            }
+
+            if (spawn)
+            {
+                frameDisplayCount++;
             }
 
             display();
