@@ -15,7 +15,7 @@ using namespace std;
 
 // Particle engine
 const int ParticleCount = 500;
-const int JetPackParticleCount = 100;
+const int JetPackParticleCount = 500;
 float jetPackParticleSize = 1;
 
 float speed = -90;
@@ -131,7 +131,7 @@ char temp[100];
 
 void resetRobot();
 
-bool spawn = true;
+bool spawn = false;
 int frameDisplayCount = 0;
 
 // use dedicated GPU to run
@@ -353,9 +353,11 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             if (isTexture)
             {
                 isTexture = false;
+                spawn = false;
             }
             else
             {
+                spawn = true;
                 isTexture = true;
             }
             break;
@@ -675,6 +677,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     sword = true;
                     jetpack = false;
                     ionBlaster = false;
+                    flyMode = false;
+                    fightMode = false;
                 }
             }
             break;
@@ -1537,7 +1541,7 @@ void resetRobot()
     fill(calfDegree, calfDegree + 2, 0);
     fill(thighDegree, thighDegree + 2, 0);
     animationX = 0;
-    animationY = 0;
+    animationY = -0.71;
     animationZ = 0;
     ionBlasterX = 0;
     ionBlasterY = 0;
@@ -3747,6 +3751,7 @@ void display()
     if (frameDisplayCount == 100)
     {
         spawn = false;
+        frameDisplayCount = 0;
     }
 
     if (isTexture)
