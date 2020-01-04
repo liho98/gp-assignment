@@ -41,8 +41,8 @@ double w = 1920;
 double h = 1080;
 double ar = w / h; // aspect ratio
 
-float v = 0;
-float v1 = 0;
+float v = 0.27;
+float v1 = 0.12;
 float v2 = 0;
 float v3 = 0;
 float v4 = 0;
@@ -79,7 +79,8 @@ bool ionBlaster = false;
 
 bool fightMode = false;
 int fightModeFlag[2] = {0, 0};
-
+bool shootFlag = false;
+float ionEnergyZ = 0;
 bool flyMode = false;
 
 float ascendSpeed = 0.01;
@@ -90,6 +91,8 @@ bool swingFlag = false;
 int exponent = 1;
 float flyForwardDegree = 0;
 
+void shoot();
+bool shooting = false;
 //
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
 int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
@@ -117,8 +120,8 @@ string dir_path = file_path.substr(0, file_path.rfind("\\"));
 string projectRoot;
 char temp[100];
 
-float adjustSpeed1 = 0.1;
-float adjustSpeed2 = 1;
+float adjustSpeed1 = 0.01;
+float adjustSpeed2 = 0.1;
 
 void resetRobot();
 
@@ -211,10 +214,15 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
     {
         switch (key)
         {
+        case GLFW_KEY_ENTER:
+            if (fightMode)
+                shootFlag = true;
+            break;
+
         case GLFW_KEY_ESCAPE:
             printf("v: %f\tv1: %f\tv2: %f\tv3: %f\n", v, v1, v2, v3);
             printf("v4: %f\tv5: %f\tv6: %f\tv7: %f\n", v4, v5, v6, v7);
-            printf("ionBlasterX: %f\tionBlasterY: %f\tionBlasterZ: %f\n", ionBlasterX + v, ionBlasterY + v1, ionBlasterZ + v2, v7);
+            printf("ionBlasterX: %f\tionBlasterY: %f\tionBlasterZ: %f\n", ionBlasterX, ionBlasterY, ionBlasterZ, v7);
 
             // printf("orthoZ: %f\texponent: %d\n", orthoZ, exponent);
             printf("perspectiveX: %f\tperspectiveY: %f\tspeed: %f\t\n", perspectiveX, perspectiveY, speed);
@@ -1210,9 +1218,34 @@ void resetRobot()
     ionBlasterXDegree = 0;
     ionBlasterYDegree = 0;
     ionBlasterZDegree = 0;
-
+    flyForwardDegree = 0;
     fill(fightModeFlag, fightModeFlag + 2, 0);
     fill(walkingFlag, walkingFlag + 2, 0);
+}
+
+void shoot()
+{
+    if (shootFlag)
+    {
+        // shoot ion energy
+        glPushMatrix();
+        {
+            // long capsule of energy
+            glTranslatef(0, 0, -1.5 + ionEnergyZ);
+            drawCapsule(2.82, 0.09);
+
+            if (ionEnergyZ < 50)
+            {
+                ionEnergyZ += 2;
+            }
+            if (ionEnergyZ >= 50)
+            {
+                shootFlag = false;
+                ionEnergyZ = 0;
+            }
+        }
+        glPopMatrix();
+    }
 }
 
 void walk(int speed)
@@ -1246,7 +1279,7 @@ void walk(int speed)
         }
 
         // hand movement
-        if (!insultControl)
+        if (!insultControl && !fightMode)
         {
             if (armDegreeX[1] < armMoveDegree)
             {
@@ -1285,7 +1318,7 @@ void walk(int speed)
         }
 
         // hand movement
-        if (!insultControl)
+        if (!insultControl && !fightMode)
         {
             if (armDegreeX[1] > -armMoveDegree)
             {
@@ -1438,7 +1471,7 @@ void activateFightMode()
 
     if (!fightModeFlag[0])
     {
-        if (ionBlasterX < 7)
+        if (ionBlasterX < 6.9)
         {
             ionBlasterX += 0.2;
         }
@@ -1455,7 +1488,7 @@ void activateFightMode()
             ionBlasterXDegree -= 2;
         }
 
-        if (ionBlasterX >= 7 && ionBlasterYDegree >= 90)
+        if (ionBlasterX >= 6.9 && ionBlasterYDegree >= 90)
         {
             fightModeFlag[0] = 1;
         }
@@ -1479,7 +1512,7 @@ void activateFightMode()
         {
             ionBlasterY -= 0.1;
         }
-        if (ionBlasterZ > -2.7)
+        if (ionBlasterZ > -2.6)
         {
             ionBlasterZ -= 0.1;
         }
@@ -1494,28 +1527,28 @@ void activateFightMode()
             armDegreeY[1] += armSpeed;
         }
 
-        if (fingerDegree[5] < 100)
+        if (fingerDegree[5] > -90)
         {
-            fingerDegree[5] += armSpeed;
+            fingerDegree[5] -= armSpeed;
         }
-        if (fingerDegree[6] < 100)
+        if (fingerDegree[6] > -90)
         {
-            fingerDegree[6] += armSpeed;
+            fingerDegree[6] -= armSpeed;
         }
-        if (fingerDegree[7] < 100)
+        if (fingerDegree[7] > -90)
         {
-            fingerDegree[7] += armSpeed;
+            fingerDegree[7] -= armSpeed;
         }
-        if (fingerDegree[8] < 100)
+        if (fingerDegree[8] > -90)
         {
-            fingerDegree[8] += armSpeed;
+            fingerDegree[8] -= armSpeed;
         }
-        if (fingerDegree[9] < 100)
+        if (fingerDegree[9] > -90)
         {
-            fingerDegree[9] += armSpeed;
+            fingerDegree[9] -= armSpeed;
         }
 
-        if (ionBlasterY <= 3 && ionBlasterZ <= -2.7 && fingerDegree[5] >= 100)
+        if (ionBlasterY <= 3 && ionBlasterZ <= -2.6 && fingerDegree[5] <= -90)
         {
             fightModeFlag[1] = 1;
         }
@@ -2801,7 +2834,7 @@ void drawIonBlaster()
         // ionBlasterZDegree = v5;
         // if (fightMode)
         // {
-        glTranslatef(ionBlasterX + v, ionBlasterY + v1, ionBlasterZ + v2);
+        glTranslatef(ionBlasterX, ionBlasterY, ionBlasterZ);
         // }
 
         glRotatef(45, 1, 0, 0);
@@ -2813,7 +2846,7 @@ void drawIonBlaster()
 
         glPushMatrix();
         {
-        
+
             initTexture("tiger_texture.bmp");
             // 1st and 2nd cylinder: muzzle
             glTranslatef(0, 0, -0.59);
@@ -3139,6 +3172,13 @@ void drawIonBlaster()
             glPopMatrix();
         }
         glPopMatrix();
+
+        // shoot energy
+        glPushMatrix();
+        {
+            shoot();
+        }
+        glPopMatrix();
     }
     glPopMatrix();
 }
@@ -3252,7 +3292,6 @@ void display()
         drawBody();
         drawHead();
         drawShoulderJoint();
-
         // item
         if (jetpack)
             drawJetpack();
