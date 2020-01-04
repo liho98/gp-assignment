@@ -72,6 +72,7 @@ int walkingFlag[2] = {0, 1};
 int direction = 0;
 bool insultControl = false;
 bool walkStationary = true;
+float walkDirectionDegree = 0;
 
 bool itemControl = false;
 bool jetpack = false;
@@ -685,6 +686,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[0] = 0;
                     walkingFlag[1] = 1;
                 }
+                walkDirectionDegree = 0;
                 direction = 1;
             }
             break;
@@ -696,20 +698,37 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                     walkingFlag[1] = 0;
                     walkingFlag[0] = 1;
                 }
+                walkDirectionDegree = 180;
                 direction = -1;
             }
-            // else if (runControl)
-            // {
-            //     if (direction != -2)
-            //     {
-            //         walkingFlag[0] = 0;
-            //         walkingFlag[1] = 1;
-            //     }
-            //     direction = -2;
-            // }
+            break;
+        case GLFW_KEY_A:
+            if (walkControl || runControl || flyMode)
+            {
+                if (direction != 2)
+                {
+                    walkingFlag[0] = 0;
+                    walkingFlag[1] = 2;
+                }
+                walkDirectionDegree = -90;
+                direction = 2;
+            }
+            break;
+        case GLFW_KEY_D:
+            if (walkControl || runControl || flyMode)
+            {
+                if (direction != -2)
+                {
+                    walkingFlag[1] = 0;
+                    walkingFlag[0] = 1;
+                }
+                walkDirectionDegree = 90;
+                direction = -2;
+            }
             break;
         case GLFW_KEY_V: // RPG or first person mode
                          // reserved
+
             break;
         case GLFW_KEY_Z: // reset robot
             resetRobot();
@@ -782,9 +801,12 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
         {
         case GLFW_KEY_W:
         case GLFW_KEY_S:
+        case GLFW_KEY_A:
+        case GLFW_KEY_D:
             if (walkControl || runControl || flyMode)
                 direction = 0;
             break;
+
         default:
             break;
         }
@@ -1219,6 +1241,7 @@ void resetRobot()
     ionBlasterYDegree = 0;
     ionBlasterZDegree = 0;
     flyForwardDegree = 0;
+    walkDirectionDegree = 0;
     fill(fightModeFlag, fightModeFlag + 2, 0);
     fill(walkingFlag, walkingFlag + 2, 0);
 }
@@ -1353,6 +1376,20 @@ void walk(int speed)
                 animationX -= 0.1;
             else if (runControl)
                 animationX -= 0.2;
+        }
+        if (direction == 2)
+        {
+            if (walkControl)
+                animationZ += 0.1;
+            else if (runControl)
+                animationZ += 0.2;
+        }
+        else if (direction == -2)
+        {
+            if (walkControl)
+                animationZ -= 0.1;
+            else if (runControl)
+                animationZ -= 0.2;
         }
     }
 }
@@ -3284,7 +3321,7 @@ void display()
     glPushMatrix();
     {
         glTranslatef(animationX, animationY, animationZ);
-        glRotatef(-90, 0, 1, 0);
+        glRotatef(-90 + walkDirectionDegree, 0, 1, 0);
         glRotatef(flyForwardDegree, 1, 0, 0);
         glScalef(0.7, 0.7, 0.7);
         drawLegs();
