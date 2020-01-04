@@ -136,7 +136,7 @@ int frameDisplayCount = 0;
 
 bool light = false;
 float diffuseColor[] = {0.64f, 0.48f, 0.76f};
-float diffusePosition[] = {-60.0f, -0.65f, 20.0f};
+float diffusePosition[] = {-30.0f, -0.65f, 15.0f};
 float objectColor[] = {0.64f, 0.48f, 0.76f};
 
 // use dedicated GPU to run
