@@ -11,9 +11,14 @@
 #include <cstdio>
 #include <cmath>
 
+#include <mmsystem.h>
+
 using namespace std;
 void glCreateJetPackParticles1();
 void glCreateJetPackParticles2();
+
+char tempMusic[100];
+char musicNames[100] = "avengers.wav";
 
 // Particle engine
 const int ParticleCount = 500;
@@ -641,6 +646,7 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             {
                 if (jetpack)
                 {
+                    PlaySound(NULL,NULL,0);
                     jetpack = false;
                     flyMode = false;
                     glCreateJetPackParticles1();
@@ -648,6 +654,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 }
                 else
                 {
+                    lstrcpyA(tempMusic, dir_path.c_str());
+                    lstrcatA(tempMusic, "\\");
+                    lstrcatA(tempMusic, musicNames);
+                    PlaySoundA(tempMusic, NULL, SND_ASYNC|SND_FILENAME|SND_LOOP); //SND_FILENAME or SND_LOOP
                     ionBlaster = false;
                     jetpack = true;
                 }
