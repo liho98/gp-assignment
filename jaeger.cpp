@@ -17,6 +17,19 @@ using namespace std;
 void glCreateJetPackParticles1();
 void glCreateJetPackParticles2();
 
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
+void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos);
+void processInput(GLFWwindow *window);
+
+// camera
+bool firstMouse = false;
+float xPosf = 0.0, yPosf = 0.0;
+float xRotated = 1.0f, yRotated = 1.0f, zRotated = -30.0f;
+
+// mouse movement
+float lastX = 0.0f, lastY = 0.0f;
+
 char tempMusic[100];
 char musicNames[100] = "avengers.wav";
 
@@ -928,6 +941,10 @@ GLFWwindow *initWindow(const int resX, const int resY)
 
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, controls);
+
+	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetCursorPosCallback(window, cursorPositionCallback);
 
     // Get info of GPU and supported OpenGL version
     printf("Renderer: %s\n", glGetString(GL_RENDERER));
@@ -3862,6 +3879,7 @@ int main(int argc, char **argv)
 
         while (!glfwWindowShouldClose(window))
         {
+            processInput(window);
             // Scale to window size
             GLint windowWidth, windowHeight;
             glfwGetWindowSize(window, &windowWidth, &windowHeight);
@@ -3965,4 +3983,41 @@ int main(int argc, char **argv)
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
+}
+
+
+void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	{
+		lastX = xPosf;
+		lastY = yPosf;
+	}
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+	// camera.ProcessMouseScroll(yoffset);
+    perspectiveZ += yoffset;
+    orthoZ += yoffset;
+}
+
+void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
+{
+	xPosf = xPos;
+	yPosf = yPos;
+}
+
+void processInput(GLFWwindow *window)
+{
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	{
+		speed += xPosf - lastX;
+		// speed += yPosf - lastY;
+		lastX = xPosf;
+		lastY = yPosf;
+	}
+
 }
