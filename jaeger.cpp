@@ -143,9 +143,6 @@ int frameDisplayCount = 0;
 
 bool light = false;
 float diffuseColor[] = {0.64f, 0.48f, 0.76f};
-// float diffuseColor[] = {1, 1, 1};
-float ambientColor[] = {1, 1, 1};
-
 float diffusePosition[] = {-30.0f, -0.65f, 15.0f};
 float objectColor[] = {0.64f, 0.48f, 0.76f};
 
@@ -3842,22 +3839,12 @@ void display()
             glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
             glLightfv(GL_LIGHT0, GL_POSITION, diffusePosition);
             glEnable(GL_LIGHT0);
-
-            glLightfv(GL_LIGHT1, GL_AMBIENT, diffuseColor);
-            glLightfv(GL_LIGHT1, GL_POSITION, diffusePosition);
-            glEnable(GL_LIGHT1);
-
-            glLightfv(GL_LIGHT2, GL_SPECULAR, diffuseColor);
-            glLightfv(GL_LIGHT2, GL_POSITION, diffusePosition);
-            glEnable(GL_LIGHT2);
-        }
+            }
         glPopMatrix();
     }
     else
     {
         glDisable(GL_LIGHTING);
-        glDisable(GL_LIGHT0);
-        glDisable(GL_LIGHT0);
         glDisable(GL_LIGHT0);
     }
 }
