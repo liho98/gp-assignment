@@ -131,6 +131,7 @@
                     "-lassimp",
                     "-lglu32",
                     "-lgdi32",
+                    "-lwinmm",
                     // "-lassimp",
                     "-lmingw32",
                     // "-lfreeglut", 
