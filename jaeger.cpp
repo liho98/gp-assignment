@@ -12,6 +12,8 @@
 #include <cmath>
 
 using namespace std;
+void glCreateJetPackParticles1();
+void glCreateJetPackParticles2();
 
 // Particle engine
 const int ParticleCount = 500;
@@ -641,6 +643,8 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 {
                     jetpack = false;
                     flyMode = false;
+                    glCreateJetPackParticles1();
+                    glCreateJetPackParticles2();
                 }
                 else
                 {
