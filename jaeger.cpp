@@ -1,17 +1,20 @@
-#include <Windows.h>
+#include <SFML/Audio.hpp>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <gl/glext.h>
+// #include <gl/glext.h>
 
-#include <gl/GL.h>
-#include <gl/GLU.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <math.h>
 #include <string>
 
 #include <cstdio>
 #include <cmath>
 
-#include <mmsystem.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
+// #include <mmsystem.h>
 
 using namespace std;
 void glCreateJetPackParticles1();
@@ -47,7 +50,7 @@ float animationX = 0, animationY = -0.71, animationZ = 0;
 float ionBlasterX = 0, ionBlasterY = 0, ionBlasterZ = 0;
 float ionBlasterXDegree = 0, ionBlasterYDegree = 0, ionBlasterZDegree = 0;
 
-bool rotate = false;
+bool rotatef = false;
 bool rotateLeft = false;
 bool rotateRight = false;
 
@@ -137,8 +140,9 @@ int stylesNo = 0;
 
 // texture
 GLuint texture = 0;
-BITMAP BMP;
-HBITMAP hBMP = NULL;
+int width, height, nrChannels;
+// BITMAP BMP;
+// HBITMAP hBMP = NULL;
 // string textures[3] = {"Brick.bmp", "Wood.bmp", "Metal.bmp"};
 int textureNo = 0;
 
@@ -163,15 +167,17 @@ bool rpgMode = false;
 float rpgX = 23.5, rpgY = -5.5, rpgZ = 0;
 float rpgRotateY = 0;
 
+sf::Music music;
+
 // use dedicated GPU to run
-extern "C"
-{
-    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-}
-extern "C"
-{
-    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-}
+// extern "C"
+// {
+//     __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+// }
+// extern "C"
+// {
+//     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+// }
 
 string textureNames[50] = {};
 int textureCount = 0;
@@ -205,26 +211,32 @@ void initTexture(string textureName)
         }
         else
         {
-            strcpy(temp, dir_path.c_str());
-            strcat(temp, "\\texture\\");
+            strcpy(temp, "/home/liho/Downloads/gp/gp-assignment-master/texture/");
+
+            // strcpy(temp, dir_path.c_str());
+            // strcat(temp, "\\texture\\");
             strcat(temp, textureName.c_str());
 
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-            HBITMAP hBMP = (HBITMAP)LoadImage(GetModuleHandle(NULL), temp, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
-            GetObject(hBMP, sizeof(BMP), &BMP);
-
-            //glActiveTexture(GL_TEXTURE0 + textureCount); // Texture unit 0
-            glBindTexture(GL_TEXTURE_2D, textures[textureCount]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                            GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                            GL_LINEAR);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, BMP.bmWidth,
-                         BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
-
-            DeleteObject(hBMP);
+            unsigned char *data;
+            stbi_set_flip_vertically_on_load(true);
+            data = stbi_load(temp, &width, &height, &nrChannels, 0);
+            if (data)
+            {
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                glBindTexture(GL_TEXTURE_2D, textures[textureCount]);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                                GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                                GL_LINEAR);
+                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            }
+            else
+            {
+                printf("Failed to load texture");
+            }
+            stbi_image_free(data);
             textureNames[textureCount] = textureName;
             textureCount++;
         }
@@ -391,10 +403,10 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             }
             break;
         case GLFW_KEY_SPACE: // rotate world
-            if (rotate)
-                rotate = false;
+            if (rotatef)
+                rotatef = false;
             else
-                rotate = true;
+                rotatef = true;
             break;
         case GLFW_KEY_COMMA: // rotate world left / right
             speed -= 1;
@@ -656,7 +668,9 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
             {
                 if (jetpack)
                 {
-                    PlaySound(NULL,NULL,0);
+                    music.pause();
+                    sf::err();
+
                     jetpack = false;
                     flyMode = false;
                     glCreateJetPackParticles1();
@@ -664,10 +678,13 @@ void controls(GLFWwindow *window, int key, int scancode, int action, int mods)
                 }
                 else
                 {
-                    lstrcpyA(tempMusic, dir_path.c_str());
-                    lstrcatA(tempMusic, "\\");
-                    lstrcatA(tempMusic, musicNames);
-                    PlaySoundA(tempMusic, NULL, SND_ASYNC|SND_FILENAME|SND_LOOP); //SND_FILENAME or SND_LOOP
+                    music.play();
+                    sf::err();
+
+                    // lstrcpyA(tempMusic, dir_path.c_str());
+                    // lstrcatA(tempMusic, "\\");
+                    // lstrcatA(tempMusic, musicNames);
+                    // PlaySoundA(tempMusic, NULL, SND_ASYNC|SND_FILENAME|SND_LOOP); //SND_FILENAME or SND_LOOP
                     ionBlaster = false;
                     jetpack = true;
                 }
@@ -942,9 +959,9 @@ GLFWwindow *initWindow(const int resX, const int resY)
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, controls);
 
-	glfwSetScrollCallback(window, scroll_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetCursorPosCallback(window, cursorPositionCallback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetCursorPosCallback(window, cursorPositionCallback);
 
     // Get info of GPU and supported OpenGL version
     printf("Renderer: %s\n", glGetString(GL_RENDERER));
@@ -3856,7 +3873,7 @@ void display()
             glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
             glLightfv(GL_LIGHT0, GL_POSITION, diffusePosition);
             glEnable(GL_LIGHT0);
-            }
+        }
         glPopMatrix();
     }
     else
@@ -3868,6 +3885,8 @@ void display()
 
 int main(int argc, char **argv)
 {
+    music.openFromFile("/home/liho/Downloads/gp/gp-assignment/avengers.wav");
+
     GLFWwindow *window = initWindow(1920, 1080);
     glCreateParticles();
     glCreateJetPackParticles1();
@@ -3968,7 +3987,7 @@ int main(int argc, char **argv)
 
             display();
 
-            if (rotate)
+            if (rotatef)
                 speed += 1;
             else
                 speed = speed;
@@ -3985,39 +4004,37 @@ int main(int argc, char **argv)
     return 0;
 }
 
-
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-	{
-		lastX = xPosf;
-		lastY = yPosf;
-	}
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        lastX = xPosf;
+        lastY = yPosf;
+    }
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
-	// camera.ProcessMouseScroll(yoffset);
+    // camera.ProcessMouseScroll(yoffset);
     perspectiveZ += yoffset;
     orthoZ += yoffset;
 }
 
 void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
 {
-	xPosf = xPos;
-	yPosf = yPos;
+    xPosf = xPos;
+    yPosf = yPos;
 }
 
 void processInput(GLFWwindow *window)
 {
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-	{
-		speed += xPosf - lastX;
-		// speed += yPosf - lastY;
-		lastX = xPosf;
-		lastY = yPosf;
-	}
-
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    {
+        speed += xPosf - lastX;
+        // speed += yPosf - lastY;
+        lastX = xPosf;
+        lastY = yPosf;
+    }
 }
