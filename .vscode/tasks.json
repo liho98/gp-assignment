@@ -92,6 +92,7 @@
                     "-I${workspaceFolder}/include", // for header files 
                     "-L${workspaceFolder}/lib/linux", // for static (.a) 
                     "-L${workspaceFolder}/bin/linux", // for shared libraries (.so)
+                    "-Wl,-rpath=${workspaceFolder}/bin/linux",
                     "-g",
                     // "${workspaceFolder}/glad.c",
                     "${file}",
@@ -99,14 +100,16 @@
                     "${fileDirname}/${fileBasenameNoExtension}",
                     "-lGL",
                     "-lGLU",
-                    // "-lglut",
-                    "-lglad",
                     "-lGLEW",
                     "-lglfw",
+                    // "-lglad",
+                    // "-lglu32",
+                    // "-lgdi32",
+                    // "-lglut",
                     // "-lassimp",
+                    "-lsfml-audio",
+                    "-lsfml-system",
                     "-ldl",
-                    "-lglu32",
-                    "-lgdi32",
                     "&&",
                     "${fileDirname}/${fileBasenameNoExtension}"
                 ],
@@ -120,20 +123,22 @@
                     "-I${workspaceFolder}\\include", // include path for header
                     "-L${workspaceFolder}\\lib\\wins", // for static (.a or .lib) 
                     "-L${workspaceFolder}\\bin\\wins", // for shared libraries (.dll)) 
+                    "-Wl,-rpath=${workspaceFolder}/bin/linux",
                     "-g",
-                    "${workspaceFolder}\\glad.c",
+                    // "${workspaceFolder}\\glad.c",
                     "${file}",
                     "-o",
                     "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe",
                     "-lopengl32",
                     "-lglew32",
                     "-lglfw3",
-                    "-lassimp",
                     "-lglu32",
-                    "-lgdi32",
-                    "-lwinmm",
-                    // "-lassimp",
                     "-lmingw32",
+                    "-lsfml-audio",
+                    "-lsfml-system",
+                    // "-lwinmm",
+                    // "-lgdi32",
+                    // "-lassimp",
                     // "-lfreeglut", 
                     "&&",
                     "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
