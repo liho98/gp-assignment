@@ -10,6 +10,7 @@ test
 model_loading
 opengl_version
 gipsydanger
+avengers.wav
 
 # exception to the rule
 !bin/linux/.gitkeep 

@@ -16,6 +16,18 @@
 
 // #include <mmsystem.h>
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+std::string slash = "\\";
+// get dir path of project root
+std::string file_path = __FILE__;
+std::string dir_path = file_path.substr(0, file_path.rfind("\\"));
+#else
+std::string slash = "/";
+// get dir path of project root
+std::string file_path = __FILE__;
+std::string dir_path = file_path.substr(0, file_path.rfind("/"));
+#endif
+
 using namespace std;
 void glCreateJetPackParticles1();
 void glCreateJetPackParticles2();
@@ -146,10 +158,6 @@ int width, height, nrChannels;
 // string textures[3] = {"Brick.bmp", "Wood.bmp", "Metal.bmp"};
 int textureNo = 0;
 
-// get dir path of project root
-string file_path = __FILE__;
-string dir_path = file_path.substr(0, file_path.rfind("\\"));
-
 string projectRoot;
 char temp[100];
 
@@ -211,10 +219,10 @@ void initTexture(string textureName)
         }
         else
         {
-            strcpy(temp, "/home/liho/Downloads/gp/gp-assignment-master/texture/");
-
-            // strcpy(temp, dir_path.c_str());
-            // strcat(temp, "\\texture\\");
+            strcpy(temp, dir_path.c_str());
+            strcat(temp, slash.c_str());
+            strcat(temp, "texture");
+            strcat(temp, slash.c_str());
             strcat(temp, textureName.c_str());
 
             unsigned char *data;
@@ -3885,7 +3893,10 @@ void display()
 
 int main(int argc, char **argv)
 {
-    music.openFromFile("/home/liho/Downloads/gp/gp-assignment/avengers.wav");
+    strcpy(tempMusic, dir_path.c_str());
+    strcat(tempMusic, slash.c_str());
+    strcat(tempMusic, "avengers.wav");
+    music.openFromFile(tempMusic);
 
     GLFWwindow *window = initWindow(1920, 1080);
     glCreateParticles();
