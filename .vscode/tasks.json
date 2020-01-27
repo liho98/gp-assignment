@@ -118,12 +118,11 @@
                 },
             },
             "windows": {
-                "command": "D:\\MinGW\\bin\\g++.exe",
+                "command": "C:\\MinGW\\bin\\g++.exe",
                 "args": [
                     "-I${workspaceFolder}\\include", // include path for header
                     "-L${workspaceFolder}\\lib\\wins", // for static (.a or .lib) 
                     "-L${workspaceFolder}\\bin\\wins", // for shared libraries (.dll)) 
-                    "-Wl,-rpath=${workspaceFolder}/bin/linux",
                     "-g",
                     // "${workspaceFolder}\\glad.c",
                     "${file}",
@@ -134,8 +133,8 @@
                     "-lglfw3",
                     "-lglu32",
                     "-lmingw32",
-                    "-lsfml-audio",
-                    "-lsfml-system",
+                    "-lsfml-audio-2",
+                    "-lsfml-system-2",
                     // "-lwinmm",
                     // "-lgdi32",
                     // "-lassimp",
@@ -144,7 +143,7 @@
                     "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
                 ],
                 "options": {
-                    "cwd": "D:\\MinGW\\bin"
+                    "cwd": "C:\\MinGW\\bin"
                 }
             },
             "problemMatcher": [
