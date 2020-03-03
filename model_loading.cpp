@@ -12,11 +12,26 @@
 
 #include <iostream>
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+std::string slash = "\\";
+// get dir path of project root
+std::string file_path = __FILE__;
+std::string dir_path = file_path.substr(0, file_path.rfind("\\"));
+#else
+std::string slash = "/";
+// get dir path of project root
+std::string file_path = __FILE__;
+std::string dir_path = file_path.substr(0, file_path.rfind("/"));
+#endif
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 unsigned int loadCubemap(vector<std::string> faces);
+
+// path
+char temp[100];
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -35,15 +50,23 @@ float lastFrame = 0.0f;
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
+string copyPath(string textureName)
+{
+    strcpy(temp, dir_path.c_str());
+    strcat(temp, slash.c_str());
+    strcat(temp, textureName.c_str());
+    return temp;
+}
+
 int main()
 {
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
@@ -80,14 +103,14 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader skyboxShader("/home/liho/Desktop/graphic-programming/gp-assignment/shader/skybox.vs", "/home/liho/Desktop/graphic-programming/gp-assignment/shader/skybox.fs");
+    Shader skyboxShader(copyPath("shader/skybox.vs").c_str(), copyPath("shader/skybox.fs").c_str());
     // Shader ourShader("/home/liho/Desktop/graphic-programming/gp-assignment/shader/material_shader.vs", "/home/liho/Desktop/graphic-programming/gp-assignment/shader/material_shader.fs");
-    Shader ourShader("/home/liho/Desktop/graphic-programming/gp-assignment/shader/model_loading.vs", "/home/liho/Desktop/graphic-programming/gp-assignment/shader/model_loading.fs");
+    Shader ourShader(copyPath("shader/model_loading.vs").c_str(), copyPath("shader/model_loading.fs").c_str());
 
     // load models
     // -----------
     // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/nanosuit/nanosuit.obj");
-    Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/windmill/windmil.obj");
+    Model ourModel(copyPath("model/windmill/windmil.obj"));
     // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/windmill/Low Poly Mill.obj");
     // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/ironman/Mark_42.obj");
     // Model ourModel("/home/liho/Desktop/graphic-programming/gp-assignment/model/nanosuit_reflection/nanosuit.obj");
@@ -148,12 +171,12 @@ int main()
     // load textures
     // -------------
     vector<std::string> faces{
-        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/right.jpg",
-        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/left.jpg",
-        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/top.jpg",
-        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/bottom.jpg",
-        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/front.jpg",
-        "/home/liho/Desktop/graphic-programming/gp-assignment/model/sor_sea/back.jpg"};
+        copyPath("model/sor_sea/right.jpg"),
+        copyPath("model/sor_sea/left.jpg"),
+        copyPath("model/sor_sea/top.jpg"),
+        copyPath("model/sor_sea/bottom.jpg"),
+        copyPath("model/sor_sea/front.jpg"),
+        copyPath("model/sor_sea/back.jpg")};
     unsigned int cubemapTexture = loadCubemap(faces);
 
     // draw in wireframe

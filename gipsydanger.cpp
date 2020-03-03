@@ -237,6 +237,29 @@ GLuint sandStoneTexture, bridgeTexture, brickRoadTexture;
 // BITMAP BMP;
 // HBITMAP hBMP = NULL;
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+std::string slash = "\\";
+// get dir path of project root
+std::string file_path = __FILE__;
+std::string dir_path = file_path.substr(0, file_path.rfind("\\"));
+#else
+std::string slash = "/";
+// get dir path of project root
+std::string file_path = __FILE__;
+std::string dir_path = file_path.substr(0, file_path.rfind("/"));
+#endif
+
+// path
+char temp[100];
+
+std::string copyPath(std::string textureName)
+{
+	strcpy(temp, dir_path.c_str());
+	strcat(temp, slash.c_str());
+	strcat(temp, textureName.c_str());
+	return temp;
+}
+
 GLuint LoadTexture(const char *fileName)
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
@@ -5980,26 +6003,26 @@ void init()
 	glEnable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 
-	armorTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/armor_texture.bmp");
-	armorTexture1 = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/armor_texture_2.bmp");
-	armorTexture2 = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/armor_texture_1.bmp");
-	metalTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/metal_texture.bmp");
-	glossyMetal = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/glossy_metal.bmp");
-	glass = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/glass.bmp");
-	camourflage = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/camouflage.bmp");
-	flame = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/flame.bmp");
-	mechanical = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/mechanical.bmp");
+	armorTexture = LoadTexture(copyPath("model/textures/armor_texture.bmp").c_str());
+	armorTexture1 = LoadTexture(copyPath("model/textures/armor_texture_2.bmp").c_str());
+	armorTexture2 = LoadTexture(copyPath("model/textures/armor_texture_1.bmp").c_str());
+	metalTexture = LoadTexture(copyPath("model/textures/metal_texture.bmp").c_str());
+	glossyMetal = LoadTexture(copyPath("model/textures/glossy_metal.bmp").c_str());
+	glass = LoadTexture(copyPath("model/textures/glass.bmp").c_str());
+	camourflage = LoadTexture(copyPath("model/textures/camouflage.bmp").c_str());
+	flame = LoadTexture(copyPath("model/textures/flame.bmp").c_str());
+	mechanical = LoadTexture(copyPath("model/textures/mechanical.bmp").c_str());
 
-	backConnectorTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/back_connector.bmp");
-	reactorOutringTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/reactor_outring_texture.bmp");
-	reactorTurn1Texture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/reactor_turn1_texture.bmp");
-	eyesTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/eyes_texture.bmp");
-	redTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/red_texture.bmp");
-	plasmaTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/plasma_texture.bmp");
-	plasmaTexture2 = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/plasma_texture2.bmp");
-	plasmaTexture3 = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/plasma_texture3.bmp");
-	cannonTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/cannon_texture.bmp");
-	boostFlame = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/boost_flame.bmp");
+	backConnectorTexture = LoadTexture(copyPath("model/textures/back_connector.bmp").c_str());
+	reactorOutringTexture = LoadTexture(copyPath("model/textures/reactor_outring_texture.bmp").c_str());
+	reactorTurn1Texture = LoadTexture(copyPath("model/textures/reactor_turn1_texture.bmp").c_str());
+	eyesTexture = LoadTexture(copyPath("model/textures/eyes_texture.bmp").c_str());
+	redTexture = LoadTexture(copyPath("model/textures/red_texture.bmp").c_str());
+	plasmaTexture = LoadTexture(copyPath("model/textures/plasma_texture.bmp").c_str());
+	plasmaTexture2 = LoadTexture(copyPath("model/textures/plasma_texture2.bmp").c_str());
+	plasmaTexture3 = LoadTexture(copyPath("model/textures/plasma_texture3.bmp").c_str());
+	cannonTexture = LoadTexture(copyPath("model/textures/cannon_texture.bmp").c_str());
+	boostFlame = LoadTexture(copyPath("model/textures/boost_flame.bmp").c_str());
 
 	textureArray[0] = armorTexture;
 	textureArray[1] = armorTexture1;
@@ -6012,22 +6035,22 @@ void init()
 	textureArray2[1] = glossyMetal;
 	textureArray2[2] = mechanical;
 
-	sunTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/sun_texture.bmp");
-	moonTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/moon_texture.bmp");
-	nightSea = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/night_sea.bmp");
+	sunTexture = LoadTexture(copyPath("model/textures/sun_texture.bmp").c_str());
+	moonTexture = LoadTexture(copyPath("model/textures/moon_texture.bmp").c_str());
+	nightSea = LoadTexture(copyPath("model/textures/night_sea.bmp").c_str());
 
-	roof = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/roof.bmp");
-	smallTower = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/small_tower.bmp");
-	towerFront = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/tower_front.bmp");
-	baseBridgeTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/base_bridge_texture.bmp");
-	roadTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/road_texture.bmp");
-	sideFenceTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/side_fence_texture.bmp");
-	base = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/base.bmp");
-	seaTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/sea_texture.bmp");
+	roof = LoadTexture(copyPath("model/textures/roof.bmp").c_str());
+	smallTower = LoadTexture(copyPath("model/textures/small_tower.bmp").c_str());
+	towerFront = LoadTexture(copyPath("model/textures/tower_front.bmp").c_str());
+	baseBridgeTexture = LoadTexture(copyPath("model/textures/base_bridge_texture.bmp").c_str());
+	roadTexture = LoadTexture(copyPath("model/textures/road_texture.bmp").c_str());
+	sideFenceTexture = LoadTexture(copyPath("model/textures/side_fence_texture.bmp").c_str());
+	base = LoadTexture(copyPath("model/textures/base.bmp").c_str());
+	seaTexture = LoadTexture(copyPath("model/textures/sea_texture.bmp").c_str());
 
-	sandStoneTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/sand_stone_texture.bmp");
-	bridgeTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/bridge_texture.bmp");
-	brickRoadTexture = LoadTexture("/home/liho/Desktop/graphic-programming/test/model/textures/brick_road_texture.bmp");
+	sandStoneTexture = LoadTexture(copyPath("model/textures/sand_stone_texture.bmp").c_str());
+	bridgeTexture = LoadTexture(copyPath("model/textures/bridge_texture.bmp").c_str());
+	brickRoadTexture = LoadTexture(copyPath("model/textures/brick_road_texture.bmp").c_str());
 }
 
 void display()
@@ -6270,7 +6293,7 @@ int main(void)
 
 	glDeleteTextures(1, &glass);
 	glDeleteTextures(1, &camourflage);
-	glDeleteTextures(1, &flame); 
+	glDeleteTextures(1, &flame);
 	glDeleteTextures(1, &mechanical);
 
 	glDeleteTextures(1, &backConnectorTexture);
@@ -6283,11 +6306,11 @@ int main(void)
 	glDeleteTextures(1, &plasmaTexture3);
 	glDeleteTextures(1, &cannonTexture);
 	glDeleteTextures(1, &boostFlame);
-	
+
 	glDeleteTextures(1, &sunTexture);
 	glDeleteTextures(1, &moonTexture);
 	glDeleteTextures(1, &nightSea);
-	
+
 	glDeleteTextures(1, &roof);
 	glDeleteTextures(1, &armorTexture);
 	glDeleteTextures(1, &smallTower);

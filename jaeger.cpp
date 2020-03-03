@@ -1,10 +1,16 @@
 #include <SFML/Audio.hpp>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 // #include <gl/glext.h>
 
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #include <math.h>
 #include <string>
 
@@ -21,6 +27,15 @@ std::string slash = "\\";
 // get dir path of project root
 std::string file_path = __FILE__;
 std::string dir_path = file_path.substr(0, file_path.rfind("\\"));
+// use dedicated GPU to run
+extern "C"
+{
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
+extern "C"
+{
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
 #else
 std::string slash = "/";
 // get dir path of project root
@@ -137,7 +152,7 @@ float flyForwardDegree = 0;
 
 void shoot();
 bool shooting = false;
-//
+
 int gluDrawStyles[4] = {100012, 100010, 100011, 100011};
 int glDrawStyles[4] = {0x0007, 0x0000, 0x0002, 0x0001};
 int glewDrawStyles[4] = {0x0009, 0x0000, 0x0002, 0x0001};
@@ -176,16 +191,6 @@ float rpgX = 23.5, rpgY = -5.5, rpgZ = 0;
 float rpgRotateY = 0;
 
 sf::Music music;
-
-// use dedicated GPU to run
-// extern "C"
-// {
-//     __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-// }
-// extern "C"
-// {
-//     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-// }
 
 string textureNames[50] = {};
 int textureCount = 0;

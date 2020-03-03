@@ -4,8 +4,58 @@
     "version": "2.0.0",
     "type": "shell",
     "tasks": [
-        {
+        { 
+            "type": "shell",
             "label": "g++ build active file",
+            "osx": {
+                "command": "g++",
+                "args": [
+                    "-I${workspaceFolder}/include", // for header files 
+                    "-L${workspaceFolder}/lib/osx", // for static (.a) 
+                    "-L${workspaceFolder}/bin/osx", // for shared libraries (.so)
+                    "-F${workspaceFolder}/bin/osx/Frameworks", // for shared libraries (.so)
+                    "-std=c++11",
+                    "-g",
+                    "${workspaceFolder}/glad.c",
+                    "${file}",
+                    "-o",
+                    "${fileDirname}/${fileBasenameNoExtension}",
+                    "-lassimp",
+                    "-framework",
+                    "sfml-system",
+                    "-framework",
+                    "sfml-audio",
+                    "-lglfw3",
+                    "-framework",
+                    "Cocoa",
+                    "-framework",
+                    "OpenGL",
+                    "-framework",
+                    "IOKit",
+                    "-framework",
+                    "CoreVideo",
+                    "-Wno-deprecated",
+                    "-ldl",
+                    "&&",
+                    "install_name_tool",
+                    "-id",
+                    "@rpath/libassimp.4.dylib",
+                    "${workspaceFolder}/bin/osx/libassimp.dylib",
+                    "&&",
+                    "install_name_tool",
+                    "-add_rpath",
+                    "${workspaceFolder}/bin/osx",
+                    "${fileDirname}/${fileBasenameNoExtension}",
+                    "&&",
+                    "install_name_tool",
+                    "-add_rpath",
+                    "${workspaceFolder}/bin/osx/Frameworks",
+                    "${fileDirname}/${fileBasenameNoExtension}",
+                ],
+                "options": {
+                    "cwd": "/usr/bin"
+                },
+            },
             "linux": {
                 "command": "g++",
                 "args": [
@@ -50,9 +100,6 @@
                     "cwd": "D:\\MinGW\\bin"
                 }
             },
-            "problemMatcher": [
-                "$gcc"
-            ],
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -71,9 +118,6 @@
             "windows": {
                 "command": "${workspaceFolder}\\bin\\wins\\${fileBasenameNoExtension}.exe"
             },
-            "problemMatcher": [
-                "$gcc"
-            ],
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -86,6 +130,58 @@
         },
         {
             "label": "g++ build & run active file",
+            "type": "shell",
+            "osx": {
+                "command": "g++",
+                "args": [
+                    "-I${workspaceFolder}/include", // for header files 
+                    "-L${workspaceFolder}/lib/osx", // for static (.a) 
+                    "-L${workspaceFolder}/bin/osx", // for shared libraries (.so)
+                    "-F${workspaceFolder}/bin/osx/Frameworks", // for shared libraries (.so)
+                    "-std=c++11",
+                    "-g",
+                    "${workspaceFolder}/glad.c",
+                    "${file}",
+                    "-o",
+                    "${fileDirname}/${fileBasenameNoExtension}",
+                    "-lassimp",
+                    "-framework",
+                    "sfml-system",
+                    "-framework",
+                    "sfml-audio",
+                    "-lglfw3",
+                    "-framework",
+                    "Cocoa",
+                    "-framework",
+                    "OpenGL",
+                    "-framework",
+                    "IOKit",
+                    "-framework",
+                    "CoreVideo",
+                    "-Wno-deprecated",
+                    "-ldl",
+                    "&&",
+                    "install_name_tool",
+                    "-id",
+                    "@rpath/libassimp.4.dylib",
+                    "${workspaceFolder}/bin/osx/libassimp.dylib",
+                    "&&",
+                    "install_name_tool",
+                    "-add_rpath",
+                    "${workspaceFolder}/bin/osx",
+                    "${fileDirname}/${fileBasenameNoExtension}",
+                    "&&",
+                    "install_name_tool",
+                    "-add_rpath",
+                    "${workspaceFolder}/bin/osx/Frameworks",
+                    "${fileDirname}/${fileBasenameNoExtension}",
+                    "&&",
+                    "${fileDirname}/${fileBasenameNoExtension}"
+                ],
+                "options": {
+                    "cwd": "/usr/bin"
+                },
+            },
             "linux": {
                 "command": "g++",
                 "args": [
@@ -146,9 +242,6 @@
                     "cwd": "C:\\MinGW\\bin"
                 }
             },
-            "problemMatcher": [
-                "$gcc"
-            ],
             "group": "build",
             "presentation": {
                 "echo": true,
